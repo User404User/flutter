@@ -17,7 +17,7 @@ vars = {
   'skia_revision': '1f39b47bf067193e98f92a75f7ae824129c18d03',
   "dart_sdk_revision": "31f74c9e350e0475dfc161f8d95a4484ecb7d8ec",
   "dart_sdk_git": "git@github.com:shorebirdtech/dart-sdk.git",
-  "updater_git": "https://github.com/shorebirdtech/updater.git",
+  "updater_git": "https://github.com/User404User/updater.git",
   "updater_rev": "ab23721e35d2e740026def44e1469e17e3440c83",
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
