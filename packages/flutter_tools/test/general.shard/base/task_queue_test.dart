@@ -16,34 +16,22 @@ void main() {
     test('no deadlock when delayed exceptions fire in closures', () async {
       final TaskQueue<void> sharedTracker = TaskQueue<void>(maxJobs: 2);
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
-          const Duration(milliseconds: 10),
-          () => throw TestException(),
-        );
+        final Future<void> t = Future<void>.delayed(const Duration(milliseconds: 10), () => throw TestException());
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
-          const Duration(milliseconds: 10),
-          () => throw TestException(),
-        );
+        final Future<void> t = Future<void>.delayed(const Duration(milliseconds: 10), () => throw TestException());
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
-          const Duration(milliseconds: 10),
-          () => throw TestException(),
-        );
+        final Future<void> t = Future<void>.delayed(const Duration(milliseconds: 10), () => throw TestException());
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
-          const Duration(milliseconds: 10),
-          () => throw TestException(),
-        );
+        final Future<void> t = Future<void>.delayed(const Duration(milliseconds: 10), () => throw TestException());
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<TestException>()));

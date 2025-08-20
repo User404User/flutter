@@ -21,7 +21,8 @@ class FrameRequestPendingLatencySummarizer {
 
   /// Computes the average `FrameRequestPendingLatency` over the period of the timeline.
   double computeAverageFrameRequestPendingLatency() {
-    final List<double> frameRequestPendingLatencies = _computeFrameRequestPendingLatencies();
+    final List<double> frameRequestPendingLatencies =
+        _computeFrameRequestPendingLatencies();
     if (frameRequestPendingLatencies.isEmpty) {
       return 0;
     }
@@ -33,7 +34,8 @@ class FrameRequestPendingLatencySummarizer {
   /// Computes the [percentile]-th percentile `FrameRequestPendingLatency` over the
   /// period of the timeline.
   double computePercentileFrameRequestPendingLatency(double percentile) {
-    final List<double> frameRequestPendingLatencies = _computeFrameRequestPendingLatencies();
+    final List<double> frameRequestPendingLatencies =
+        _computeFrameRequestPendingLatencies();
     if (frameRequestPendingLatencies.isEmpty) {
       return 0;
     }

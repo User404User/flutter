@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:typed_data';
 
 import 'package:pool/pool.dart';
@@ -23,10 +24,10 @@ final class AssetTransformer {
     required FileSystem fileSystem,
     required String dartBinaryPath,
     required BuildMode buildMode,
-  }) : _processManager = processManager,
-       _fileSystem = fileSystem,
-       _dartBinaryPath = dartBinaryPath,
-       _buildMode = buildMode;
+  })  : _processManager = processManager,
+        _fileSystem = fileSystem,
+        _dartBinaryPath = dartBinaryPath,
+        _buildMode = buildMode;
 
   static const String buildModeEnvVar = 'FLUTTER_BUILD_MODE';
 
@@ -53,6 +54,7 @@ final class AssetTransformer {
     required List<AssetTransformerEntry> transformerEntries,
     required Logger logger,
   }) async {
+
     final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
 
     int transformStep = 0;
@@ -94,9 +96,7 @@ final class AssetTransformer {
         }
       }
 
-      logger.printTrace(
-        "Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)",
-      );
+      logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
@@ -133,7 +133,9 @@ final class AssetTransformer {
     final ProcessResult result = await _processManager.run(
       command,
       workingDirectory: workingDirectory,
-      environment: <String, String>{AssetTransformer.buildModeEnvVar: _buildMode.cliName},
+      environment: <String, String>{
+        AssetTransformer.buildModeEnvVar: _buildMode.cliName,
+      }
     );
     final String stdout = result.stdout as String;
     final String stderr = result.stderr as String;
@@ -144,7 +146,7 @@ final class AssetTransformer {
         'Transformer package: ${transformer.package}\n'
         'Full command: ${command.join(' ')}\n'
         'stdout:\n$stdout\n'
-        'stderr:\n$stderr',
+        'stderr:\n$stderr'
       );
     }
 
@@ -163,15 +165,16 @@ final class AssetTransformer {
   }
 }
 
+
 // A wrapper around [AssetTransformer] to support hot reload of transformed assets.
 final class DevelopmentAssetTransformer {
   DevelopmentAssetTransformer({
     required FileSystem fileSystem,
     required AssetTransformer transformer,
     required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _transformer = transformer,
-       _logger = logger;
+  })  : _fileSystem = fileSystem,
+        _transformer = transformer,
+        _logger = logger;
 
   final AssetTransformer _transformer;
   final FileSystem _fileSystem;
@@ -188,9 +191,7 @@ final class DevelopmentAssetTransformer {
     required List<AssetTransformerEntry> transformerEntries,
     required String workingDirectory,
   }) async {
-    final File output = _fileSystem.systemTempDirectory.childFile(
-      'retransformerInput-$inputAssetKey',
-    );
+    final File output = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
     ErrorHandlingFileSystem.deleteIfExists(output);
     File? inputFile;
     bool cleanupInput = false;

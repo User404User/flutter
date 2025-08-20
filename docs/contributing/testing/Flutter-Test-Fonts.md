@@ -17,7 +17,7 @@ Thanks to that, the `FlutterTest` font generally provides more precise and font-
 
 **Example**
 
-You can expect this test to pass on all platforms:
+You can expect this test to pass on all platforms (currently with the exception of the web HTML renderer):
 
 ```dart
 final painter = TextPainter(

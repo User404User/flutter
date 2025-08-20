@@ -8,7 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Radio Smoke Test', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RadioExampleApp());
+    await tester.pumpWidget(
+      const example.RadioExampleApp(),
+    );
 
     expect(find.widgetWithText(AppBar, 'Radio Sample'), findsOneWidget);
     final Finder listTile1 = find.widgetWithText(ListTile, 'Lafayette');
@@ -21,23 +23,11 @@ void main() {
 
     await tester.tap(radioButton1);
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<Radio<example.SingingCharacter>>(radioButton1).groupValue,
-      tester.widget<Radio<example.SingingCharacter>>(radioButton1).value,
-    );
-    expect(
-      tester.widget<Radio<example.SingingCharacter>>(radioButton2).groupValue,
-      isNot(tester.widget<Radio<example.SingingCharacter>>(radioButton2).value),
-    );
+    expect(tester.widget<Radio<example.SingingCharacter>>(radioButton1).groupValue, tester.widget<Radio<example.SingingCharacter>>(radioButton1).value);
+    expect(tester.widget<Radio<example.SingingCharacter>>(radioButton2).groupValue, isNot(tester.widget<Radio<example.SingingCharacter>>(radioButton2).value));
     await tester.tap(radioButton2);
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<Radio<example.SingingCharacter>>(radioButton1).groupValue,
-      isNot(tester.widget<Radio<example.SingingCharacter>>(radioButton1).value),
-    );
-    expect(
-      tester.widget<Radio<example.SingingCharacter>>(radioButton2).groupValue,
-      tester.widget<Radio<example.SingingCharacter>>(radioButton2).value,
-    );
+    expect(tester.widget<Radio<example.SingingCharacter>>(radioButton1).groupValue, isNot(tester.widget<Radio<example.SingingCharacter>>(radioButton1).value));
+    expect(tester.widget<Radio<example.SingingCharacter>>(radioButton2).groupValue, tester.widget<Radio<example.SingingCharacter>>(radioButton2).value);
   });
 }

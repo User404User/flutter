@@ -13,7 +13,10 @@ class NavigationRailExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(theme: ThemeData(useMaterial3: true), home: const NavRailExample());
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const NavRailExample(),
+    );
   }
 }
 
@@ -46,25 +49,23 @@ class _NavRailExampleState extends State<NavRailExample> {
                 });
               },
               labelType: labelType,
-              leading:
-                  showLeading
-                      ? FloatingActionButton(
-                        elevation: 0,
-                        onPressed: () {
-                          // Add your onPressed code here!
-                        },
-                        child: const Icon(Icons.add),
-                      )
-                      : const SizedBox(),
-              trailing:
-                  showTrailing
-                      ? IconButton(
-                        onPressed: () {
-                          // Add your onPressed code here!
-                        },
-                        icon: const Icon(Icons.more_horiz_rounded),
-                      )
-                      : const SizedBox(),
+              leading: showLeading
+                  ? FloatingActionButton(
+                      elevation: 0,
+                      onPressed: () {
+                        // Add your onPressed code here!
+                      },
+                      child: const Icon(Icons.add),
+                    )
+                  : const SizedBox(),
+              trailing: showTrailing
+                  ? IconButton(
+                      onPressed: () {
+                        // Add your onPressed code here!
+                      },
+                      icon: const Icon(Icons.more_horiz_rounded),
+                    )
+                  : const SizedBox(),
               destinations: const <NavigationRailDestination>[
                 NavigationRailDestination(
                   icon: Icon(Icons.favorite_border),
@@ -77,8 +78,14 @@ class _NavRailExampleState extends State<NavRailExample> {
                   label: Text('Second'),
                 ),
                 NavigationRailDestination(
-                  icon: Badge(label: Text('4'), child: Icon(Icons.star_border)),
-                  selectedIcon: Badge(label: Text('4'), child: Icon(Icons.star)),
+                  icon: Badge(
+                    label: Text('4'),
+                    child: Icon(Icons.star_border),
+                  ),
+                  selectedIcon: Badge(
+                    label: Text('4'),
+                    child: Icon(Icons.star),
+                  ),
                   label: Text('Third'),
                 ),
               ],

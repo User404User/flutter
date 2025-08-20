@@ -17,9 +17,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
-import '../painting/_web_image_info_io.dart'
-    if (dart.library.js_util) '../painting/_web_image_info_web.dart';
-import '_web_image_io.dart' if (dart.library.js_util) '_web_image_web.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'disposable_build_context.dart';
@@ -31,18 +28,17 @@ import 'scroll_aware_image_provider.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/painting.dart'
-    show
-        AssetImage,
-        ExactAssetImage,
-        FileImage,
-        FilterQuality,
-        ImageConfiguration,
-        ImageInfo,
-        ImageProvider,
-        ImageStream,
-        MemoryImage,
-        NetworkImage;
+export 'package:flutter/painting.dart' show
+  AssetImage,
+  ExactAssetImage,
+  FileImage,
+  FilterQuality,
+  ImageConfiguration,
+  ImageInfo,
+  ImageProvider,
+  ImageStream,
+  MemoryImage,
+  NetworkImage;
 
 // Examples can assume:
 // late Widget image;
@@ -62,7 +58,7 @@ export 'package:flutter/painting.dart'
 /// See also:
 ///
 ///  * [ImageProvider], which has an example showing how this might be used.
-ImageConfiguration createLocalImageConfiguration(BuildContext context, {Size? size}) {
+ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? size }) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0,
@@ -147,15 +143,13 @@ Future<void> precacheImage(
       if (onError != null) {
         onError(exception, stackTrace);
       } else {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            context: ErrorDescription('image failed to precache'),
-            library: 'image resource service',
-            exception: exception,
-            stack: stackTrace,
-            silent: true,
-          ),
-        );
+        FlutterError.reportError(FlutterErrorDetails(
+          context: ErrorDescription('image failed to precache'),
+          library: 'image resource service',
+          exception: exception,
+          stack: stackTrace,
+          silent: true,
+        ));
       }
     },
   );
@@ -192,8 +186,12 @@ Future<void> precacheImage(
 ///
 ///  * [Image.frameBuilder], which makes use of this signature in the [Image]
 ///    widget.
-typedef ImageFrameBuilder =
-    Widget Function(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded);
+typedef ImageFrameBuilder = Widget Function(
+  BuildContext context,
+  Widget child,
+  int? frame,
+  bool wasSynchronouslyLoaded,
+);
 
 /// Signature used by [Image.loadingBuilder] to build a representation of the
 /// image's loading progress.
@@ -226,13 +224,19 @@ typedef ImageFrameBuilder =
 ///    widget.
 ///  * [ImageChunkListener], a lower-level signature for listening to raw
 ///    [ImageChunkEvent]s.
-typedef ImageLoadingBuilder =
-    Widget Function(BuildContext context, Widget child, ImageChunkEvent? loadingProgress);
+typedef ImageLoadingBuilder = Widget Function(
+  BuildContext context,
+  Widget child,
+  ImageChunkEvent? loadingProgress,
+);
 
 /// Signature used by [Image.errorBuilder] to create a replacement widget to
 /// render instead of the image.
-typedef ImageErrorWidgetBuilder =
-    Widget Function(BuildContext context, Object error, StackTrace? stackTrace);
+typedef ImageErrorWidgetBuilder = Widget Function(
+  BuildContext context,
+  Object error,
+  StackTrace? stackTrace,
+);
 
 /// A widget that displays an image.
 ///
@@ -301,6 +305,14 @@ typedef ImageErrorWidgetBuilder =
 /// vertical dimensions) would only use 330KB if those dimensions are specified
 /// using the `cacheWidth` and `cacheHeight` parameters, a 100-fold reduction in
 /// memory usage.
+///
+/// ### Web considerations
+///
+/// In the case where a network image is used on the Web platform, the
+/// `cacheWidth` and `cacheHeight` parameters are only supported when the
+/// application is running with the CanvasKit renderer. When the application is
+/// using the HTML renderer, the web engine delegates image decoding of network
+/// images to the Web, which does not support custom decode sizes.
 ///
 /// ## Custom image providers
 ///
@@ -393,34 +405,6 @@ class Image extends StatefulWidget {
   /// In the case where the network image is on the Web platform, the [cacheWidth]
   /// and [cacheHeight] parameters are ignored as the web engine delegates
   /// image decoding to the web which does not support custom decode sizes.
-  ///
-  /// ### Same-origin policy on Web
-  ///
-  /// Due to browser restriction on Cross-Origin Resource Sharing (CORS),
-  /// Flutter on the Web platform can not fetch images from other origins
-  /// (domain, scheme, or port) than the origin that hosts the app, unless the
-  /// image hosting origin explicitly allows so. CORS errors can be resolved
-  /// by configuring the image hosting server. More information can be
-  /// found at Mozilla's introduction on
-  /// [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy)
-  /// and
-  /// [CORS errors](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors).
-  ///
-  /// If it's not possible to configure the host, such as when images are hosted
-  /// on a CDN or from arbitrary URLs, the app can set the
-  /// `webHtmlElementStrategy` parameter of [Image.network] to display the image
-  /// in an HTML element, which bypasses the same-origin policy.
-  ///
-  /// The HTML element is placed in a platform view, and therefore has the
-  /// following drawbacks:
-  ///
-  ///  * Suboptimal performance.
-  ///  * Can't be captured by screenshot widgets.
-  ///  * The `headers` argument must be null or empty.
-  ///  * Some image options are ignored, including [opacity], [colorBlendMode],
-  ///    [repeat], filtering, and blurring.
-  ///
-  /// By default, this feature is turned off ([WebHtmlElementStrategy.never]).
   Image.network(
     String src, {
     super.key,
@@ -446,17 +430,7 @@ class Image extends StatefulWidget {
     Map<String, String>? headers,
     int? cacheWidth,
     int? cacheHeight,
-    WebHtmlElementStrategy webHtmlElementStrategy = WebHtmlElementStrategy.never,
-  }) : image = ResizeImage.resizeIfNeeded(
-         cacheWidth,
-         cacheHeight,
-         NetworkImage(
-           src,
-           scale: scale,
-           headers: headers,
-           webHtmlElementStrategy: webHtmlElementStrategy,
-         ),
-       ),
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
 
@@ -515,12 +489,13 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
-  }) : // FileImage is not supported on Flutter Web therefore neither this method.
+  }) :
+       // FileImage is not supported on Flutter Web therefore neither this method.
        assert(
          !kIsWeb,
          'Image.file is not supported on Flutter Web. '
          'Consider using either Image.asset or Image.network instead.',
-       ),
+        ),
        image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
@@ -682,8 +657,8 @@ class Image extends StatefulWidget {
          cacheWidth,
          cacheHeight,
          scale != null
-             ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-             : AssetImage(name, bundle: bundle, package: package),
+           ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+           : AssetImage(name, bundle: bundle, package: package),
        ),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
@@ -740,11 +715,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
-  }) : image = ResizeImage.resizeIfNeeded(
-         cacheWidth,
-         cacheHeight,
-         MemoryImage(bytes, scale: scale),
-       ),
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
@@ -1067,14 +1038,10 @@ class Image extends StatefulWidget {
     properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    properties.add(
-      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
-    );
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
-    properties.add(
-      FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'),
-    );
+    properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
@@ -1155,9 +1122,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _updateInvertColors() {
-    _invertColors =
-        MediaQuery.maybeInvertColorsOf(context) ??
-        SemanticsBinding.instance.accessibilityFeatures.invertColors;
+    _invertColors = MediaQuery.maybeInvertColorsOf(context)
+        ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
   }
 
   void _resolveImage() {
@@ -1165,15 +1131,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       context: _scrollAwareContext,
       imageProvider: widget.image,
     );
-    final ImageStream newStream = provider.resolve(
-      createLocalImageConfiguration(
+    final ImageStream newStream =
+      provider.resolve(createLocalImageConfiguration(
         context,
-        size:
-            widget.width != null && widget.height != null
-                ? Size(widget.width!, widget.height!)
-                : null,
-      ),
-    );
+        size: widget.width != null && widget.height != null ? Size(widget.width!, widget.height!) : null,
+      ));
     _updateSourceStream(newStream);
   }
 
@@ -1185,22 +1147,21 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStreamListener = ImageStreamListener(
         _handleImageFrame,
         onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
-        onError:
-            widget.errorBuilder != null || kDebugMode
-                ? (Object error, StackTrace? stackTrace) {
-                  setState(() {
-                    _lastException = error;
-                    _lastStack = stackTrace;
-                  });
-                  assert(() {
-                    if (widget.errorBuilder == null) {
-                      // ignore: only_throw_errors, since we're just proxying the error.
-                      throw error; // Ensures the error message is printed to the console.
-                    }
-                    return true;
-                  }());
-                }
-                : null,
+        onError: widget.errorBuilder != null || kDebugMode
+            ? (Object error, StackTrace? stackTrace) {
+                setState(() {
+                  _lastException = error;
+                  _lastStack = stackTrace;
+                });
+                assert(() {
+                  if (widget.errorBuilder == null) {
+                    // ignore: only_throw_errors, since we're just proxying the error.
+                    throw error; // Ensures the error message is printed to the console.
+                  }
+                  return true;
+                }());
+              }
+            : null,
       );
     }
     return _imageStreamListener!;
@@ -1230,7 +1191,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     final ImageInfo? oldImageInfo = _imageInfo;
     SchedulerBinding.instance.addPostFrameCallback(
       (_) => oldImageInfo?.dispose(),
-      debugLabel: 'Image.disposeOldInfo',
+      debugLabel: 'Image.disposeOldInfo'
     );
     _imageInfo = info;
   }
@@ -1248,9 +1209,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     }
 
     if (!widget.gaplessPlayback) {
-      setState(() {
-        _replaceImage(info: null);
-      });
+      setState(() { _replaceImage(info: null); });
     }
 
     setState(() {
@@ -1301,7 +1260,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
-        const Positioned.fill(child: Placeholder(color: Color(0xCF8D021F))),
+        const Positioned.fill(
+          child: Placeholder(
+            color: Color(0xCF8D021F),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(4.0),
           child: FittedBox(
@@ -1309,7 +1272,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
               '$error',
               textAlign: TextAlign.center,
               textDirection: TextDirection.ltr,
-              style: const TextStyle(shadows: <Shadow>[Shadow(blurRadius: 1.0)]),
+              style: const TextStyle(
+                shadows: <Shadow>[
+                  Shadow(blurRadius: 1.0),
+                ],
+              ),
             ),
           ),
         ),
@@ -1328,45 +1295,28 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       }
     }
 
-    late Widget result;
-    if (_imageInfo case final WebImageInfo webImage) {
-      // TODO(harryterkelsen): Support the remaining properties that are
-      // supported by `RawImage` but not `RawWebImage`. See the following issue
-      // above for a discussion of the missing properties and suggestions for
-      // how they can be implemented, https://github.com/flutter/flutter/issues/159565.
-      result = RawWebImage(
-        image: webImage,
-        debugImageLabel: _imageInfo?.debugLabel,
-        width: widget.width,
-        height: widget.height,
-        fit: widget.fit,
-        alignment: widget.alignment,
-        matchTextDirection: widget.matchTextDirection,
-      );
-    } else {
-      result = RawImage(
-        // Do not clone the image, because RawImage is a stateless wrapper.
-        // The image will be disposed by this state object when it is not needed
-        // anymore, such as when it is unmounted or when the image stream pushes
-        // a new image.
-        image: _imageInfo?.image,
-        debugImageLabel: _imageInfo?.debugLabel,
-        width: widget.width,
-        height: widget.height,
-        scale: _imageInfo?.scale ?? 1.0,
-        color: widget.color,
-        opacity: widget.opacity,
-        colorBlendMode: widget.colorBlendMode,
-        fit: widget.fit,
-        alignment: widget.alignment,
-        repeat: widget.repeat,
-        centerSlice: widget.centerSlice,
-        matchTextDirection: widget.matchTextDirection,
-        invertColors: _invertColors,
-        isAntiAlias: widget.isAntiAlias,
-        filterQuality: widget.filterQuality,
-      );
-    }
+    Widget result = RawImage(
+      // Do not clone the image, because RawImage is a stateless wrapper.
+      // The image will be disposed by this state object when it is not needed
+      // anymore, such as when it is unmounted or when the image stream pushes
+      // a new image.
+      image: _imageInfo?.image,
+      debugImageLabel: _imageInfo?.debugLabel,
+      width: widget.width,
+      height: widget.height,
+      scale: _imageInfo?.scale ?? 1.0,
+      color: widget.color,
+      opacity: widget.opacity,
+      colorBlendMode: widget.colorBlendMode,
+      fit: widget.fit,
+      alignment: widget.alignment,
+      repeat: widget.repeat,
+      centerSlice: widget.centerSlice,
+      matchTextDirection: widget.matchTextDirection,
+      invertColors: _invertColors,
+      isAntiAlias: widget.isAntiAlias,
+      filterQuality: widget.filterQuality,
+    );
 
     if (!widget.excludeFromSemantics) {
       result = Semantics(

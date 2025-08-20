@@ -78,9 +78,7 @@ class InputDatePickerFormField extends StatefulWidget {
       'initialDate ${this.initialDate} must be on or before lastDate ${this.lastDate}.',
     );
     assert(
-      selectableDayPredicate == null ||
-          initialDate == null ||
-          selectableDayPredicate!(this.initialDate!),
+      selectableDayPredicate == null || initialDate == null || selectableDayPredicate!(this.initialDate!),
       'Provided initialDate ${this.initialDate} must satisfy provided selectableDayPredicate.',
     );
   }
@@ -195,9 +193,10 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       TextEditingValue textEditingValue = TextEditingValue(text: _inputText!);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
-        textEditingValue = textEditingValue.copyWith(
-          selection: TextSelection(baseOffset: 0, extentOffset: _inputText!.length),
-        );
+        textEditingValue = textEditingValue.copyWith(selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: _inputText!.length,
+        ));
         _autoSelected = true;
       }
       _controller.value = textEditingValue;
@@ -213,10 +212,11 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   }
 
   bool _isValidAcceptableDate(DateTime? date) {
-    return date != null &&
-        !date.isBefore(widget.firstDate) &&
-        !date.isAfter(widget.lastDate) &&
-        (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
+    return
+      date != null &&
+      !date.isBefore(widget.firstDate) &&
+      !date.isAfter(widget.lastDate) &&
+      (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
   }
 
   String? _validateDate(String? text) {
@@ -256,10 +256,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final DatePickerThemeData datePickerTheme = theme.datePickerTheme;
     final InputDecorationTheme inputTheme = theme.inputDecorationTheme;
-    final InputBorder effectiveInputBorder =
-        datePickerTheme.inputDecorationTheme?.border ??
-        theme.inputDecorationTheme.border ??
-        (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
+    final InputBorder effectiveInputBorder =  datePickerTheme.inputDecorationTheme?.border
+      ?? theme.inputDecorationTheme.border
+      ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
 
     return Semantics(
       container: true,
@@ -267,10 +266,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         decoration: InputDecoration(
           hintText: widget.fieldHintText ?? localizations.dateHelpText,
           labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
-        ).applyDefaults(
-          inputTheme
-              .merge(datePickerTheme.inputDecorationTheme)
-              .copyWith(border: effectiveInputBorder),
+        ).applyDefaults(inputTheme
+          .merge(datePickerTheme.inputDecorationTheme)
+          .copyWith(border: effectiveInputBorder),
         ),
         validator: _validateDate,
         keyboardType: widget.keyboardType ?? TextInputType.datetime,

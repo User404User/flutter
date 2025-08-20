@@ -26,10 +26,7 @@ import '../cupertino_localizations.dart';
 //
 // These classes are constructed by the [getCupertinoTranslation] method at the
 // bottom of this file, and used by the [_GlobalCupertinoLocalizationsDelegate.load]
-// method defined in `flutter_localizations/lib/src/cupertino_localizations.dart`.
-
-// TODO(goderbauer): Extend the generator to properly format the output.
-// dart format off''';
+// method defined in `flutter_localizations/lib/src/cupertino_localizations.dart`.''';
 }
 
 /// Returns the source of the constructor for a GlobalCupertinoLocalizations

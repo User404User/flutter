@@ -36,9 +36,16 @@ import 'theme.dart';
 ///    application.
 @immutable
 class DividerThemeData with Diagnosticable {
+
   /// Creates a theme that can be used for [DividerTheme] or
   /// [ThemeData.dividerTheme].
-  const DividerThemeData({this.color, this.space, this.thickness, this.indent, this.endIndent});
+  const DividerThemeData({
+    this.color,
+    this.space,
+    this.thickness,
+    this.indent,
+    this.endIndent,
+  });
 
   /// The color of [Divider]s and [VerticalDivider]s, also
   /// used between [ListTile]s, between rows in [DataTable]s, and so forth.
@@ -96,7 +103,13 @@ class DividerThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(color, space, thickness, indent, endIndent);
+  int get hashCode => Object.hash(
+    color,
+    space,
+    thickness,
+    indent,
+    endIndent,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -106,12 +119,12 @@ class DividerThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DividerThemeData &&
-        other.color == color &&
-        other.space == space &&
-        other.thickness == thickness &&
-        other.indent == indent &&
-        other.endIndent == endIndent;
+    return other is DividerThemeData
+        && other.color == color
+        && other.space == space
+        && other.thickness == thickness
+        && other.indent == indent
+        && other.endIndent == endIndent;
   }
 
   @override
@@ -132,7 +145,11 @@ class DividerTheme extends InheritedTheme {
   /// Creates a divider theme that controls the configurations for
   /// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
   /// between rows in [DataTable]s in its widget subtree.
-  const DividerTheme({super.key, required this.data, required super.child});
+  const DividerTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
 
   /// The properties for descendant [Divider]s, [VerticalDivider]s, dividers
   /// between [ListTile]s, and dividers between rows in [DataTable]s.

@@ -27,16 +27,16 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super(
-         'mac-designed-for-ipad',
-         platformType: PlatformType.macos,
-         ephemeral: false,
-         processManager: processManager,
-         logger: logger,
-         fileSystem: fileSystem,
-         operatingSystemUtils: operatingSystemUtils,
-       );
+  })  : _operatingSystemUtils = operatingSystemUtils,
+        super(
+          'mac-designed-for-ipad',
+          platformType: PlatformType.macos,
+          ephemeral: false,
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          operatingSystemUtils: operatingSystemUtils,
+        );
 
   final OperatingSystemUtils _operatingSystemUtils;
 
@@ -54,8 +54,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
-    return flutterProject.ios.existsSync() &&
-        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+    return flutterProject.ios.existsSync() && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
   }
 
   @override
@@ -70,15 +69,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required bool ipv6,
     required Logger logger,
   }) {
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: false,
-        );
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: false,
+    );
 
     return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
       mdnsVMServiceDiscoveryForAttach,
@@ -108,7 +106,10 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async => false;
+  Future<bool> stopApp(
+    ApplicationPackage? app, {
+    String? userIdentifier,
+  }) async => false;
 
   @override
   Future<void> buildForDevice({
@@ -129,13 +130,13 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _platform = platform,
-       _iosWorkflow = iosWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('Mac designed for iPad devices');
+  })  : _logger = logger,
+        _platform = platform,
+        _iosWorkflow = iosWorkflow,
+        _processManager = processManager,
+        _fileSystem = fileSystem,
+        _operatingSystemUtils = operatingSystemUtils,
+        super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
   final Platform _platform;
@@ -151,8 +152,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
-      _iosWorkflow.canListDevices &&
-      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+      _iosWorkflow.canListDevices && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   Future<List<Device>> pollingGetDevices({Duration? timeout}) async {

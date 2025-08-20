@@ -22,17 +22,17 @@ class XcodeValidator extends DoctorValidator {
     required Xcode xcode,
     required IOSSimulatorUtils iosSimulatorUtils,
     required UserMessages userMessages,
-  }) : _xcode = xcode,
-       _iosSimulatorUtils = iosSimulatorUtils,
-       _userMessages = userMessages,
-       super('Xcode - develop for iOS and macOS');
+  })  : _xcode = xcode,
+        _iosSimulatorUtils = iosSimulatorUtils,
+        _userMessages = userMessages,
+        super('Xcode - develop for iOS and macOS');
 
   final Xcode _xcode;
   final IOSSimulatorUtils _iosSimulatorUtils;
   final UserMessages _userMessages;
 
   @override
-  Future<ValidationResult> validateImpl() async {
+  Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
     String? xcodeVersionInfo;
@@ -56,16 +56,10 @@ class XcodeValidator extends DoctorValidator {
       }
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
-        messages.add(
-          ValidationMessage.error(_userMessages.xcodeOutdated(xcodeRequiredVersion.toString())),
-        );
+        messages.add(ValidationMessage.error(_userMessages.xcodeOutdated(xcodeRequiredVersion.toString())));
       } else if (!_xcode.isRecommendedVersionSatisfactory) {
         xcodeStatus = ValidationType.partial;
-        messages.add(
-          ValidationMessage.hint(
-            _userMessages.xcodeRecommended(xcodeRecommendedVersion.toString()),
-          ),
-        );
+        messages.add(ValidationMessage.hint(_userMessages.xcodeRecommended(xcodeRecommendedVersion.toString())));
       }
 
       if (!_xcode.eulaSigned) {
@@ -125,7 +119,8 @@ class XcodeValidator extends DoctorValidator {
     // iphonesimulator SDK major version.
     try {
       runtimes.firstWhere(
-        (IOSSimulatorRuntime runtime) => runtime.version?.major == platformSDKVersion.major,
+        (IOSSimulatorRuntime runtime) =>
+            runtime.version?.major == platformSDKVersion.major,
       );
     } on StateError {
       return ValidationMessage.hint(_iOSSimulatorMissing(platformSDKVersion.toString()));

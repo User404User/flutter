@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/magnifier/magnifier.0.dart' as example;
+import 'package:flutter_api_samples/widgets/magnifier/magnifier.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -37,7 +38,10 @@ void main() {
     );
     await tester.dragFrom(centerOfPositioned, dragDistance);
     await tester.pump();
-    expect(positionedWidgetInTree, isPositionedAt(updatedPositioned));
+    expect(
+      positionedWidgetInTree,
+      isPositionedAt(updatedPositioned),
+    );
   });
 
   testWidgets('should match golden', (WidgetTester tester) async {
@@ -49,6 +53,9 @@ void main() {
     await tester.dragFrom(centerOfPositioned, dragDistance);
     await tester.pump();
 
-    await expectLater(find.byType(RepaintBoundary).last, matchesGoldenFile('magnifier.0_test.png'));
+    await expectLater(
+      find.byType(RepaintBoundary).last,
+      matchesGoldenFile('magnifier.0_test.png'),
+    );
   });
 }

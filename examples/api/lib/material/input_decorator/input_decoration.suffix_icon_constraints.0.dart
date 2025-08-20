@@ -45,7 +45,10 @@ class SuffixIconConstraintsExample extends StatelessWidget {
               isDense: true,
               hintText: 'Smaller Icon Constraints',
               suffixIcon: Icon(Icons.search),
-              suffixIconConstraints: BoxConstraints(minHeight: 32, minWidth: 32),
+              suffixIconConstraints: BoxConstraints(
+                minHeight: 32,
+                minWidth: 32,
+              ),
             ),
           ),
         ],

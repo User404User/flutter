@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+
 // Examples can assume:
 // late BuildContext context;
 
@@ -131,15 +132,15 @@ class BadgeThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BadgeThemeData &&
-        other.backgroundColor == backgroundColor &&
-        other.textColor == textColor &&
-        other.smallSize == smallSize &&
-        other.largeSize == largeSize &&
-        other.textStyle == textStyle &&
-        other.padding == padding &&
-        other.alignment == alignment &&
-        other.offset == offset;
+    return other is BadgeThemeData
+      && other.backgroundColor == backgroundColor
+      && other.textColor == textColor
+      && other.smallSize == smallSize
+      && other.largeSize == largeSize
+      && other.textStyle == textStyle
+      && other.padding == padding
+      && other.alignment == alignment
+      && other.offset == offset;
   }
 
   @override
@@ -151,9 +152,7 @@ class BadgeThemeData with Diagnosticable {
     properties.add(DoubleProperty('largeSize', largeSize, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(
-      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
-    );
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     properties.add(DiagnosticsProperty<Offset>('offset', offset, defaultValue: null));
   }
 }
@@ -166,7 +165,11 @@ class BadgeThemeData with Diagnosticable {
 class BadgeTheme extends InheritedTheme {
   /// Creates a theme that overrides the default color parameters for [Badge]s
   /// in this widget's subtree.
-  const BadgeTheme({super.key, required this.data, required super.child});
+  const BadgeTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
 
   /// Specifies the default color and size overrides for descendant [Badge] widgets.
   final BadgeThemeData data;

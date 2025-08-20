@@ -32,11 +32,10 @@ class _ScrollNotificationObserverScope extends InheritedWidget {
     required ScrollNotificationObserverState scrollNotificationObserverState,
   }) : _scrollNotificationObserverState = scrollNotificationObserverState;
 
-  final ScrollNotificationObserverState _scrollNotificationObserverState;
+  final ScrollNotificationObserverState  _scrollNotificationObserverState;
 
   @override
-  bool updateShouldNotify(_ScrollNotificationObserverScope old) =>
-      _scrollNotificationObserverState != old._scrollNotificationObserverState;
+  bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
 final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
@@ -86,7 +85,10 @@ final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// {@end-tool}
 class ScrollNotificationObserver extends StatefulWidget {
   /// Create a [ScrollNotificationObserver].
-  const ScrollNotificationObserver({super.key, required this.child});
+  const ScrollNotificationObserver({
+    super.key,
+    required this.child,
+  });
 
   /// The subtree below this widget.
   final Widget child;
@@ -104,9 +106,7 @@ class ScrollNotificationObserver extends StatefulWidget {
   /// * [ScrollNotificationObserver.of], which is similar to this method, but
   ///   asserts if no [ScrollNotificationObserver] ancestor is found.
   static ScrollNotificationObserverState? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()
-        ?._scrollNotificationObserverState;
+    return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
   }
 
   /// The closest instance of this class that encloses the given context.
@@ -199,27 +199,23 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
           entry.listener(notification);
         }
       } catch (exception, stack) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'widget library',
-            context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  DiagnosticsProperty<ScrollNotificationObserverState>(
-                    'The $runtimeType sending notification was',
-                    this,
-                    style: DiagnosticsTreeStyle.errorProperty,
-                  ),
-                ],
-          ),
-        );
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widget library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<ScrollNotificationObserverState>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ],
+        ));
       }
     }
   }
 
-  @protected
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollMetricsNotification>(
@@ -243,7 +239,6 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     );
   }
 
-  @protected
   @override
   void dispose() {
     assert(_debugAssertNotDisposed());

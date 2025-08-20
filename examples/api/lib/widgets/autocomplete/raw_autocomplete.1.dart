@@ -15,8 +15,12 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('RawAutocomplete Custom Type')),
-        body: const Center(child: AutocompleteCustomTypeExample()),
+        appBar: AppBar(
+          title: const Text('RawAutocomplete Custom Type'),
+        ),
+        body: const Center(
+          child: AutocompleteCustomTypeExample(),
+        ),
       ),
     );
   }
@@ -25,7 +29,10 @@ class AutocompleteExampleApp extends StatelessWidget {
 // An example of a type that someone might want to autocomplete a list of.
 @immutable
 class User {
-  const User({required this.email, required this.name});
+  const User({
+    required this.email,
+    required this.name,
+  });
 
   final String email;
   final String name;
@@ -83,11 +90,7 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
           },
         );
       },
-      optionsViewBuilder: (
-        BuildContext context,
-        AutocompleteOnSelected<User> onSelected,
-        Iterable<User> options,
-      ) {
+      optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
         return Align(
           alignment: Alignment.topLeft,
           child: Material(
@@ -103,7 +106,9 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
                     onTap: () {
                       onSelected(option);
                     },
-                    child: ListTile(title: Text(_displayStringForOption(option))),
+                    child: ListTile(
+                      title: Text(_displayStringForOption(option)),
+                    ),
                   );
                 },
               ),

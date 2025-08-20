@@ -15,7 +15,11 @@ class ButtonStyleButtonIconAlignmentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: ButtonStyleButtonIconAlignmentExample()));
+    return const MaterialApp(
+      home: Scaffold(
+        body: ButtonStyleButtonIconAlignmentExample(),
+      ),
+    );
   }
 }
 
@@ -23,12 +27,10 @@ class ButtonStyleButtonIconAlignmentExample extends StatefulWidget {
   const ButtonStyleButtonIconAlignmentExample({super.key});
 
   @override
-  State<ButtonStyleButtonIconAlignmentExample> createState() =>
-      _ButtonStyleButtonIconAlignmentExampleState();
+  State<ButtonStyleButtonIconAlignmentExample> createState() => _ButtonStyleButtonIconAlignmentExampleState();
 }
 
-class _ButtonStyleButtonIconAlignmentExampleState
-    extends State<ButtonStyleButtonIconAlignmentExample> {
+class _ButtonStyleButtonIconAlignmentExampleState extends State<ButtonStyleButtonIconAlignmentExample> {
   TextDirection _textDirection = TextDirection.ltr;
   IconAlignment _iconAlignment = IconAlignment.start;
 
@@ -99,14 +101,13 @@ class _ButtonStyleButtonIconAlignmentExampleState
                             _iconAlignment = value.first;
                           });
                         },
-                        selected: <IconAlignment>{_iconAlignment},
-                        segments:
-                            IconAlignment.values.map((IconAlignment iconAlignment) {
-                              return ButtonSegment<IconAlignment>(
-                                value: iconAlignment,
-                                label: Text(iconAlignment.name),
-                              );
-                            }).toList(),
+                        selected: <IconAlignment>{ _iconAlignment },
+                        segments: IconAlignment.values.map((IconAlignment iconAlignment) {
+                          return ButtonSegment<IconAlignment>(
+                            value: iconAlignment,
+                            label: Text(iconAlignment.name),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),
@@ -120,7 +121,7 @@ class _ButtonStyleButtonIconAlignmentExampleState
                             _textDirection = value.first;
                           });
                         },
-                        selected: <TextDirection>{_textDirection},
+                        selected: <TextDirection>{ _textDirection },
                         segments: const <ButtonSegment<TextDirection>>[
                           ButtonSegment<TextDirection>(
                             value: TextDirection.ltr,

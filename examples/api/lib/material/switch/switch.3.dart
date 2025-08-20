@@ -22,7 +22,9 @@ class SwitchApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(title: const Text('Switch Sample')),
-        body: const Center(child: SwitchExample()),
+        body: const Center(
+          child: SwitchExample(),
+        ),
       ),
     );
   }

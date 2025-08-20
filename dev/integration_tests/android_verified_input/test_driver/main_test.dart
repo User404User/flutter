@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
+
 Future<void> main() async {
   late FlutterDriver driver;
 
@@ -34,13 +35,8 @@ Future<void> main() async {
     inputEventWasVerified.whenComplete(() => stop = true);
     while (!stop) {
       // We must use the Android input tool to get verified input events.
-      final ProcessResult result = await Process.run('adb', <String>[
-        'shell',
-        'input',
-        'tap',
-        '${offset.dx}',
-        '${offset.dy}',
-      ]);
+      final ProcessResult result =
+          await Process.run('adb', <String>['shell', 'input', 'tap', '${offset.dx}', '${offset.dy}']);
       expect(result.exitCode, equals(0));
     }
     // Input

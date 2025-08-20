@@ -10,7 +10,13 @@ void main() {
     const Widget title = Text('CupertinoListTile');
 
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoListTile(title: title))),
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoListTile(
+            title: title,
+          ),
+        ),
+      ),
     );
 
     expect(tester.widget<Text>(find.byType(Text)), title);
@@ -22,7 +28,12 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(title: Icon(CupertinoIcons.add), subtitle: subtitle)),
+        home: Center(
+          child: CupertinoListTile(
+            title: Icon(CupertinoIcons.add),
+            subtitle: subtitle,
+          ),
+        ),
       ),
     );
 
@@ -36,7 +47,10 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
-          child: CupertinoListTile(title: Icon(CupertinoIcons.add), additionalInfo: additionalInfo),
+          child: CupertinoListTile(
+            title: Icon(CupertinoIcons.add),
+            additionalInfo: additionalInfo,
+          ),
         ),
       ),
     );
@@ -50,14 +64,16 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(title: Icon(CupertinoIcons.add), trailing: trailing)),
+        home: Center(
+          child: CupertinoListTile(
+            title: Icon(CupertinoIcons.add),
+            trailing: trailing,
+          ),
+        ),
       ),
     );
 
-    expect(
-      tester.widget<CupertinoListTileChevron>(find.byType(CupertinoListTileChevron)),
-      trailing,
-    );
+    expect(tester.widget<CupertinoListTileChevron>(find.byType(CupertinoListTileChevron)), trailing);
   });
 
   testWidgets('shows leading', (WidgetTester tester) async {
@@ -65,7 +81,12 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoListTile(leading: leading, title: Text('CupertinoListTile'))),
+        home: Center(
+          child: CupertinoListTile(
+            leading: leading,
+            title: Text('CupertinoListTile'),
+          ),
+        ),
       ),
     );
 
@@ -82,7 +103,10 @@ void main() {
           data: const MediaQueryData(),
           child: CupertinoListSection(
             children: const <Widget>[
-              CupertinoListTile(title: Text('CupertinoListTile'), backgroundColor: backgroundColor),
+              CupertinoListTile(
+                title: Text('CupertinoListTile'),
+                backgroundColor: backgroundColor,
+              ),
             ],
           ),
         ),
@@ -94,9 +118,7 @@ void main() {
     expect(container.color, backgroundColor);
   });
 
-  testWidgets('does not change backgroundColor when tapped if onTap is not provided', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('does not change backgroundColor when tapped if onTap is not provided', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
     const Color backgroundColorActivated = CupertinoColors.systemRed;
 
@@ -126,9 +148,7 @@ void main() {
     expect(container.color, backgroundColor);
   });
 
-  testWidgets('changes backgroundColor when tapped if onTap is provided', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('changes backgroundColor when tapped if onTap is provided', (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
     const Color backgroundColorActivated = CupertinoColors.systemRed;
 
@@ -143,9 +163,7 @@ void main() {
                 title: const Text('CupertinoListTile'),
                 backgroundColor: backgroundColor,
                 backgroundColorActivated: backgroundColorActivated,
-                onTap: () async {
-                  await Future<void>.delayed(const Duration(milliseconds: 1), () {});
-                },
+                onTap: () async { await Future<void>.delayed(const Duration(milliseconds: 1), () {}); },
               ),
             ],
           ),
@@ -169,16 +187,18 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('does not contain GestureDetector if onTap is not provided', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('does not contain GestureDetector if onTap is not provided', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
           child: CupertinoListSection(
-            children: const <Widget>[CupertinoListTile(title: Text('CupertinoListTile'))],
+            children: const <Widget>[
+              CupertinoListTile(
+                title: Text('CupertinoListTile'),
+              ),
+            ],
           ),
         ),
       ),
@@ -196,7 +216,10 @@ void main() {
           data: const MediaQueryData(),
           child: CupertinoListSection(
             children: <Widget>[
-              CupertinoListTile(title: const Text('CupertinoListTile'), onTap: () async {}),
+              CupertinoListTile(
+                title: const Text('CupertinoListTile'),
+                onTap: () async {},
+              ),
             ],
           ),
         ),
@@ -215,7 +238,7 @@ void main() {
       CupertinoApp(
         home: Builder(
           builder: (BuildContext context) {
-            final Widget secondPage = Center(
+             final Widget secondPage = Center(
               child: CupertinoButton(
                 child: const Text('Go back'),
                 onPressed: () => Navigator.of(context).pop<void>(),
@@ -226,14 +249,13 @@ void main() {
                 textDirection: TextDirection.ltr,
                 child: MediaQuery(
                   data: const MediaQueryData(),
-                  child: CupertinoListTile(
+                  child:CupertinoListTile(
                     title: const Text('CupertinoListTile'),
                     backgroundColor: backgroundColor,
                     backgroundColorActivated: backgroundColorActivated,
-                    onTap:
-                        () => Navigator.of(context).push(
-                          CupertinoPageRoute<Widget>(builder: (BuildContext context) => secondPage),
-                        ),
+                    onTap: () => Navigator.of(context).push(CupertinoPageRoute<Widget>(
+                      builder: (BuildContext context) => secondPage,
+                    )),
                   ),
                 ),
               ),
@@ -266,7 +288,10 @@ void main() {
           home: Center(
             child: Directionality(
               textDirection: TextDirection.ltr,
-              child: CupertinoListTile(title: title, leading: leading),
+              child: CupertinoListTile(
+                title: title,
+                leading: leading,
+              ),
             ),
           ),
         ),
@@ -287,7 +312,10 @@ void main() {
           home: Center(
             child: Directionality(
               textDirection: TextDirection.ltr,
-              child: CupertinoListTile(title: title, subtitle: subtitle),
+              child: CupertinoListTile(
+                title: title,
+                subtitle: subtitle,
+              ),
             ),
           ),
         ),
@@ -309,7 +337,10 @@ void main() {
           home: Center(
             child: Directionality(
               textDirection: TextDirection.ltr,
-              child: CupertinoListTile(title: title, additionalInfo: additionalInfo),
+              child: CupertinoListTile(
+                title: title,
+                additionalInfo: additionalInfo,
+              ),
             ),
           ),
         ),
@@ -358,7 +389,10 @@ void main() {
           home: Center(
             child: Directionality(
               textDirection: TextDirection.rtl,
-              child: CupertinoListTile(title: title, leading: leading),
+              child: CupertinoListTile(
+                title: title,
+                leading: leading,
+              ),
             ),
           ),
         ),
@@ -379,7 +413,10 @@ void main() {
           home: Center(
             child: Directionality(
               textDirection: TextDirection.rtl,
-              child: CupertinoListTile(title: title, subtitle: subtitle),
+              child: CupertinoListTile(
+                title: title,
+                subtitle: subtitle,
+              ),
             ),
           ),
         ),
@@ -401,7 +438,10 @@ void main() {
           home: Center(
             child: Directionality(
               textDirection: TextDirection.rtl,
-              child: CupertinoListTile(title: title, additionalInfo: additionalInfo),
+              child: CupertinoListTile(
+                title: title,
+                additionalInfo: additionalInfo,
+              ),
             ),
           ),
         ),
@@ -446,7 +486,10 @@ void main() {
 
     Future<void> onTap() async {
       showTile = false;
-      await Future<void>.delayed(const Duration(seconds: 1), () => showTile = true);
+      await Future<void>.delayed(
+        const Duration(seconds: 1),
+        () => showTile = true,
+      );
     }
 
     Widget buildCupertinoListTile() {
@@ -455,7 +498,13 @@ void main() {
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[if (showTile) CupertinoListTile(onTap: onTap, title: title)],
+              children: <Widget>[
+                if (showTile)
+                  CupertinoListTile(
+                    onTap: onTap,
+                    title: title,
+                  ),
+               ],
             ),
           ),
         ),
@@ -475,7 +524,9 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
-          child: CupertinoListTile(title: Text('CupertinoListTile' * 10)),
+          child: CupertinoListTile(
+            title: Text('CupertinoListTile' * 10),
+          ),
         ),
       ),
     );
@@ -487,7 +538,10 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
-          child: CupertinoListTile(title: const Text(''), subtitle: Text('CupertinoListTile' * 10)),
+          child: CupertinoListTile(
+            title: const Text(''),
+            subtitle: Text('CupertinoListTile' * 10),
+          ),
         ),
       ),
     );

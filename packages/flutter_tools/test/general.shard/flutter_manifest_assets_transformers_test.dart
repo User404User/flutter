@@ -23,16 +23,13 @@ flutter:
       transformers:
         - package: my_package
   ''';
-      final FlutterManifest? parsedManifest = FlutterManifest.createFromString(
-        manifest,
-        logger: logger,
-      );
+      final FlutterManifest? parsedManifest = FlutterManifest.createFromString(manifest, logger: logger);
 
       expect(parsedManifest!.assets, <AssetsEntry>[
         AssetsEntry(
           uri: Uri.parse('asset/hello.txt'),
           transformers: const <AssetTransformerEntry>[
-            AssetTransformerEntry(package: 'my_package', args: <String>[]),
+            AssetTransformerEntry(package: 'my_package', args: <String>[])
           ],
         ),
       ]);
@@ -55,16 +52,16 @@ flutter:
         - package: my_package
           args: ["-e", "--color", "purple"]
 ''';
-      final FlutterManifest? parsedManifest = FlutterManifest.createFromString(
-        manifest,
-        logger: logger,
-      );
+      final FlutterManifest? parsedManifest = FlutterManifest.createFromString(manifest, logger: logger);
 
       expect(parsedManifest!.assets, <AssetsEntry>[
         AssetsEntry(
           uri: Uri.parse('asset/hello.txt'),
           transformers: const <AssetTransformerEntry>[
-            AssetTransformerEntry(package: 'my_package', args: <String>['-e', '--color', 'purple']),
+            AssetTransformerEntry(
+              package: 'my_package',
+              args: <String>['-e', '--color', 'purple'],
+            )
           ],
         ),
       ]);
@@ -141,11 +138,9 @@ flutter:
       );
     });
 
-    testWithoutContext(
-      'fails when a transformer has args field that is not a list of strings',
-      () async {
-        final BufferLogger logger = BufferLogger.test();
-        const String manifest = '''
+    testWithoutContext('fails when a transformer has args field that is not a list of strings', () async {
+      final BufferLogger logger = BufferLogger.test();
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -158,15 +153,14 @@ flutter:
         - package: my_transformer
           args: hello
     ''';
-        FlutterManifest.createFromString(manifest, logger: logger);
-        expect(
-          logger.errorText,
-          'Unable to parse assets section.\n'
-          'In transformers section of asset "asset/hello.txt": In args section '
-          'of transformer using package "my_transformer": Expected args to be a '
-          'list of String, but got hello (String).\n',
-        );
-      },
-    );
+      FlutterManifest.createFromString(manifest, logger: logger);
+      expect(
+        logger.errorText,
+        'Unable to parse assets section.\n'
+        'In transformers section of asset "asset/hello.txt": In args section '
+        'of transformer using package "my_transformer": Expected args to be a '
+        'list of String, but got hello (String).\n',
+      );
+    });
   });
 }

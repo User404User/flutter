@@ -18,7 +18,9 @@ class WidgetStateBorderSideExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('WidgetStateBorderSide Sample')),
-        body: const Center(child: WidgetStateBorderSideExample()),
+        body: const Center(
+          child: WidgetStateBorderSideExample(),
+        ),
       ),
     );
   }
@@ -44,13 +46,15 @@ class _WidgetStateBorderSideExampleState extends State<WidgetStateBorderSideExam
           _isSelected = value;
         });
       },
-      side: const WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide?>{
-        WidgetState.pressed: BorderSide(color: Colors.green),
-        WidgetState.hovered: BorderSide(color: Colors.blue),
-        WidgetState.selected: BorderSide(color: Colors.red),
-        // Resolves to null if no keys match, deferring to the default value
-        // of the theme or widget.
-      }),
+      side: const WidgetStateBorderSide.fromMap(
+        <WidgetStatesConstraint, BorderSide?>{
+          WidgetState.pressed:  BorderSide(color: Colors.green),
+          WidgetState.hovered:  BorderSide(color: Colors.blue),
+          WidgetState.selected: BorderSide(color: Colors.red),
+          // Resolves to null if no keys match, deferring to the default value
+          // of the theme or widget.
+        },
+      ),
     );
   }
 }

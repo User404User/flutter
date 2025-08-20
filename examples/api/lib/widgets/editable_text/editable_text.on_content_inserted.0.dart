@@ -15,7 +15,9 @@ class KeyboardInsertedContentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: KeyboardInsertedContentDemo());
+    return const MaterialApp(
+      home: KeyboardInsertedContentDemo(),
+    );
   }
 }
 

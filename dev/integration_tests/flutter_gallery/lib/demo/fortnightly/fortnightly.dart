@@ -33,7 +33,7 @@ class FortnightlyDemo extends StatelessWidget {
 }
 
 class ShortAppBar extends StatelessWidget {
-  const ShortAppBar({super.key, this.onBackPressed});
+  const ShortAppBar({ super.key, this.onBackPressed });
 
   final VoidCallback? onBackPressed;
 
@@ -115,13 +115,19 @@ over water meant for the whole central valley of California? The story will shoc
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        Text('US', style: textTheme.labelSmall),
+                        Text(
+                          'US',
+                          style: textTheme.labelSmall,
+                        ),
                         Text(
                           ' ¬ ',
                           // TODO(larche): Replace textTheme.headline2.color with a ColorScheme value when known.
                           style: textTheme.labelSmall!.apply(color: textTheme.displayMedium!.color),
                         ),
-                        Text('CULTURE', style: textTheme.labelSmall),
+                        Text(
+                          'CULTURE',
+                          style: textTheme.labelSmall,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -132,7 +138,7 @@ over water meant for the whole central valley of California? The story will shoc
                     const SizedBox(height: 10),
                     Text(
                       'How these crazy fruits sweetened our hearts, relationships, '
-                      'and puffed pastries',
+                          'and puffed pastries',
                       style: textTheme.bodyMedium,
                     ),
                     Padding(
@@ -147,7 +153,10 @@ over water meant for the whole central valley of California? The story will shoc
                             radius: 20,
                           ),
                           const SizedBox(width: 12),
-                          Text('by', style: textTheme.displayMedium),
+                          Text(
+                            'by',
+                            style: textTheme.displayMedium,
+                          ),
                           const SizedBox(width: 4),
                           const Text(
                             'Connor Eghan',
@@ -161,7 +170,10 @@ over water meant for the whole central valley of California? The story will shoc
                         ],
                       ),
                     ),
-                    Text('$paragraph1\n\n$paragraph2', style: textTheme.bodyLarge),
+                    Text(
+                      '$paragraph1\n\n$paragraph2',
+                      style: textTheme.bodyLarge,
+                    ),
                   ],
                 ),
               ),

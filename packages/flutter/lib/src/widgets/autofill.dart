@@ -177,9 +177,8 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 
   @override
   Iterable<AutofillClient> get autofillClients {
-    return _clients.values.where(
-      (AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled,
-    );
+    return _clients.values
+      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
@@ -214,20 +213,20 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     _clients.remove(autofillId);
   }
 
-  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _isTopmostAutofillGroup = AutofillGroup.maybeOf(context) == null;
   }
 
-  @protected
   @override
   Widget build(BuildContext context) {
-    return _AutofillScope(autofillScopeState: this, child: widget.child);
+    return _AutofillScope(
+      autofillScopeState: this,
+      child: widget.child,
+    );
   }
 
-  @protected
   @override
   void dispose() {
     super.dispose();
@@ -245,8 +244,10 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 }
 
 class _AutofillScope extends InheritedWidget {
-  const _AutofillScope({required super.child, AutofillGroupState? autofillScopeState})
-    : _scope = autofillScopeState;
+  const _AutofillScope({
+    required super.child,
+    AutofillGroupState? autofillScopeState,
+  }) : _scope = autofillScopeState;
 
   final AutofillGroupState? _scope;
 

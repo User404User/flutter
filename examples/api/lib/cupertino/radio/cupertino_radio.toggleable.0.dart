@@ -15,8 +15,12 @@ class CupertinoRadioApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CupertinoApp(
       home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('CupertinoRadio Toggleable Example')),
-        child: SafeArea(child: CupertinoRadioExample()),
+        navigationBar: CupertinoNavigationBar(
+          middle: Text('CupertinoRadio Toggleable Example'),
+        ),
+        child: SafeArea(
+          child: CupertinoRadioExample(),
+        ),
       ),
     );
   }

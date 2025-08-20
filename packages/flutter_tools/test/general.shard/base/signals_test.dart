@@ -59,23 +59,20 @@ void main() {
       await completer.future;
     });
 
-    testWithoutContext(
-      'signal handlers do not cause concurrent modification errors when removing handlers in a signal callback',
-      () async {
-        final Completer<void> completer = Completer<void>();
-        late Object token;
-        Future<void> handle(ProcessSignal s) async {
-          expect(s, signalUnderTest);
-          expect(await signals.removeHandler(signalUnderTest, token), true);
-          completer.complete();
-        }
+    testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
+      final Completer<void> completer = Completer<void>();
+      late Object token;
+      Future<void> handle(ProcessSignal s) async {
+        expect(s, signalUnderTest);
+        expect(await signals.removeHandler(signalUnderTest, token), true);
+        completer.complete();
+      }
 
-        token = signals.addHandler(signalUnderTest, handle);
+      token = signals.addHandler(signalUnderTest, handle);
 
-        fakeSignal.controller.add(fakeSignal);
-        await completer.future;
-      },
-    );
+      fakeSignal.controller.add(fakeSignal);
+      await completer.future;
+    });
 
     testWithoutContext('signal handler error goes on error stream', () async {
       final Exception exn = Exception('Error');
@@ -85,10 +82,12 @@ void main() {
 
       final Completer<void> completer = Completer<void>();
       final List<Object> errList = <Object>[];
-      final StreamSubscription<Object> errSub = signals.errors.listen((Object err) {
-        errList.add(err);
-        completer.complete();
-      });
+      final StreamSubscription<Object> errSub = signals.errors.listen(
+        (Object err) {
+          errList.add(err);
+          completer.complete();
+        },
+      );
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;
@@ -97,16 +96,21 @@ void main() {
     });
 
     testWithoutContext('removed signal handler does not run', () async {
-      final Object token = signals.addHandler(signalUnderTest, (ProcessSignal s) async {
-        fail('Signal handler should have been removed.');
-      });
+      final Object token = signals.addHandler(
+        signalUnderTest,
+        (ProcessSignal s) async {
+          fail('Signal handler should have been removed.');
+        },
+      );
 
       await signals.removeHandler(signalUnderTest, token);
 
       final List<Object> errList = <Object>[];
-      final StreamSubscription<Object> errSub = signals.errors.listen((Object err) {
-        errList.add(err);
-      });
+      final StreamSubscription<Object> errSub = signals.errors.listen(
+        (Object err) {
+          errList.add(err);
+        },
+      );
 
       fakeSignal.controller.add(fakeSignal);
 
@@ -121,15 +125,20 @@ void main() {
         completer.complete();
       });
 
-      final Object token = signals.addHandler(signalUnderTest, (ProcessSignal s) async {
-        fail('Signal handler should have been removed.');
-      });
+      final Object token = signals.addHandler(
+        signalUnderTest,
+        (ProcessSignal s) async {
+          fail('Signal handler should have been removed.');
+        },
+      );
       await signals.removeHandler(signalUnderTest, token);
 
       final List<Object> errList = <Object>[];
-      final StreamSubscription<Object> errSub = signals.errors.listen((Object err) {
-        errList.add(err);
-      });
+      final StreamSubscription<Object> errSub = signals.errors.listen(
+        (Object err) {
+          errList.add(err);
+        },
+      );
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;
@@ -152,9 +161,11 @@ void main() {
       });
 
       final List<Object> errList = <Object>[];
-      final StreamSubscription<Object> errSub = signals.errors.listen((Object err) {
-        errList.add(err);
-      });
+      final StreamSubscription<Object> errSub = signals.errors.listen(
+        (Object err) {
+          errList.add(err);
+        },
+      );
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;

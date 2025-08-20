@@ -18,9 +18,7 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
   @override
   Future<void> migrate() async {
     if (!_cmakeFile.existsSync()) {
-      logger.printTrace(
-        'CMake project not found, skipping add_custom_command() VERBATIM migration',
-      );
+      logger.printTrace('CMake project not found, skipping add_custom_command() VERBATIM migration');
       return;
     }
 
@@ -52,10 +50,7 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
       final String? addCustomCommandOriginal = match.group(1);
       if (addCustomCommandOriginal != null && !addCustomCommandOriginal.contains('VERBATIM')) {
         final String addCustomCommandReplacement = '$addCustomCommandOriginal\n  VERBATIM';
-        newProjectContents = newProjectContents.replaceAll(
-          addCustomCommandOriginal,
-          addCustomCommandReplacement,
-        );
+        newProjectContents = newProjectContents.replaceAll(addCustomCommandOriginal, addCustomCommandReplacement);
       }
 
       // CMake's add_custom_command() should add FLUTTER_TARGET_PLATFORM to support multi-architecture.
@@ -66,16 +61,11 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
       //    FLUTTER_TARGET_PLATFORM
       // ------------------------------
       if (addCustomCommandOriginal?.contains('linux-x64') ?? false) {
-        newProjectContents = newProjectContents.replaceAll(
-          'linux-x64',
-          r'${FLUTTER_TARGET_PLATFORM}',
-        );
+        newProjectContents = newProjectContents.replaceAll('linux-x64', r'${FLUTTER_TARGET_PLATFORM}');
       }
     }
     if (originalProjectContents != newProjectContents) {
-      logger.printStatus(
-        'add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.',
-      );
+      logger.printStatus('add_custom_command() missing VERBATIM or FLUTTER_TARGET_PLATFORM, updating.');
       _cmakeFile.writeAsStringSync(newProjectContents);
     }
   }

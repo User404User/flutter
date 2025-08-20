@@ -177,8 +177,7 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
   }
 }
 
-class _TweenAnimationBuilderState<T extends Object?>
-    extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
+class _TweenAnimationBuilderState<T extends Object?> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
   Tween<T>? _currentTween;
 
   @override
@@ -197,14 +196,10 @@ class _TweenAnimationBuilderState<T extends Object?>
       widget.tween.end != null,
       'Tween provided to TweenAnimationBuilder must have non-null Tween.end value.',
     );
-    _currentTween =
-        visitor(_currentTween, widget.tween.end, (dynamic value) {
-              assert(false);
-              throw StateError(
-                'Constructor will never be called because null is never provided as current tween.',
-              );
-            })
-            as Tween<T>?;
+    _currentTween = visitor(_currentTween, widget.tween.end, (dynamic value) {
+      assert(false);
+      throw StateError('Constructor will never be called because null is never provided as current tween.');
+    }) as Tween<T>?;
   }
 
   @override

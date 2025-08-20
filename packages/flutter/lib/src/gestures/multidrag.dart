@@ -102,13 +102,11 @@ abstract class MultiDragPointerState {
     if (_client != null) {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.
-      _client!.update(
-        DragUpdateDetails(
-          sourceTimeStamp: event.timeStamp,
-          delta: event.delta,
-          globalPosition: event.position,
-        ),
-      );
+      _client!.update(DragUpdateDetails(
+        sourceTimeStamp: event.timeStamp,
+        delta: event.delta,
+        globalPosition: event.position,
+      ));
     } else {
       assert(pendingDelta != null);
       _pendingDelta = _pendingDelta! + event.delta;
@@ -121,7 +119,7 @@ abstract class MultiDragPointerState {
   /// This is called when a pointer movement is received, but only if the gesture
   /// has not yet been resolved.
   @protected
-  void checkForResolutionAfterMove() {}
+  void checkForResolutionAfterMove() { }
 
   /// Called when the gesture was accepted.
   ///
@@ -296,7 +294,7 @@ abstract class MultiDragGestureRecognizer extends GestureRecognizer {
     assert(_pointers != null);
     final MultiDragPointerState? state = _pointers![pointer];
     if (state == null) {
-      return; // We might already have canceled this drag if the up comes before the accept.
+      return;  // We might already have canceled this drag if the up comes before the accept.
     }
     state.accepted((Offset initialPosition) => _startDrag(initialPosition, pointer));
   }
@@ -399,6 +397,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
   String get debugDescription => 'multidrag';
 }
 
+
 class _HorizontalPointerState extends MultiDragPointerState {
   _HorizontalPointerState(super.initialPosition, super.kind, super.gestureSettings);
 
@@ -450,6 +449,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer {
   @override
   String get debugDescription => 'horizontal multidrag';
 }
+
 
 class _VerticalPointerState extends MultiDragPointerState {
   _VerticalPointerState(super.initialPosition, super.kind, super.gestureSettings);

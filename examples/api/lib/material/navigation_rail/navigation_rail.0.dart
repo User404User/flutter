@@ -13,7 +13,9 @@ class NavigationRailExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: NavRailExample());
+    return const MaterialApp(
+      home: NavRailExample(),
+    );
   }
 }
 
@@ -45,25 +47,23 @@ class _NavRailExampleState extends State<NavRailExample> {
               });
             },
             labelType: labelType,
-            leading:
-                showLeading
-                    ? FloatingActionButton(
-                      elevation: 0,
-                      onPressed: () {
-                        // Add your onPressed code here!
-                      },
-                      child: const Icon(Icons.add),
-                    )
-                    : const SizedBox(),
-            trailing:
-                showTrailing
-                    ? IconButton(
-                      onPressed: () {
-                        // Add your onPressed code here!
-                      },
-                      icon: const Icon(Icons.more_horiz_rounded),
-                    )
-                    : const SizedBox(),
+            leading: showLeading
+                ? FloatingActionButton(
+                    elevation: 0,
+                    onPressed: () {
+                      // Add your onPressed code here!
+                    },
+                    child: const Icon(Icons.add),
+                  )
+                : const SizedBox(),
+            trailing: showTrailing
+                ? IconButton(
+                    onPressed: () {
+                      // Add your onPressed code here!
+                    },
+                    icon: const Icon(Icons.more_horiz_rounded),
+                  )
+                : const SizedBox(),
             destinations: const <NavigationRailDestination>[
               NavigationRailDestination(
                 icon: Icon(Icons.favorite_border),

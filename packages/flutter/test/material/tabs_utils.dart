@@ -11,12 +11,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 // This returns render paragraph of the Tab label text.
 RenderParagraph getTabText(WidgetTester tester, String text) {
-  return tester.renderObject<RenderParagraph>(
-    find.descendant(
-      of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_TabStyle'),
-      matching: find.text(text),
-    ),
-  );
+  return tester.renderObject<RenderParagraph>(find.descendant(
+    of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_TabStyle'),
+    matching: find.text(text),
+  ));
 }
 
 // This creates and returns a TabController.
@@ -38,7 +36,7 @@ TabController createTabController({
 
 // This widget is used to test widget state in the tabs_test.dart file.
 class TabStateMarker extends StatefulWidget {
-  const TabStateMarker({super.key, this.child});
+  const TabStateMarker({ super.key, this.child });
 
   final Widget? child;
 
@@ -75,8 +73,7 @@ class TabControllerFrame extends StatefulWidget {
   TabControllerFrameState createState() => TabControllerFrameState();
 }
 
-class TabControllerFrameState extends State<TabControllerFrame>
-    with SingleTickerProviderStateMixin {
+class TabControllerFrameState extends State<TabControllerFrame> with SingleTickerProviderStateMixin {
   late TabController _controller;
 
   @override
@@ -119,10 +116,10 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
 }
 
 // This creates a Fake implementation of ScrollMetrics.
-class TabMockScrollMetrics extends Fake implements ScrollMetrics {}
+class TabMockScrollMetrics extends Fake implements ScrollMetrics { }
 
 class TabBarTestScrollPhysics extends ScrollPhysics {
-  const TabBarTestScrollPhysics({super.parent});
+  const TabBarTestScrollPhysics({ super.parent });
 
   @override
   TabBarTestScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -146,7 +143,12 @@ class TabBarTestScrollPhysics extends ScrollPhysics {
 
 // This widget is used to log the lifecycle of the TabBarView children.
 class TabBody extends StatefulWidget {
-  const TabBody({super.key, required this.index, required this.log, this.marker = ''});
+  const TabBody({
+    super.key,
+    required this.index,
+    required this.log,
+    this.marker = '',
+  });
 
   final int index;
   final List<String> log;
@@ -179,17 +181,16 @@ class TabBodyState extends State<TabBody> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child:
-          widget.marker.isEmpty
-              ? Text('${widget.index}')
-              : Text('${widget.index}-${widget.marker}'),
+      child: widget.marker.isEmpty
+        ? Text('${widget.index}')
+        : Text('${widget.index}-${widget.marker}'),
     );
   }
 }
 
 // This widget is used to test the lifecycle of the TabBarView children with Ink widget.
 class TabKeepAliveInk extends StatefulWidget {
-  const TabKeepAliveInk({super.key, required this.title});
+  const TabKeepAliveInk({ super.key, required this.title });
 
   final String title;
 
@@ -204,7 +205,9 @@ class _TabKeepAliveInkState extends State<TabKeepAliveInk> with AutomaticKeepAli
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Ink(child: Text(widget.title));
+    return Ink(
+      child: Text(widget.title),
+    );
   }
 }
 
@@ -218,8 +221,7 @@ class TabAlwaysKeepAliveWidget extends StatefulWidget {
   State<TabAlwaysKeepAliveWidget> createState() => _TabAlwaysKeepAliveWidgetState();
 }
 
-class _TabAlwaysKeepAliveWidgetState extends State<TabAlwaysKeepAliveWidget>
-    with AutomaticKeepAliveClientMixin {
+class _TabAlwaysKeepAliveWidgetState extends State<TabAlwaysKeepAliveWidget> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 

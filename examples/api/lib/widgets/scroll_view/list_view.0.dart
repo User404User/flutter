@@ -13,7 +13,9 @@ class ListViewExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ListTileSelectExample());
+    return const MaterialApp(
+      home: ListTileSelectExample(),
+    );
   }
 }
 
@@ -50,11 +52,12 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ListTile selection'),
-        leading:
-            isSelectionMode
-                ? IconButton(
+        appBar: AppBar(
+          title: const Text(
+            'ListTile selection',
+          ),
+          leading: isSelectionMode
+              ? IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () {
                     setState(() {
@@ -63,44 +66,47 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
                     initializeSelection();
                   },
                 )
-                : const SizedBox(),
-        actions: <Widget>[
-          if (_isGridMode)
-            IconButton(
-              icon: const Icon(Icons.grid_on),
-              onPressed: () {
-                setState(() {
-                  _isGridMode = false;
-                });
-              },
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.list),
-              onPressed: () {
-                setState(() {
-                  _isGridMode = true;
-                });
-              },
-            ),
-          if (isSelectionMode)
-            TextButton(
-              child:
-                  !_selectAll
-                      ? const Text('select all', style: TextStyle(color: Colors.white))
-                      : const Text('unselect all', style: TextStyle(color: Colors.white)),
-              onPressed: () {
-                _selectAll = !_selectAll;
-                setState(() {
-                  _selected = List<bool>.generate(listLength, (_) => _selectAll);
-                });
-              },
-            ),
-        ],
-      ),
-      body:
-          _isGridMode
-              ? GridBuilder(
+              : const SizedBox(),
+          actions: <Widget>[
+            if (_isGridMode)
+              IconButton(
+                icon: const Icon(Icons.grid_on),
+                onPressed: () {
+                  setState(() {
+                    _isGridMode = false;
+                  });
+                },
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.list),
+                onPressed: () {
+                  setState(() {
+                    _isGridMode = true;
+                  });
+                },
+              ),
+            if (isSelectionMode)
+              TextButton(
+                  child: !_selectAll
+                      ? const Text(
+                          'select all',
+                          style: TextStyle(color: Colors.white),
+                        )
+                      : const Text(
+                          'unselect all',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                  onPressed: () {
+                    _selectAll = !_selectAll;
+                    setState(() {
+                      _selected = List<bool>.generate(listLength, (_) => _selectAll);
+                    });
+                  }),
+          ],
+        ),
+        body: _isGridMode
+            ? GridBuilder(
                 isSelectionMode: isSelectionMode,
                 selectedList: _selected,
                 onSelectionChange: (bool x) {
@@ -109,7 +115,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
                   });
                 },
               )
-              : ListBuilder(
+            : ListBuilder(
                 isSelectionMode: isSelectionMode,
                 selectedList: _selected,
                 onSelectionChange: (bool x) {
@@ -117,8 +123,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
                     isSelectionMode = x;
                   });
                 },
-              ),
-    );
+              ));
   }
 }
 
@@ -150,33 +155,27 @@ class GridBuilderState extends State<GridBuilder> {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      itemCount: widget.selectedList.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-      itemBuilder: (_, int index) {
-        return InkWell(
-          onTap: () => _toggle(index),
-          onLongPress: () {
-            if (!widget.isSelectionMode) {
-              setState(() {
-                widget.selectedList[index] = true;
-              });
-              widget.onSelectionChange!(true);
-            }
-          },
-          child: GridTile(
-            child: Container(
-              child:
-                  widget.isSelectionMode
-                      ? Checkbox(
-                        onChanged: (bool? x) => _toggle(index),
-                        value: widget.selectedList[index],
-                      )
-                      : const Icon(Icons.image),
-            ),
-          ),
-        );
-      },
-    );
+        itemCount: widget.selectedList.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        itemBuilder: (_, int index) {
+          return InkWell(
+            onTap: () => _toggle(index),
+            onLongPress: () {
+              if (!widget.isSelectionMode) {
+                setState(() {
+                  widget.selectedList[index] = true;
+                });
+                widget.onSelectionChange!(true);
+              }
+            },
+            child: GridTile(
+                child: Container(
+              child: widget.isSelectionMode
+                  ? Checkbox(onChanged: (bool? x) => _toggle(index), value: widget.selectedList[index])
+                  : const Icon(Icons.image),
+            )),
+          );
+        });
   }
 }
 
@@ -208,28 +207,25 @@ class _ListBuilderState extends State<ListBuilder> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: widget.selectedList.length,
-      itemBuilder: (_, int index) {
-        return ListTile(
-          onTap: () => _toggle(index),
-          onLongPress: () {
-            if (!widget.isSelectionMode) {
-              setState(() {
-                widget.selectedList[index] = true;
-              });
-              widget.onSelectionChange!(true);
-            }
-          },
-          trailing:
-              widget.isSelectionMode
+        itemCount: widget.selectedList.length,
+        itemBuilder: (_, int index) {
+          return ListTile(
+              onTap: () => _toggle(index),
+              onLongPress: () {
+                if (!widget.isSelectionMode) {
+                  setState(() {
+                    widget.selectedList[index] = true;
+                  });
+                  widget.onSelectionChange!(true);
+                }
+              },
+              trailing: widget.isSelectionMode
                   ? Checkbox(
-                    value: widget.selectedList[index],
-                    onChanged: (bool? x) => _toggle(index),
-                  )
+                      value: widget.selectedList[index],
+                      onChanged: (bool? x) => _toggle(index),
+                    )
                   : const SizedBox.shrink(),
-          title: Text('item $index'),
-        );
-      },
-    );
+              title: Text('item $index'));
+        });
   }
 }

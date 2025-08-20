@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'system_channels.dart';
 
 /// A sound provided by the system.
@@ -32,6 +33,9 @@ abstract final class SystemSound {
   /// The web platform currently does not support playing sounds, so this call
   /// will yield no behavior on that platform.
   static Future<void> play(SystemSoundType type) async {
-    await SystemChannels.platform.invokeMethod<void>('SystemSound.play', type.toString());
+    await SystemChannels.platform.invokeMethod<void>(
+      'SystemSound.play',
+      type.toString(),
+    );
   }
 }

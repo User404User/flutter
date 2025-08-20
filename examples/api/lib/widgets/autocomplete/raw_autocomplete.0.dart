@@ -15,8 +15,12 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('RawAutocomplete Basic')),
-        body: const Center(child: AutocompleteBasicExample()),
+        appBar: AppBar(
+          title: const Text('RawAutocomplete Basic'),
+        ),
+        body: const Center(
+          child: AutocompleteBasicExample(),
+        ),
       ),
     );
   }
@@ -25,7 +29,11 @@ class AutocompleteExampleApp extends StatelessWidget {
 class AutocompleteBasicExample extends StatelessWidget {
   const AutocompleteBasicExample({super.key});
 
-  static const List<String> _options = <String>['aardvark', 'bobcat', 'chameleon'];
+  static const List<String> _options = <String>[
+    'aardvark',
+    'bobcat',
+    'chameleon',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +77,9 @@ class AutocompleteBasicExample extends StatelessWidget {
                     onTap: () {
                       onSelected(option);
                     },
-                    child: ListTile(title: Text(option)),
+                    child: ListTile(
+                      title: Text(option),
+                    ),
                   );
                 },
               ),

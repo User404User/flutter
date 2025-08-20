@@ -13,7 +13,10 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: IconTheme(
-          data: IconThemeData(color: Color(0xFF666666), opacity: 0.5),
+          data: IconThemeData(
+            color: Color(0xFF666666),
+            opacity: 0.5,
+          ),
           child: Icon(IconData(0xd0a0, fontFamily: 'Arial')),
         ),
       ),
@@ -24,7 +27,12 @@ void main() {
 
   testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: Center(child: Icon(null))),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Icon(null),
+        ),
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(Icon));
@@ -35,7 +43,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(null, size: 96.0)),
+        child: Center(
+          child: Icon(
+            null,
+            size: 96.0,
+          ),
+        ),
       ),
     );
 
@@ -47,7 +60,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconTheme(data: IconThemeData(size: 36.0), child: Icon(null))),
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(size: 36.0),
+            child: Icon(null),
+          ),
+        ),
       ),
     );
 
@@ -60,7 +78,13 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: IconTheme(data: IconThemeData(size: 36.0), child: Icon(null, size: 48.0)),
+          child: IconTheme(
+            data: IconThemeData(size: 36.0),
+            child: Icon(
+              null,
+              size: 48.0,
+            ),
+          ),
         ),
       ),
     );
@@ -73,7 +97,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconTheme(data: IconThemeData(), child: Icon(null))),
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(),
+            child: Icon(null),
+          ),
+        ),
       ),
     );
 
@@ -81,15 +110,20 @@ void main() {
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
-  testWidgets('Icon sizing - no theme, default size, considering text scaler', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Icon sizing - no theme, default size, considering text scaler', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(textScaler: _TextDoubler()),
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(child: Icon(null, applyTextScaling: true)),
+          child: Center(
+            child: Icon(
+              null,
+              applyTextScaling: true,
+            ),
+          ),
         ),
       ),
     );
@@ -98,15 +132,21 @@ void main() {
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
-  testWidgets('Icon sizing - no theme, explicit size, considering text scaler', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Icon sizing - no theme, explicit size, considering text scaler', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(textScaler: _TextDoubler()),
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(child: Icon(null, size: 96.0, applyTextScaling: true)),
+          child: Center(
+            child: Icon(
+              null,
+              size: 96.0,
+              applyTextScaling: true,
+            ),
+          ),
         ),
       ),
     );
@@ -118,12 +158,17 @@ void main() {
   testWidgets('Icon sizing - sized theme, considering text scaler', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(textScaler: _TextDoubler()),
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: IconTheme(
-              data: IconThemeData(size: 36.0, applyTextScaling: true),
+              data: IconThemeData(
+                size: 36.0,
+                applyTextScaling: true,
+              ),
               child: Icon(null),
             ),
           ),
@@ -135,18 +180,25 @@ void main() {
     expect(renderObject.size, equals(const Size.square(72.0)));
   });
 
-  testWidgets('Icon sizing - sized theme, explicit size, considering text scale', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Icon sizing - sized theme, explicit size, considering text scale', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(textScaler: _TextDoubler()),
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: IconTheme(
-              data: IconThemeData(size: 36.0, applyTextScaling: true),
-              child: Icon(null, size: 48.0, applyTextScaling: false),
+              data: IconThemeData(
+                size: 36.0,
+                applyTextScaling: true,
+              ),
+              child: Icon(
+                null,
+                size: 48.0,
+                applyTextScaling: false,
+              ),
             ),
           ),
         ),
@@ -157,15 +209,20 @@ void main() {
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
-  testWidgets('Icon sizing - sizeless theme, default size, default consideration for text scaler', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Icon sizing - sizeless theme, default size, default consideration for text scaler', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(textScaler: _TextDoubler()),
+        data: MediaQueryData(
+          textScaler: _TextDoubler(),
+        ),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(child: IconTheme(data: IconThemeData(), child: Icon(null))),
+          child: Center(
+            child: IconTheme(
+              data: IconThemeData(),
+              child: Icon(null),
+            ),
+          ),
         ),
       ),
     );
@@ -178,7 +235,9 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(IconData(0x41, fontFamily: 'Roboto'))),
+        child: Center(
+          child: Icon(IconData(0x41, fontFamily: 'Roboto')),
+        ),
       ),
     );
 
@@ -186,14 +245,14 @@ void main() {
     expect(richText.text.style!.fontFamily, equals('Roboto'));
   });
 
-  testWidgets("Icon's TextStyle makes sure the font body is vertically center-aligned", (
-    WidgetTester tester,
-  ) async {
+  testWidgets("Icon's TextStyle makes sure the font body is vertically center-aligned", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/138592.
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(IconData(0x41))),
+        child: Center(
+          child: Icon(IconData(0x41)),
+        ),
       ),
     );
 
@@ -206,7 +265,9 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(IconData(0x41, fontFamilyFallback: <String>['FallbackFont']))),
+        child: Center(
+          child: Icon(IconData(0x41, fontFamilyFallback: <String>['FallbackFont'])),
+        ),
       ),
     );
 
@@ -220,7 +281,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(Icons.title, semanticLabel: 'a label')),
+        child: Center(
+          child: Icon(
+            Icons.title,
+            semanticLabel: 'a label',
+          ),
+        ),
       ),
     );
 
@@ -235,7 +301,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(null, semanticLabel: 'a label')),
+        child: Center(
+          child: Icon(
+            null,
+            semanticLabel: 'a label',
+          ),
+        ),
       ),
     );
 
@@ -244,13 +315,13 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets("Changing semantic label from null doesn't rebuild tree ", (
-    WidgetTester tester,
-  ) async {
+  testWidgets("Changing semantic label from null doesn't rebuild tree ", (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(Icons.time_to_leave)),
+        child: Center(
+          child: Icon(Icons.time_to_leave),
+        ),
       ),
     );
 
@@ -259,7 +330,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(Icons.time_to_leave, semanticLabel: 'a label')),
+        child: Center(
+          child: Icon(
+            Icons.time_to_leave,
+            semanticLabel: 'a label',
+          ),
+        ),
       ),
     );
 
@@ -276,20 +352,18 @@ void main() {
     expect(const IconData(123), isNot(const IconData(123, fontFamily: 'f')));
     expect(const IconData(123), isNot(const IconData(123, fontPackage: 'p')));
     expect(const IconData(123).hashCode, const IconData(123).hashCode);
-    expect(
-      const IconData(123).hashCode,
-      isNot(const IconData(123, matchTextDirection: true).hashCode),
-    );
+    expect(const IconData(123).hashCode, isNot(const IconData(123, matchTextDirection: true).hashCode));
     expect(const IconData(123).hashCode, isNot(const IconData(123, fontFamily: 'f').hashCode));
     expect(const IconData(123).hashCode, isNot(const IconData(123, fontPackage: 'p').hashCode));
     expect(const IconData(123).toString(), 'IconData(U+0007B)');
   });
 
-  testWidgets('Fill, weight, grade, and optical size variations are passed', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Fill, weight, grade, and optical size variations are passed', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: Icon(Icons.abc)),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Icon(Icons.abc),
+      ),
     );
 
     RichText text = tester.widget(find.byType(RichText));
@@ -297,7 +371,7 @@ void main() {
       const FontVariation('FILL', 0.0),
       const FontVariation('wght', 400.0),
       const FontVariation('GRAD', 0.0),
-      const FontVariation('opsz', 48.0),
+      const FontVariation('opsz', 48.0)
     ]);
 
     await tester.pumpWidget(
@@ -313,18 +387,21 @@ void main() {
       const FontVariation('FILL', 0.5),
       const FontVariation('wght', 300.0),
       const FontVariation('GRAD', 200.0),
-      const FontVariation('opsz', 48.0),
+      const FontVariation('opsz', 48.0)
     ]);
   });
 
-  testWidgets('Fill, weight, grade, and optical size can be set at the theme-level', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Fill, weight, grade, and optical size can be set at the theme-level', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: IconTheme(
-          data: IconThemeData(fill: 0.2, weight: 3.0, grade: 4.0, opticalSize: 5.0),
+          data: IconThemeData(
+            fill: 0.2,
+            weight: 3.0,
+            grade: 4.0,
+            opticalSize: 5.0,
+          ),
           child: Icon(Icons.abc),
         ),
       ),
@@ -335,18 +412,21 @@ void main() {
       const FontVariation('FILL', 0.2),
       const FontVariation('wght', 3.0),
       const FontVariation('GRAD', 4.0),
-      const FontVariation('opsz', 5.0),
+      const FontVariation('opsz', 5.0)
     ]);
   });
 
-  testWidgets('Theme-level fill, weight, grade, and optical size can be overridden', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Theme-level fill, weight, grade, and optical size can be overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: IconTheme(
-          data: IconThemeData(fill: 0.2, weight: 3.0, grade: 4.0, opticalSize: 5.0),
+          data: IconThemeData(
+            fill: 0.2,
+            weight: 3.0,
+            grade: 4.0,
+            opticalSize: 5.0,
+          ),
           child: Icon(Icons.abc, fill: 0.6, weight: 7.0, grade: 8.0, opticalSize: 9.0),
         ),
       ),
@@ -358,20 +438,21 @@ void main() {
       const FontVariation('FILL', 0.6),
       const FontVariation('wght', 7.0),
       const FontVariation('GRAD', 8.0),
-      const FontVariation('opsz', 9.0),
+      const FontVariation('opsz', 9.0)
     ]);
   });
 
-  testWidgets("TextStyle's blendMode should bind in foreground property", (
-    WidgetTester tester,
-  ) async {
+  testWidgets("TextStyle's blendMode should bind in foreground property", (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: IconTheme(
             data: IconThemeData(opacity: 0.5),
-            child: Icon(IconData(0x41), blendMode: BlendMode.clear),
+            child: Icon(
+              IconData(0x41),
+              blendMode: BlendMode.clear,
+            ),
           ),
         ),
       ),

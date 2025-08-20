@@ -70,10 +70,12 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
                   );
                 }).toList();
               },
-              items:
-                  cities.keys.map<DropdownMenuItem<String>>((String item) {
-                    return DropdownMenuItem<String>(value: item, child: Text(item));
-                  }).toList(),
+              items: cities.keys.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                );
+              }).toList(),
             ),
           ),
         ],

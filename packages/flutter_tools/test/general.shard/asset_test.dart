@@ -34,7 +34,8 @@ void main() {
           style: style == Style.posix ? FileSystemStyle.posix : FileSystemStyle.windows,
         );
         logger = BufferLogger.test();
-        platform = FakePlatform(operatingSystem: style == Style.posix ? 'linux' : 'windows');
+        platform = FakePlatform(
+            operatingSystem: style == Style.posix ? 'linux' : 'windows');
         flutterRoot = Cache.defaultFlutterRoot(
           platform: platform,
           fileSystem: fileSystem,
@@ -43,12 +44,9 @@ void main() {
       });
 
       testWithoutContext('app font uses local font file', () async {
-        final String packagesPath = fileSystem.path.join(
-          'main',
-          '.dart_tool',
-          'package_config.json',
-        );
-        final String manifestPath = fileSystem.path.join('main', 'pubspec.yaml');
+        final String packagesPath = fileSystem.path.join('main', '.dart_tool', 'package_config.json');
+        final String manifestPath =
+            fileSystem.path.join('main', 'pubspec.yaml');
         final ManifestAssetBundle assetBundle = ManifestAssetBundle(
           logger: logger,
           fileSystem: fileSystem,
@@ -64,7 +62,7 @@ name: font
 description: A test project that contains a font.
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: '>=3.2.0-0 <4.0.0'
 
 flutter:
   uses-material-design: true
@@ -77,7 +75,8 @@ flutter:
           ..createSync(recursive: true)
           ..writeAsStringSync('This is a fake font.');
 
-        fileSystem.file(fileSystem.path.join('main', '.dart_tool', 'package_config.json'))
+        fileSystem.file(
+            fileSystem.path.join('main', '.dart_tool', 'package_config.json'))
           ..createSync(recursive: true)
           ..writeAsStringSync(r'''
   {
@@ -108,7 +107,7 @@ name: main
 description: A test project that has a package with a font as a dependency.
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: '>=3.2.0-0 <4.0.0'
 
 dependencies:
   font:
@@ -133,19 +132,15 @@ dependencies:
             packagesPath,
             fileSystem.path.join(fileSystem.currentDirectory.path, 'font', 'pubspec.yaml'),
             fileSystem.path.join(fileSystem.currentDirectory.path, manifestPath),
-            fileSystem.path.join(fileSystem.currentDirectory.path, 'font', 'test_font_file'),
+            fileSystem.path.join(fileSystem.currentDirectory.path,'font', 'test_font_file'),
           ]),
         );
       });
 
       testWithoutContext('handles empty pubspec with .dart_tool/package_config.json', () async {
-        final String packageConfigPath = fileSystem.path.join(
-          'fuchsia_test',
-          'main',
-          '.dart_tool',
-          'package_config.json',
-        );
-        final String manifestPath = fileSystem.path.join('fuchsia_test', 'main', 'pubspec.yaml');
+        final String packageConfigPath = fileSystem.path.join('fuchsia_test', 'main', '.dart_tool', 'package_config.json');
+        final String manifestPath =
+            fileSystem.path.join('fuchsia_test', 'main', 'pubspec.yaml');
 
         fileSystem.directory(fileSystem.file(manifestPath)).parent.createSync(recursive: true);
         fileSystem.directory(fileSystem.file(packageConfigPath)).parent.createSync(recursive: true);
@@ -165,10 +160,14 @@ dependencies:
         );
 
         expect(assetBundle.wasBuiltOnce(), true);
-        expect(assetBundle.inputFiles.map((File f) => f.path), <String>[]);
+        expect(
+          assetBundle.inputFiles.map((File f) => f.path),
+          <String>[],
+        );
       });
 
-      testWithoutContext('bundles material shaders on non-web platforms', () async {
+      testWithoutContext('bundles material shaders on non-web platforms',
+          () async {
         final String shaderPath = fileSystem.path.join(
           flutterRoot,
           'packages',
@@ -212,7 +211,8 @@ dependencies:
         expect(assetBundle.entries.keys, contains('shaders/ink_sparkle.frag'));
       });
 
-      testWithoutContext('bundles material shaders on web platforms', () async {
+      testWithoutContext('bundles material shaders on web platforms',
+          () async {
         final String shaderPath = fileSystem.path.join(
           flutterRoot,
           'packages',

@@ -115,12 +115,7 @@ class ShaderCompiler {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
-        return <String>[
-          '--sksl',
-          '--runtime-stage-gles',
-          '--runtime-stage-gles3',
-          '--runtime-stage-vulkan',
-        ];
+        return <String>['--sksl', '--runtime-stage-gles', '--runtime-stage-vulkan'];
 
       case TargetPlatform.ios:
       case TargetPlatform.darwin:
@@ -133,6 +128,7 @@ class ShaderCompiler {
 
       case TargetPlatform.web_javascript:
         return <String>['--sksl'];
+
     }
   }
 
@@ -140,9 +136,7 @@ class ShaderCompiler {
   ///
   /// See [Target.inputs].
   static const List<Source> inputs = <Source>[
-    Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart',
-    ),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart'),
     Source.hostArtifact(HostArtifact.impellerc),
   ];
 
@@ -160,7 +154,9 @@ class ShaderCompiler {
     required TargetPlatform targetPlatform,
     bool fatal = true,
   }) async {
-    final File impellerc = _fs.file(_artifacts.getHostArtifact(HostArtifact.impellerc));
+    final File impellerc = _fs.file(
+      _artifacts.getHostArtifact(HostArtifact.impellerc),
+    );
     if (!impellerc.existsSync()) {
       throw ShaderCompilerException._(
         'The impellerc utility is missing at "${impellerc.path}". '
@@ -173,7 +169,8 @@ class ShaderCompiler {
       impellerc.path,
       ..._shaderTargetsFromTargetPlatform(targetPlatform),
       '--iplr',
-      if (targetPlatform == TargetPlatform.web_javascript) '--json',
+      if (targetPlatform == TargetPlatform.web_javascript)
+        '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',

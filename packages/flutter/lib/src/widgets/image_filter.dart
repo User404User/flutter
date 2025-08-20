@@ -38,7 +38,12 @@ import 'framework.dart';
 @immutable
 class ImageFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies an [ImageFilter] to its child.
-  const ImageFiltered({super.key, required this.imageFilter, super.child, this.enabled = true});
+  const ImageFiltered({
+    super.key,
+    required this.imageFilter,
+    super.child,
+    this.enabled = true,
+  });
 
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;
@@ -51,8 +56,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   final bool enabled;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _ImageFilterRenderObject(imageFilter, enabled);
+  RenderObject createRenderObject(BuildContext context) => _ImageFilterRenderObject(imageFilter, enabled);
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
@@ -97,7 +101,7 @@ class _ImageFilterRenderObject extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null && enabled;
 
-  @override
+   @override
   bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   @override

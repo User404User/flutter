@@ -5,8 +5,6 @@
 import 'dart:io';
 
 import 'package:file/local.dart';
-
-import 'apk_utils.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
@@ -18,13 +16,13 @@ import 'utils.dart';
 /// by an easily find/replaceable string.
 const String gradleSettingsFileContent = r'''
 pluginManagement {
-    val flutterSdkPath = run {
-        val properties = java.util.Properties()
-        file("local.properties").inputStream().use { properties.load(it) }
-        val flutterSdkPath = properties.getProperty("flutter.sdk")
-        require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
-        flutterSdkPath
-    }
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }()
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
@@ -36,12 +34,12 @@ pluginManagement {
 }
 
 plugins {
-    id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "AGP_REPLACE_ME" apply false
-    id("org.jetbrains.kotlin.android") version "KGP_REPLACE_ME" apply false
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "com.android.application" version "AGP_REPLACE_ME" apply false
+    id "org.jetbrains.kotlin.android" version "KGP_REPLACE_ME" apply false
 }
 
-include(":app")
+include ":app"
 
 ''';
 
@@ -60,10 +58,11 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 ''';
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
-final RegExp flutterCompileSdkString = RegExp(r'flutter\.compileSdkVersion|flutter\.compileSdk');
+const String flutterCompileSdkString = 'flutter.compileSdkVersion';
 
 /// A simple class containing a Kotlin, Gradle, and AGP version.
 class VersionTuple {
+
   VersionTuple({
     required this.agpVersion,
     required this.gradleVersion,
@@ -93,8 +92,7 @@ class VersionTuple {
 Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required List<VersionTuple> versionTuples,
   required Directory tempDir,
-  required LocalFileSystem localFileSystem,
-}) async {
+  required LocalFileSystem localFileSystem,}) async {
   for (final VersionTuple versions in versionTuples) {
     final Directory innerTempDir = tempDir.createTempSync(versions.gradleVersion);
     try {
@@ -102,58 +100,53 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       section('Create new app with dependency versions: $versions');
       await flutter(
         'create',
-        options: <String>['dependency_checker_app', '--platforms=android'],
+        options: <String>[
+          'dependency_checker_app',
+          '--platforms=android',
+        ],
         workingDirectory: innerTempDir.path,
       );
 
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
       if (versions.compileSdkVersion != null) {
-        final File appGradleBuild = getAndroidBuildFile(
-          localFileSystem.path.join(appPath, 'android', 'app'),
-        );
-        final String appBuildContent = appGradleBuild.readAsStringSync().replaceFirst(
-          flutterCompileSdkString,
-          versions.compileSdkVersion!,
-        );
+        final File appGradleBuild = localFileSystem.file(localFileSystem.path.join(
+            appPath, 'android', 'app', 'build.gradle'));
+        final String appBuildContent = appGradleBuild.readAsStringSync()
+            .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
         appGradleBuild.writeAsStringSync(appBuildContent);
       }
 
       // Modify gradle version to passed in version.
-      final File gradleWrapperProperties = localFileSystem.file(
-        localFileSystem.path.join(
-          appPath,
-          'android',
-          'gradle',
-          'wrapper',
-          'gradle-wrapper.properties',
-        ),
-      );
+      final File gradleWrapperProperties = localFileSystem.file(localFileSystem.path.join(
+          appPath, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
       final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
         gradleReplacementString,
         versions.gradleVersion,
       );
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-      final File gradleSettingsFile = getAndroidBuildFile(
-        localFileSystem.path.join(appPath, 'android'),
-        settings: true,
-      );
+      final File gradleSettings = localFileSystem.file(localFileSystem.path.join(
+          appPath, 'android', 'settings.gradle'));
       final String settingsContent = gradleSettingsFileContent
           .replaceFirst(agpReplacementString, versions.agpVersion)
           .replaceFirst(kgpReplacementString, versions.kotlinVersion);
-      await gradleSettingsFile.writeAsString(settingsContent, flush: true);
+      await gradleSettings.writeAsString(settingsContent, flush: true);
+
 
       // Ensure that gradle files exists from templates.
-      section(
-        "Ensure 'flutter build apk' succeeds with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}",
+      section("Ensure 'flutter build apk' succeeds with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}");
+      await flutter(
+        'build',
+        options: <String>[
+          'apk',
+          '--debug',
+        ],
+        workingDirectory: appPath,
       );
-      await flutter('build', options: <String>['apk', '--debug'], workingDirectory: appPath);
     } catch (e) {
       tempDir.deleteSync(recursive: true);
-      return TaskResult.failure(
-        'Failed to build app with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}, error was:\n$e',
-      );
+      return TaskResult.failure('Failed to build app with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}, error was:\n$e');
     }
   }
   tempDir.deleteSync(recursive: true);

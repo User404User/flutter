@@ -31,7 +31,9 @@ class ExampleWidget extends StatelessWidget {
       "Ooohh, we weren't going to tell him that.",
       style: TextStyle(
         fontFamily: 'Barriecito',
-        fontFeatures: <FontFeature>[FontFeature.contextualAlternates()],
+        fontFeatures: <FontFeature>[
+          FontFeature.contextualAlternates(),
+        ],
       ),
     );
   }

@@ -10,7 +10,7 @@ import 'visual_studio.dart';
 VisualStudioValidator? get visualStudioValidator => context.get<VisualStudioValidator>();
 
 class VisualStudioValidator extends DoctorValidator {
-  VisualStudioValidator({
+  const VisualStudioValidator({
     required VisualStudio visualStudio,
     required UserMessages userMessages,
   }) : _visualStudio = visualStudio,
@@ -21,7 +21,7 @@ class VisualStudioValidator extends DoctorValidator {
   final UserMessages _userMessages;
 
   @override
-  Future<ValidationResult> validateImpl() async {
+  Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType status = ValidationType.missing;
     String? versionInfo;
@@ -29,20 +29,14 @@ class VisualStudioValidator extends DoctorValidator {
     if (_visualStudio.isInstalled) {
       status = ValidationType.success;
 
-      messages.add(
-        ValidationMessage(
-          _userMessages.visualStudioLocation(_visualStudio.installLocation ?? 'unknown'),
-        ),
-      );
+      messages.add(ValidationMessage(
+          _userMessages.visualStudioLocation(_visualStudio.installLocation ?? 'unknown')
+      ));
 
-      messages.add(
-        ValidationMessage(
-          _userMessages.visualStudioVersion(
-            _visualStudio.displayName ?? 'unknown',
-            _visualStudio.fullVersion ?? 'unknown',
-          ),
-        ),
-      );
+      messages.add(ValidationMessage(_userMessages.visualStudioVersion(
+          _visualStudio.displayName ?? 'unknown',
+          _visualStudio.fullVersion ?? 'unknown',
+      )));
 
       if (_visualStudio.isPrerelease) {
         messages.add(ValidationMessage(_userMessages.visualStudioIsPrerelease));
@@ -56,14 +50,12 @@ class VisualStudioValidator extends DoctorValidator {
       // Messages for faulty installations.
       if (!_visualStudio.isAtLeastMinimumVersion) {
         status = ValidationType.partial;
-        messages.add(
-          ValidationMessage.error(
+        messages.add(ValidationMessage.error(
             _userMessages.visualStudioTooOld(
-              _visualStudio.minimumVersionDescription,
-              _visualStudio.workloadDescription,
+                _visualStudio.minimumVersionDescription,
+                _visualStudio.workloadDescription,
             ),
-          ),
-        );
+        ));
       } else if (_visualStudio.isRebootRequired) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(_userMessages.visualStudioRebootRequired));
@@ -75,14 +67,12 @@ class VisualStudioValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.visualStudioNotLaunchable));
       } else if (!_visualStudio.hasNecessaryComponents) {
         status = ValidationType.partial;
-        messages.add(
-          ValidationMessage.error(
+        messages.add(ValidationMessage.error(
             _userMessages.visualStudioMissingComponents(
-              _visualStudio.workloadDescription,
-              _visualStudio.necessaryComponentDescriptions(),
+                _visualStudio.workloadDescription,
+                _visualStudio.necessaryComponentDescriptions(),
             ),
-          ),
-        );
+        ));
       } else if (windows10SdkVersion == null) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.hint(_userMessages.windows10SdkNotFound));
@@ -90,11 +80,11 @@ class VisualStudioValidator extends DoctorValidator {
       versionInfo = '${_visualStudio.displayName} ${_visualStudio.displayVersion}';
     } else {
       status = ValidationType.missing;
-      messages.add(
-        ValidationMessage.error(
-          _userMessages.visualStudioMissing(_visualStudio.workloadDescription),
+      messages.add(ValidationMessage.error(
+        _userMessages.visualStudioMissing(
+          _visualStudio.workloadDescription,
         ),
-      );
+      ));
     }
 
     return ValidationResult(status, messages, statusInfo: versionInfo);

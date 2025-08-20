@@ -8,7 +8,6 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'menu_style.dart';
 import 'theme.dart';
@@ -37,7 +36,7 @@ import 'theme.dart';
 @immutable
 class MenuThemeData with Diagnosticable {
   /// Creates a const set of properties used to configure [MenuTheme].
-  const MenuThemeData({this.style, this.submenuIcon});
+  const MenuThemeData({this.style});
 
   /// The [MenuStyle] of a [SubmenuButton] menu.
   ///
@@ -45,27 +44,16 @@ class MenuThemeData with Diagnosticable {
   /// property.
   final MenuStyle? style;
 
-  /// If provided, the widget replaces the default [SubmenuButton] arrow icon.
-  ///
-  /// Resolves in the following states:
-  ///  * [WidgetState.disabled].
-  ///  * [WidgetState.hovered].
-  ///  * [WidgetState.focused].
-  final MaterialStateProperty<Widget?>? submenuIcon;
-
   /// Linearly interpolate between two menu button themes.
   static MenuThemeData? lerp(MenuThemeData? a, MenuThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    return MenuThemeData(
-      style: MenuStyle.lerp(a?.style, b?.style, t),
-      submenuIcon: t < 0.5 ? a?.submenuIcon : b?.submenuIcon,
-    );
+    return MenuThemeData(style: MenuStyle.lerp(a?.style, b?.style, t));
   }
 
   @override
-  int get hashCode => Object.hash(style, submenuIcon);
+  int get hashCode => style.hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -75,20 +63,13 @@ class MenuThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MenuThemeData && other.style == style && other.submenuIcon == submenuIcon;
+    return other is MenuThemeData && other.style == style;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MenuStyle>('style', style, defaultValue: null));
-    properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Widget?>>(
-        'submenuIcon',
-        submenuIcon,
-        defaultValue: null,
-      ),
-    );
   }
 }
 
@@ -112,7 +93,11 @@ class MenuThemeData with Diagnosticable {
 class MenuTheme extends InheritedTheme {
   /// Creates a const theme that controls the configurations for the menus
   /// created by the [SubmenuButton] or [MenuAnchor] widgets.
-  const MenuTheme({super.key, required this.data, required super.child});
+  const MenuTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
 
   /// The properties for [MenuBar] and [MenuItemButton] in this widget's
   /// descendants.

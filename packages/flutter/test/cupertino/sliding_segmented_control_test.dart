@@ -7,7 +7,6 @@
 //   machines.
 @Tags(<String>['reduced-test-set'])
 library;
-
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
@@ -19,13 +18,14 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 RenderBox getRenderSegmentedControl(WidgetTester tester) {
-  return tester.allRenderObjects.firstWhere((RenderObject currentObject) {
-        return currentObject.toStringShort().contains('_RenderSegmentedControl');
-      })
-      as RenderBox;
+  return tester.allRenderObjects.firstWhere(
+    (RenderObject currentObject) {
+      return currentObject.toStringShort().contains('_RenderSegmentedControl');
+    },
+  ) as RenderBox;
 }
 
-Rect currentUnscaledThumbRect(WidgetTester tester, {bool useGlobalCoordinate = false}) {
+Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
   // Using dynamic to access private class in test.
   // ignore: avoid_dynamic_calls
@@ -51,7 +51,10 @@ double currentThumbScale(WidgetTester tester) {
 }
 
 Widget setupSimpleSegmentedControl() {
-  const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+  const Map<int, Widget> children = <int, Widget>{
+    0: Text('Child 1'),
+    1: Text('Child 2'),
+  };
 
   return boilerplate(
     builder: (BuildContext context) {
@@ -67,26 +70,23 @@ Widget setupSimpleSegmentedControl() {
 StateSetter? setState;
 int? groupValue = 0;
 void defaultCallback(int? newValue) {
-  setState!(() {
-    groupValue = newValue;
-  });
+  setState!(() { groupValue = newValue; });
 }
 
-Widget boilerplate({required WidgetBuilder builder}) {
+Widget boilerplate({ required WidgetBuilder builder }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setter) {
-          setState = setter;
-          return builder(context);
-        },
-      ),
+      child: StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return builder(context);
+      }),
     ),
   );
 }
 
 void main() {
+
   setUp(() {
     setState = null;
     groupValue = 0;
@@ -102,13 +102,11 @@ void main() {
           onValueChanged: defaultCallback,
         ),
       ),
-      throwsA(
-        isAssertionError.having(
-          (AssertionError error) => error.toString(),
-          '.toString()',
-          contains('children.length'),
-        ),
-      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
     );
 
     await expectLater(
@@ -119,67 +117,61 @@ void main() {
           onValueChanged: defaultCallback,
         ),
       ),
-      throwsA(
-        isAssertionError.having(
-          (AssertionError error) => error.toString(),
-          '.toString()',
-          contains('children.length'),
-        ),
-      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('children.length'),
+      )),
     );
 
     groupValue = -1;
     await expectLater(
       () => tester.pumpWidget(
         CupertinoSlidingSegmentedControl<int>(
-          children: const <int, Widget>{0: Text('Child 1'), 1: Text('Child 2'), 2: Text('Child 3')},
+          children: const <int, Widget>{
+            0: Text('Child 1'),
+            1: Text('Child 2'),
+            2: Text('Child 3'),
+          },
           groupValue: groupValue,
           onValueChanged: defaultCallback,
         ),
       ),
-      throwsA(
-        isAssertionError.having(
-          (AssertionError error) => error.toString(),
-          '.toString()',
-          contains('groupValue must be either null or one of the keys in the children map'),
-        ),
-      ),
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        '.toString()',
+        contains('groupValue must be either null or one of the keys in the children map'),
+      )),
     );
   });
 
   testWidgets('Padding works', (WidgetTester tester) async {
     const Key key = Key('Container');
 
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
-    Future<void> verifyPadding({EdgeInsets? padding}) async {
-      final EdgeInsets effectivePadding =
-          padding ?? const EdgeInsets.symmetric(vertical: 2, horizontal: 3);
+    Future<void> verifyPadding({ EdgeInsets? padding }) async {
+      final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(vertical: 2, horizontal: 3);
       final Rect segmentedControlRect = tester.getRect(find.byKey(key));
 
       expect(
-        tester.getTopLeft(
-          find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData)),
-        ),
+        tester.getTopLeft(find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData))),
         segmentedControlRect.topLeft + effectivePadding.topLeft,
       );
       expect(
-        tester.getBottomLeft(
-          find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData)),
-        ),
+        tester.getBottomLeft(find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData))),
         segmentedControlRect.bottomLeft + effectivePadding.bottomLeft,
       );
 
       expect(
-        tester.getTopRight(
-          find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData)),
-        ),
+        tester.getTopRight(find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData))),
         segmentedControlRect.topRight + effectivePadding.topRight,
       );
       expect(
-        tester.getBottomRight(
-          find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData)),
-        ),
+        tester.getBottomRight(find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData))),
         segmentedControlRect.bottomRight + effectivePadding.bottomRight,
       );
     }
@@ -262,42 +254,49 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets('Segmented controls respect theme', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Icon(IconData(1))};
+  testWidgets(
+    'Segmented controls respect theme',
+    (WidgetTester tester) async {
+      const Map<int, Widget> children = <int, Widget>{
+        0: Text('Child 1'),
+        1: Icon(IconData(1)),
+      };
 
-    await tester.pumpWidget(
-      CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
-        home: boilerplate(
-          builder: (BuildContext context) {
-            return CupertinoSlidingSegmentedControl<int>(
-              children: children,
-              groupValue: groupValue,
-              onValueChanged: defaultCallback,
-            );
-          },
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.dark),
+          home: boilerplate(
+            builder: (BuildContext context) {
+              return CupertinoSlidingSegmentedControl<int>(
+                children: children,
+                groupValue: groupValue,
+                onValueChanged: defaultCallback,
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    DefaultTextStyle textStyle = tester.widget(
-      find.widgetWithText(DefaultTextStyle, 'Child 1').first,
-    );
+      DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
-    expect(textStyle.style.fontWeight, FontWeight.w600);
+      expect(textStyle.style.fontWeight, FontWeight.w600);
 
-    await tester.tap(find.byIcon(const IconData(1)));
-    await tester.pump();
-    await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(const IconData(1)));
+      await tester.pump();
+      await tester.pumpAndSettle();
 
-    textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
+      textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
 
-    expect(groupValue, 1);
-    expect(textStyle.style.fontWeight, FontWeight.w500);
-  });
+      expect(groupValue, 1);
+      expect(textStyle.style.fontWeight, FontWeight.w500);
+    },
+  );
 
   testWidgets('SegmentedControl dark mode', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Icon(IconData(1))};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Icon(IconData(1)),
+    };
 
     Brightness brightness = Brightness.light;
     late StateSetter setState;
@@ -324,60 +323,50 @@ void main() {
       ),
     );
 
-    final BoxDecoration decoration =
-        tester
-                .widget<Container>(
-                  find.descendant(
-                    of: find.byType(UnconstrainedBox),
-                    matching: find.byType(Container),
-                  ),
-                )
-                .decoration!
-            as BoxDecoration;
+    final BoxDecoration decoration = tester.widget<Container>(find.descendant(
+      of: find.byType(UnconstrainedBox),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
 
     expect(getThumbColor(tester).value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color!.value, CupertinoColors.systemRed.color.value);
 
-    setState(() {
-      brightness = Brightness.dark;
-    });
+    setState(() { brightness = Brightness.dark; });
     await tester.pump();
 
-    final BoxDecoration decorationDark =
-        tester
-                .widget<Container>(
-                  find.descendant(
-                    of: find.byType(UnconstrainedBox),
-                    matching: find.byType(Container),
-                  ),
-                )
-                .decoration!
-            as BoxDecoration;
+    final BoxDecoration decorationDark = tester.widget<Container>(find.descendant(
+      of: find.byType(UnconstrainedBox),
+      matching: find.byType(Container),
+    )).decoration! as BoxDecoration;
+
 
     expect(getThumbColor(tester).value, CupertinoColors.systemGreen.darkColor.value);
     expect(decorationDark.color!.value, CupertinoColors.systemRed.darkColor.value);
   });
 
-  testWidgets('Children can be non-Text or Icon widgets (in this case, '
-      'a Container or Placeholder widget)', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
-      0: Text('Child 1'),
-      1: SizedBox(width: 50, height: 50),
-      2: Placeholder(),
-    };
+  testWidgets(
+    'Children can be non-Text or Icon widgets (in this case, '
+        'a Container or Placeholder widget)',
+    (WidgetTester tester) async {
+      const Map<int, Widget> children = <int, Widget>{
+        0: Text('Child 1'),
+        1: SizedBox(width: 50, height: 50),
+        2: Placeholder(),
+      };
 
-    await tester.pumpWidget(
-      boilerplate(
-        builder: (BuildContext context) {
-          return CupertinoSlidingSegmentedControl<int>(
-            children: children,
-            groupValue: groupValue,
-            onValueChanged: defaultCallback,
-          );
-        },
-      ),
-    );
-  });
+      await tester.pumpWidget(
+        boilerplate(
+          builder: (BuildContext context) {
+            return CupertinoSlidingSegmentedControl<int>(
+              children: children,
+              groupValue: groupValue,
+              onValueChanged: defaultCallback,
+            );
+          },
+        ),
+      );
+    },
+  );
 
   testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
@@ -385,10 +374,11 @@ void main() {
     expect(getHighlightedIndex(tester), 0);
   });
 
-  testWidgets('Null input for value results in no child initially selected', (
-    WidgetTester tester,
-  ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+  testWidgets('Null input for value results in no child initially selected', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
     groupValue = null;
     await tester.pumpWidget(
@@ -410,7 +400,7 @@ void main() {
     expect(getHighlightedIndex(tester), null);
   });
 
-  testWidgets('Disabled segment can be selected programmatically', (WidgetTester tester) async {
+  testWidgets('Disabled segment can be selected programmtically', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),
@@ -463,12 +453,9 @@ void main() {
     );
 
     double getChildOpacityByName(String childName) {
-      return tester
-          .renderObject<RenderAnimatedOpacity>(
-            find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
-          )
-          .opacity
-          .value;
+      return tester.renderObject<RenderAnimatedOpacity>(
+        find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
+      ).opacity.value;
     }
 
     // Opacity 1 with no interaction.
@@ -505,16 +492,11 @@ void main() {
     expect(getChildOpacityByName('Child 2'), 0.2);
   });
 
-  testWidgets('Long press does not change the opacity of currently-selected child', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Long press does not change the opacity of currently-selected child', (WidgetTester tester) async {
     double getChildOpacityByName(String childName) {
-      return tester
-          .renderObject<RenderAnimatedOpacity>(
-            find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
-          )
-          .opacity
-          .value;
+      return tester.renderObject<RenderAnimatedOpacity>(
+        find.ancestor(matching: find.byType(AnimatedOpacity), of: find.text(childName)),
+      ).opacity.value;
     }
 
     await tester.pumpWidget(setupSimpleSegmentedControl());
@@ -531,9 +513,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Height of segmented control is determined by tallest widget', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(height: 100.0)),
       1: Container(constraints: const BoxConstraints.tightFor(height: 400.0)),
@@ -563,9 +543,7 @@ void main() {
     );
   });
 
-  testWidgets('Width of each segmented control segment is determined by widest widget by default', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Width of each segmented control segment is determined by widest widget by default', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: Container(constraints: const BoxConstraints.tightFor(width: 50.0)),
       1: Container(constraints: const BoxConstraints.tightFor(width: 100.0)),
@@ -597,7 +575,7 @@ void main() {
   });
 
   testWidgets('If proportionalWidth is true, the width of each segmented '
-      'control segment is determined by its own content', (WidgetTester tester) async {
+  'control segment is determined by its own content', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
       1: const SizedBox(width: 100, child: Text('Second')),
@@ -620,7 +598,10 @@ void main() {
 
     Size getChildSize(int index) {
       return tester.getSize(
-        find.ancestor(of: find.byWidget(children[index]!), matching: find.byType(MetaData)),
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
       );
     }
 
@@ -638,8 +619,7 @@ void main() {
       find.byKey(const ValueKey<String>('Segmented Control')),
     );
 
-    final double childWidthSum =
-        firstChildSize.width + secondChildSize.width + thirdChildSize.width;
+    final double childWidthSum = firstChildSize.width + secondChildSize.width + thirdChildSize.width;
     expect(segmentedControl.size.width, childWidthSum + 6.0 + 2.0);
   });
 
@@ -667,7 +647,10 @@ void main() {
 
     Size getChildSize(int index) {
       return tester.getSize(
-        find.ancestor(of: find.byWidget(children[index]!), matching: find.byType(MetaData)),
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
       );
     }
 
@@ -680,9 +663,7 @@ void main() {
     Size thirdChildSize = getChildSize(2);
     expect(thirdChildSize.width, 200 + 10.0 * 2);
 
-    setState!(() {
-      proportionalWidth = true;
-    });
+    setState!(() { proportionalWidth = true; });
     await tester.pump();
 
     firstChildSize = getChildSize(0);
@@ -696,7 +677,7 @@ void main() {
   });
 
   testWidgets('If proportionalWidth is true, the width of each segmented '
-      'control segment is updated when children change', (WidgetTester tester) async {
+  'control segment is updated when children change', (WidgetTester tester) async {
     Map<int, Widget> children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
       1: const SizedBox(width: 100, child: Text('Second')),
@@ -719,7 +700,10 @@ void main() {
 
     Size getChildSize(int index) {
       return tester.getSize(
-        find.ancestor(of: find.byWidget(children[index]!), matching: find.byType(MetaData)),
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
       );
     }
 
@@ -751,10 +735,9 @@ void main() {
     expect(thirdChildSize.width, 170 + 10.0 * 2);
   });
 
+
   testWidgets('If proportionalWidth is true and the overall segment control width '
-      'is larger than the max width of the parent constraints, each segment scales down', (
-    WidgetTester tester,
-  ) async {
+  'is larger than the max width of the parent constraints, each segment scales down', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: const SizedBox(width: 50, child: Text('First')),
       1: const SizedBox(width: 100, child: Text('Second')),
@@ -780,7 +763,10 @@ void main() {
 
     Size getChildSize(int index) {
       return tester.getSize(
-        find.ancestor(of: find.byWidget(children[index]!), matching: find.byType(MetaData)),
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
       );
     }
 
@@ -800,9 +786,7 @@ void main() {
   });
 
   testWidgets('If proportionalWidth is true and the overall segment control width '
-      'is smaller than the min width of the parent constraints, each segment scales up', (
-    WidgetTester tester,
-  ) async {
+  'is smaller than the min width of the parent constraints, each segment scales up', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{
       0: const SizedBox(width: 20, child: Text('First')),
       1: const SizedBox(width: 30, child: Text('Second')),
@@ -828,7 +812,10 @@ void main() {
 
     Size getChildSize(int index) {
       return tester.getSize(
-        find.ancestor(of: find.byWidget(children[index]!), matching: find.byType(MetaData)),
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
       );
     }
 
@@ -838,26 +825,20 @@ void main() {
     final Size firstChildSize = getChildSize(0);
     const double constraintsMinWidth = 200 - 6 - 2;
     const double originalTotal = 160.0;
-    expect(
-      firstChildSize.width,
-      moreOrLessEquals((20 + 10.0 * 2) * constraintsMinWidth / originalTotal),
-    );
+    expect(firstChildSize.width, moreOrLessEquals((20 + 10.0 * 2) * constraintsMinWidth / originalTotal));
 
     final Size secondChildSize = getChildSize(1);
-    expect(
-      secondChildSize.width,
-      moreOrLessEquals((30 + 10.0 * 2) * constraintsMinWidth / originalTotal),
-    );
+    expect(secondChildSize.width, moreOrLessEquals((30 + 10.0 * 2) * constraintsMinWidth / originalTotal));
 
     final Size thirdChildSize = getChildSize(2);
-    expect(
-      thirdChildSize.width,
-      moreOrLessEquals((50 + 10.0 * 2) * constraintsMinWidth / originalTotal),
-    );
+    expect(thirdChildSize.width, moreOrLessEquals((50 + 10.0 * 2) * constraintsMinWidth / originalTotal));
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: SizedBox(width: 50), 1: SizedBox(width: 70)};
+    const Map<int, Widget> children = <int, Widget>{
+      0: SizedBox(width: 50),
+      1: SizedBox(width: 70),
+    };
 
     await tester.pumpWidget(
       boilerplate(
@@ -886,10 +867,11 @@ void main() {
     );
   });
 
-  testWidgets('Directionality test - RTL should reverse order of widgets', (
-    WidgetTester tester,
-  ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+  testWidgets('Directionality test - RTL should reverse order of widgets', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
     await tester.pumpWidget(
       Directionality(
@@ -909,14 +891,14 @@ void main() {
       ),
     );
 
-    expect(
-      tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx,
-      isTrue,
-    );
+    expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
   testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -951,7 +933,10 @@ void main() {
 
   testWidgets('Segmented control semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
 
     await tester.pumpWidget(
       boilerplate(
@@ -975,20 +960,21 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
-                SemanticsFlag.hasSelectedState,
                 SemanticsFlag.isSelected,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
             ),
             TestSemantics.rootChild(
               label: 'Child 2',
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
-                // Declares that it is selectable, but not currently selected.
-                SemanticsFlag.hasSelectedState,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
             ),
           ],
         ),
@@ -1011,20 +997,21 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
-                // Declares that it is selectable, but not currently selected.
-                SemanticsFlag.hasSelectedState,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
             ),
             TestSemantics.rootChild(
               label: 'Child 2',
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
-                SemanticsFlag.hasSelectedState,
                 SemanticsFlag.isSelected,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
             ),
           ],
         ),
@@ -1065,7 +1052,7 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets('Non-centered taps work on proportional segments', (WidgetTester tester) async {
+  testWidgets('Non-centered taps work on propotional segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const SizedBox(width: 50, height: 30);
     children[1] = const SizedBox();
@@ -1087,32 +1074,21 @@ void main() {
 
     expect(groupValue, 0);
 
-    final Rect firstChild = tester.getRect(
-      find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData)),
-    );
+    final Rect firstChild = tester.getRect(find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData)));
     expect(firstChild.width, 50.0 + 10.0 * 2);
 
-    final Rect secondChild = tester.getRect(
-      find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData)),
-    );
+    final Rect secondChild = tester.getRect(find.ancestor(of: find.byWidget(children[1]!), matching: find.byType(MetaData)));
     expect(secondChild.width, 0.0 + 10.0 * 2);
 
-    final Rect thirdChild = tester.getRect(
-      find.ancestor(of: find.byWidget(children[2]!), matching: find.byType(MetaData)),
-    );
-    expect(thirdChild.width, 100.0 + 10.0 * 2);
+    final Rect thirdChild = tester.getRect(find.ancestor(of: find.byWidget(children[2]!), matching: find.byType(MetaData)));
+    expect(thirdChild.width, 100.0  + 10.0 * 2);
 
-    final Finder child0 = find.ancestor(
-      of: find.byWidget(children[0]!),
-      matching: find.byType(MetaData),
-    );
+    final Finder child0 = find.ancestor(of: find.byWidget(children[0]!), matching: find.byType(MetaData));
     final Offset centerOfChild0 = tester.getCenter(child0);
     await tester.tapAt(centerOfChild0 + Offset(firstChild.width / 2 + 1, 0));
     expect(groupValue, 1);
 
-    await tester.tapAt(
-      centerOfChild0 + Offset(firstChild.width / 2 + 1 + secondChild.width + 1, 0),
-    );
+    await tester.tapAt(centerOfChild0 + Offset(firstChild.width / 2 + 1 + secondChild.width + 1, 0));
     expect(groupValue, 2);
   });
 
@@ -1121,9 +1097,7 @@ void main() {
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (TapDownDetails details) {
-        tapDownDetails = details;
-      },
+      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
       child: const SizedBox(width: 200, height: 200),
     );
     children[1] = const Text('Child 2');
@@ -1150,16 +1124,12 @@ void main() {
     expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
   });
 
-  testWidgets('Hit-tests report accurate local position in proportional segments', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Hit-tests report accurate local position in proportional segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (TapDownDetails details) {
-        tapDownDetails = details;
-      },
+      onTapDown: (TapDownDetails details) { tapDownDetails = details; },
       child: const SizedBox(width: 200, height: 200),
     );
     children[1] = const Text('Child 2');
@@ -1187,9 +1157,7 @@ void main() {
     expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
   });
 
-  testWidgets('Thumb animation is correct when the selected segment changes', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Thumb animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     final Rect initialRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
@@ -1232,8 +1200,7 @@ void main() {
     // is Alignment.centerRight, with ltr text direction because "Child 2" is
     // the trailing item.
     expect(currentThumbScale(tester), lessThan(1));
-    double centerDelta =
-        tester.getSize(find.text('Child 2')).width * (1 - currentThumbScale(tester)) / 2;
+    double centerDelta = tester.getSize(find.text('Child 2')).width * (1 - currentThumbScale(tester)) / 2;
     expect(
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
       moreOrLessEquals(tester.getCenter(find.text('Child 2')).dy, epsilon: 0.01),
@@ -1288,15 +1255,16 @@ void main() {
     expect(currentThumbScale(tester), moreOrLessEquals(1, epsilon: 0.01));
   });
 
-  testWidgets('Thumb does not go out of bounds in animation', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{
-      0: Text('Child 1', maxLines: 1),
-      1: Text('wiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiide Child 2', maxLines: 1),
-      2: SizedBox(height: 400),
-    };
+  testWidgets(
+    'Thumb does not go out of bounds in animation',
+    (WidgetTester tester) async {
+      const Map<int, Widget> children = <int, Widget>{
+        0: Text('Child 1', maxLines: 1),
+        1: Text('wiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiide Child 2', maxLines: 1),
+        2: SizedBox(height: 400),
+      };
 
-    await tester.pumpWidget(
-      boilerplate(
+      await tester.pumpWidget(boilerplate(
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
             children: children,
@@ -1304,25 +1272,21 @@ void main() {
             onValueChanged: defaultCallback,
           );
         },
-      ),
-    );
+      ));
 
-    final Rect initialThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+      final Rect initialThumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
 
-    // Starts animating towards 1.
-    setState!(() {
-      groupValue = 1;
-    });
-    await tester.pump(const Duration(milliseconds: 10));
+      // Starts animating towards 1.
+      setState!(() { groupValue = 1; });
+      await tester.pump(const Duration(milliseconds: 10));
 
-    const Map<int, Widget> newChildren = <int, Widget>{
-      0: Text('C1', maxLines: 1),
-      1: Text('C2', maxLines: 1),
-    };
+      const Map<int, Widget> newChildren = <int, Widget>{
+        0: Text('C1', maxLines: 1),
+        1: Text('C2', maxLines: 1),
+      };
 
-    // Now let the segments shrink.
-    await tester.pumpWidget(
-      boilerplate(
+      // Now let the segments shrink.
+      await tester.pumpWidget(boilerplate(
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
             children: newChildren,
@@ -1330,31 +1294,30 @@ void main() {
             onValueChanged: defaultCallback,
           );
         },
-      ),
-    );
+      ));
 
-    final RenderBox renderSegmentedControl = getRenderSegmentedControl(tester);
-    final Offset segmentedControlOrigin = renderSegmentedControl.localToGlobal(Offset.zero);
+      final RenderBox renderSegmentedControl = getRenderSegmentedControl(tester);
+      final Offset segmentedControlOrigin = renderSegmentedControl.localToGlobal(Offset.zero);
 
-    // Expect the segmented control to be much narrower.
-    expect(segmentedControlOrigin.dx, greaterThan(initialThumbRect.left));
+      // Expect the segmented control to be much narrower.
+      expect(segmentedControlOrigin.dx, greaterThan(initialThumbRect.left));
 
-    final Rect thumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
-    expect(initialThumbRect.size.height, 400);
-    expect(thumbRect.size.height, lessThan(100));
-    // The new thumbRect should fit in the segmentedControl. The -1 and the +1
-    // are to account for the thumb's vertical EdgeInsets.
-    expect(segmentedControlOrigin.dx - 1, lessThanOrEqualTo(thumbRect.left));
-    expect(
-      segmentedControlOrigin.dx + renderSegmentedControl.size.width + 1,
-      greaterThanOrEqualTo(thumbRect.right),
-    );
-  });
+      final Rect thumbRect = currentUnscaledThumbRect(tester, useGlobalCoordinate: true);
+      expect(initialThumbRect.size.height, 400);
+      expect(thumbRect.size.height, lessThan(100));
+      // The new thumbRect should fit in the segmentedControl. The -1 and the +1
+      // are to account for the thumb's vertical EdgeInsets.
+      expect(segmentedControlOrigin.dx - 1, lessThanOrEqualTo(thumbRect.left));
+      expect(segmentedControlOrigin.dx + renderSegmentedControl.size.width + 1, greaterThanOrEqualTo(thumbRect.right));
+    },
+  );
 
-  testWidgets('Transition is triggered while a transition is already occurring', (
-    WidgetTester tester,
-  ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+  testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
 
     await tester.pumpWidget(
       boilerplate(
@@ -1446,7 +1409,11 @@ void main() {
   });
 
   testWidgets('change selection programmatically when dragging', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
 
     bool callbackCalled = false;
 
@@ -1473,9 +1440,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Change selection programmatically.
-    setState!(() {
-      groupValue = 1;
-    });
+    setState!(() { groupValue = 1; });
     await tester.pump();
     await tester.pumpAndSettle();
 
@@ -1484,8 +1449,7 @@ void main() {
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dy,
       moreOrLessEquals(tester.getCenter(find.text('A')).dy, epsilon: 0.01),
     );
-    final double centerDelta =
-        tester.getSize(find.text('A')).width * (1 - currentThumbScale(tester)) / 2;
+    final double centerDelta = tester.getSize(find.text('A')).width * (1 - currentThumbScale(tester)) / 2;
     expect(
       currentUnscaledThumbRect(tester, useGlobalCoordinate: true).center.dx,
       moreOrLessEquals(tester.getCenter(find.text('A')).dx + centerDelta, epsilon: 0.01),
@@ -1508,10 +1472,12 @@ void main() {
     expect(callbackCalled, isFalse);
   });
 
-  testWidgets('Disable "highlighted" segment during drag, highlight stays', (
-    WidgetTester tester,
-  ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+  testWidgets('Disable "highlighted" segment during drag, highlight stays', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
     Set<int> disabledChildren = <int>{};
     await tester.pumpWidget(
       boilerplate(
@@ -1537,9 +1503,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Disable B.
-    setState!(() {
-      disabledChildren = <int>{1};
-    });
+    setState!(() { disabledChildren = <int>{ 1 }; });
     await tester.pumpAndSettle();
 
     // During dragging, we can still see the "highlighted" segment.
@@ -1557,19 +1521,19 @@ void main() {
     expect(getHighlightedIndex(tester), 1);
   });
 
-  testWidgets('Disable "highlighted" segment during drag, onValueChanged is still called', (
-    WidgetTester tester,
-  ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+  testWidgets('Disable "highlighted" segment during drag, onValueChanged is still called', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
     Set<int> disabledChildren = <int>{};
 
     int callbackCalled = 0;
 
     void onValueChanged(int? newValue) {
       callbackCalled += 1;
-      setState!(() {
-        groupValue = newValue;
-      });
+      setState!(() { groupValue = newValue; });
     }
 
     await tester.pumpWidget(
@@ -1597,9 +1561,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Disable B.
-    setState!(() {
-      disabledChildren = <int>{1};
-    });
+    setState!(() { disabledChildren = <int>{ 1 }; });
     await tester.pumpAndSettle();
 
     // Stop dragging.
@@ -1612,10 +1574,12 @@ void main() {
     expect(callbackCalled, 1);
   });
 
-  testWidgets('Dragging out of bound does not cause out of range exception', (
-    WidgetTester tester,
-  ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCC')};
+  testWidgets('Dragging out of bound does not cause out of range exception', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCC'),
+    };
 
     await tester.pumpWidget(
       boilerplate(
@@ -1632,7 +1596,10 @@ void main() {
 
     Size getChildSize(int index) {
       return tester.getSize(
-        find.ancestor(of: find.byWidget(children[index]!), matching: find.byType(MetaData)),
+        find.ancestor(
+          of: find.byWidget(children[index]!),
+          matching: find.byType(MetaData)
+        )
       );
     }
 
@@ -1666,7 +1633,11 @@ void main() {
   });
 
   testWidgets('Disallow new gesture when dragging', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
 
     bool callbackCalled = false;
 
@@ -1728,7 +1699,11 @@ void main() {
 
   testWidgets('gesture outlives the widget', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63338.
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
 
     await tester.pumpWidget(
       boilerplate(
@@ -1762,7 +1737,11 @@ void main() {
 
   testWidgets('computeDryLayout is pure', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/73362.
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
 
     const Key key = ValueKey<int>(1);
 
@@ -1792,7 +1771,11 @@ void main() {
 
   testWidgets('Has consistent size, independent of groupValue', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62063.
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
 
     groupValue = null;
     await tester.pumpWidget(
@@ -1812,9 +1795,7 @@ void main() {
     final Size size = renderBox.size;
 
     for (final int value in children.keys) {
-      setState!(() {
-        groupValue = value;
-      });
+      setState!(() { groupValue = value; });
       await tester.pump();
       await tester.pumpAndSettle();
 
@@ -1823,7 +1804,10 @@ void main() {
   });
 
   testWidgets('ScrollView + SlidingSegmentedControl interaction', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('Child 1'), 1: Text('Child 2')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('Child 1'),
+      1: Text('Child 2'),
+    };
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -1906,52 +1890,51 @@ void main() {
     expect(groupValue, 1);
   });
 
-  testWidgets(
-    'Hovering over Cupertino sliding segmented control updates cursor to clickable on Web',
-    (WidgetTester tester) async {
-      const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+  testWidgets('Hovering over Cupertino sliding segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
 
-      await tester.pumpWidget(
-        boilerplate(
-          builder: (BuildContext context) {
-            return CupertinoSlidingSegmentedControl<int>(
-              key: const ValueKey<String>('Segmented Control'),
-              children: children,
-              onValueChanged: defaultCallback,
-            );
-          },
-        ),
-      );
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            key: const ValueKey<String>('Segmented Control'),
+            children: children,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
 
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-        pointer: 1,
-      );
-      await gesture.addPointer(location: const Offset(10, 10));
-      await tester.pumpAndSettle();
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic,
-      );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-      final Offset firstChild = tester.getCenter(find.text('A'));
-      await gesture.moveTo(firstChild);
-      await tester.pumpAndSettle();
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      );
-    },
-  );
+    final Offset firstChild = tester.getCenter(find.text('A'));
+    await gesture.moveTo(firstChild);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
 
-  testWidgets('CupertinoSlidingSegmentedControl defaults - no selection', (
-    WidgetTester tester,
-  ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+  testWidgets('CupertinoSlidingSegmentedControl defaults - no selection', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
 
-    Widget buildSlidingSegmentedControl({Brightness? brightness}) {
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
       return CupertinoApp(
-        theme: CupertinoThemeData(brightness: brightness ?? Brightness.light),
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
         home: CupertinoPageScaffold(
           child: Center(
             child: CupertinoSlidingSegmentedControl<int>(
@@ -1959,7 +1942,7 @@ void main() {
               onValueChanged: defaultCallback,
             ),
           ),
-        ),
+        )
       );
     }
 
@@ -1980,14 +1963,18 @@ void main() {
     );
   });
 
-  testWidgets('CupertinoSlidingSegmentedControl defaults - group value is not null', (
-    WidgetTester tester,
-  ) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+  testWidgets('CupertinoSlidingSegmentedControl defaults - group value is not null', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
 
-    Widget buildSlidingSegmentedControl({Brightness? brightness}) {
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
       return CupertinoApp(
-        theme: CupertinoThemeData(brightness: brightness ?? Brightness.light),
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
         home: CupertinoPageScaffold(
           child: Center(
             child: CupertinoSlidingSegmentedControl<int>(
@@ -1996,7 +1983,7 @@ void main() {
               onValueChanged: defaultCallback,
             ),
           ),
-        ),
+        )
       );
     }
 
@@ -2018,20 +2005,26 @@ void main() {
   });
 
   testWidgets('CupertinoSlidingSegmentedControl defaults - disabled', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
 
-    Widget buildSlidingSegmentedControl({Brightness? brightness}) {
+    Widget buildSlidingSegmentedControl({ Brightness? brightness }) {
       return CupertinoApp(
-        theme: CupertinoThemeData(brightness: brightness ?? Brightness.light),
+        theme: CupertinoThemeData(
+          brightness: brightness ?? Brightness.light,
+        ),
         home: CupertinoPageScaffold(
           child: Center(
             child: CupertinoSlidingSegmentedControl<int>(
-              disabledChildren: const <int>{0},
+              disabledChildren: const <int> { 0 },
               children: children,
               onValueChanged: defaultCallback,
             ),
           ),
-        ),
+        )
       );
     }
 
@@ -2053,20 +2046,24 @@ void main() {
   });
 
   testWidgets('Segment can be disabled', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
 
     groupValue = 1;
     await tester.pumpWidget(
       boilerplate(
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
-            disabledChildren: const <int>{0},
+            disabledChildren: const <int> { 0 },
             children: children,
             groupValue: groupValue,
             onValueChanged: defaultCallback,
           );
         },
-      ),
+      )
     );
 
     expect(getHighlightedIndex(tester), 1);
@@ -2091,14 +2088,18 @@ void main() {
   });
 
   testWidgets('Several segments can be disabled', (WidgetTester tester) async {
-    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('BB'),
+      2: Text('CCCC'),
+    };
 
     int onValueChangedCalled = 0;
     await tester.pumpWidget(
       boilerplate(
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
-            disabledChildren: const <int>{0, 1, 2},
+            disabledChildren: const <int> { 0, 1, 2 },
             children: children,
             groupValue: groupValue,
             onValueChanged: (int? value) {
@@ -2107,7 +2108,7 @@ void main() {
             },
           );
         },
-      ),
+      )
     );
 
     // All segments are disabled, so onValueChangedCalled should always be 0.

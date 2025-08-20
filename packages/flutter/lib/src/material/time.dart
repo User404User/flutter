@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'debug.dart';
 import 'material_localizations.dart';
 
+
 /// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
   /// Ante meridiem (before noon).
@@ -52,13 +53,15 @@ class TimeOfDay implements Comparable<TimeOfDay> {
   ///
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
   /// argument must be between 0 and 59, inclusive.
-  const TimeOfDay({required this.hour, required this.minute});
+  const TimeOfDay({ required this.hour, required this.minute });
 
   /// Creates a time of day based on the given time.
   ///
   /// The [hour] is set to the time's hour and the [minute] is set to the time's
   /// minute in the timezone of the given [DateTime].
-  TimeOfDay.fromDateTime(DateTime time) : hour = time.hour, minute = time.minute;
+  TimeOfDay.fromDateTime(DateTime time)
+    : hour = time.hour,
+      minute = time.minute;
 
   /// Creates a time of day based on the current time.
   ///
@@ -76,7 +79,7 @@ class TimeOfDay implements Comparable<TimeOfDay> {
   static const int minutesPerHour = 60;
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
-  TimeOfDay replacing({int? hour, int? minute}) {
+  TimeOfDay replacing({ int? hour, int? minute }) {
     assert(hour == null || (hour >= 0 && hour < hoursPerDay));
     assert(minute == null || (minute >= 0 && minute < minutesPerHour));
     return TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
@@ -147,7 +150,9 @@ class TimeOfDay implements Comparable<TimeOfDay> {
 
   @override
   bool operator ==(Object other) {
-    return other is TimeOfDay && other.hour == hour && other.minute == minute;
+    return other is TimeOfDay
+        && other.hour == hour
+        && other.minute == minute;
   }
 
   @override
@@ -193,7 +198,10 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
   @override
   TimeOfDay fromPrimitives(Object? data) {
     final List<Object?> timeData = data! as List<Object?>;
-    return TimeOfDay(minute: timeData[0]! as int, hour: timeData[1]! as int);
+    return TimeOfDay(
+      minute: timeData[0]! as int,
+      hour: timeData[1]! as int,
+    );
   }
 
   @override
@@ -266,7 +274,7 @@ enum HourFormat {
 }
 
 /// The [HourFormat] used for the given [TimeOfDayFormat].
-HourFormat hourFormat({required TimeOfDayFormat of}) {
+HourFormat hourFormat({ required TimeOfDayFormat of }) {
   switch (of) {
     case TimeOfDayFormat.h_colon_mm_space_a:
     case TimeOfDayFormat.a_space_h_colon_mm:

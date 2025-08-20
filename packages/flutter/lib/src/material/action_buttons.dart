@@ -65,8 +65,7 @@ abstract class _ActionButton extends IconButton {
 
 typedef _ActionIconBuilderCallback = WidgetBuilder? Function(ActionIconThemeData? actionIconTheme);
 typedef _ActionIconDataCallback = IconData Function(BuildContext context);
-typedef _AndroidSemanticsLabelCallback =
-    String Function(MaterialLocalizations materialLocalization);
+typedef _AndroidSemanticsLabelCallback = String Function(MaterialLocalizations materialLocalization);
 
 class _ActionIcon extends StatelessWidget {
   const _ActionIcon({
@@ -121,7 +120,7 @@ class _ActionIcon extends StatelessWidget {
 class BackButtonIcon extends StatelessWidget {
   /// Creates an icon that shows the appropriate "back" image for
   /// the current platform (as obtained from the [Theme]).
-  const BackButtonIcon({super.key});
+  const BackButtonIcon({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -189,8 +188,15 @@ class BackButtonIcon extends StatelessWidget {
 class BackButton extends _ActionButton {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({super.key, super.color, super.style, super.onPressed})
-    : super(icon: const BackButtonIcon(), standardComponent: StandardComponentType.backButton);
+  const BackButton({
+    super.key,
+    super.color,
+    super.style,
+    super.onPressed,
+  }) : super(
+    icon: const BackButtonIcon(),
+    standardComponent: StandardComponentType.backButton,
+  );
 
   @override
   void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
@@ -216,7 +222,7 @@ class BackButton extends _ActionButton {
 class CloseButtonIcon extends StatelessWidget {
   /// Creates an icon that shows the appropriate "close" image for
   /// the current platform (as obtained from the [Theme]).
-  const CloseButtonIcon({super.key});
+  const CloseButtonIcon({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -258,8 +264,11 @@ class CloseButtonIcon extends StatelessWidget {
 ///  * [IconButton], to create other Material Design icon buttons.
 class CloseButton extends _ActionButton {
   /// Creates a Material Design close icon button.
-  const CloseButton({super.key, super.color, super.onPressed, super.style})
-    : super(icon: const CloseButtonIcon(), standardComponent: StandardComponentType.closeButton);
+  const CloseButton({ super.key, super.color, super.onPressed, super.style })
+      : super(
+          icon: const CloseButtonIcon(),
+          standardComponent: StandardComponentType.closeButton,
+        );
 
   @override
   void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
@@ -287,7 +296,7 @@ class CloseButton extends _ActionButton {
 class DrawerButtonIcon extends StatelessWidget {
   /// Creates an icon that shows the appropriate "close" image for
   /// the current platform (as obtained from the [Theme]).
-  const DrawerButtonIcon({super.key});
+  const DrawerButtonIcon({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -320,8 +329,15 @@ class DrawerButtonIcon extends StatelessWidget {
 ///  * [ThemeData.platform], which specifies the current platform.
 class DrawerButton extends _ActionButton {
   /// Creates a Material Design drawer icon button.
-  const DrawerButton({super.key, super.color, super.style, super.onPressed})
-    : super(icon: const DrawerButtonIcon(), standardComponent: StandardComponentType.drawerButton);
+  const DrawerButton({
+    super.key,
+    super.color,
+    super.style,
+    super.onPressed,
+  }) : super(
+        icon: const DrawerButtonIcon(),
+        standardComponent: StandardComponentType.drawerButton,
+      );
 
   @override
   void _onPressedCallback(BuildContext context) => Scaffold.of(context).openDrawer();
@@ -349,7 +365,7 @@ class DrawerButton extends _ActionButton {
 class EndDrawerButtonIcon extends StatelessWidget {
   /// Creates an icon that shows the appropriate "end drawer" image for
   /// the current platform (as obtained from the [Theme]).
-  const EndDrawerButtonIcon({super.key});
+  const EndDrawerButtonIcon({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -382,8 +398,12 @@ class EndDrawerButtonIcon extends StatelessWidget {
 ///  * [ThemeData.platform], which specifies the current platform.
 class EndDrawerButton extends _ActionButton {
   /// Creates a Material Design end drawer icon button.
-  const EndDrawerButton({super.key, super.color, super.style, super.onPressed})
-    : super(icon: const EndDrawerButtonIcon());
+  const EndDrawerButton({
+    super.key,
+    super.color,
+    super.style,
+    super.onPressed,
+  }) : super(icon: const EndDrawerButtonIcon());
 
   @override
   void _onPressedCallback(BuildContext context) => Scaffold.of(context).openEndDrawer();

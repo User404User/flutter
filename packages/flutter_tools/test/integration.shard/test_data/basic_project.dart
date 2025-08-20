@@ -5,11 +5,12 @@
 import 'project.dart';
 
 class BasicProject extends Project {
+
   @override
   final String pubspec = '''
   name: test
   environment:
-    sdk: ^3.7.0-0
+    sdk: '>=3.2.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -57,11 +58,12 @@ class BasicProject extends Project {
 /// A repro for the issue at https://github.com/Dart-Code/Dart-Code/issues/3448
 /// where Hot Restart could become stuck on exceptions and never complete.
 class BasicProjectThatThrows extends Project {
+
   @override
   final String pubspec = '''
   name: test
   environment:
-    sdk: ^3.7.0-0
+    sdk: '>=3.2.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -118,7 +120,7 @@ class BasicProjectWithTimelineTraces extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ^3.7.0-0
+    sdk: '>=3.2.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -167,7 +169,7 @@ class BasicProjectWithFlutterGen extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ^3.7.0-0
+    sdk: '>=3.2.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -187,11 +189,12 @@ class BasicProjectWithFlutterGen extends Project {
 }
 
 class BasicProjectWithUnaryMain extends Project {
+
   @override
   final String pubspec = '''
   name: test
   environment:
-    sdk: ^3.7.0-0
+    sdk: '>=3.2.0-0 <4.0.0'
   dependencies:
     flutter:
       sdk: flutter

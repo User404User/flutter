@@ -27,9 +27,13 @@ void main() {
   testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
-    const BoxDecoration decorationA = BoxDecoration(color: Color(0xFF00FF00));
+    const BoxDecoration decorationA = BoxDecoration(
+      color: Color(0xFF00FF00),
+    );
 
-    const BoxDecoration decorationB = BoxDecoration(color: Color(0xFF0000FF));
+    const BoxDecoration decorationB = BoxDecoration(
+      color: Color(0xFF0000FF),
+    );
 
     BoxDecoration actualDecoration;
 
@@ -123,10 +127,7 @@ void main() {
         color: const Color(0xFF0000FF),
       ),
     );
-    expect(
-      tester.binding.transientCallbackCount,
-      1,
-    ); // this is the only time an animation should have started!
+    expect(tester.binding.transientCallbackCount, 1); // this is the only time an animation should have started!
     await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.transientCallbackCount, 0);
     await tester.pumpWidget(
@@ -138,9 +139,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('AnimatedContainer padding visual-to-directional animation', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('AnimatedContainer padding visual-to-directional animation', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -182,9 +181,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(700.0, 0.0));
   });
 
-  testWidgets('AnimatedContainer alignment visual-to-directional animation', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('AnimatedContainer alignment visual-to-directional animation', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -345,14 +342,18 @@ void main() {
   testWidgets('AnimatedContainer sets clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedContainer(
-        decoration: const BoxDecoration(color: Color(0xFFED1D7F)),
+        decoration: const BoxDecoration(
+          color: Color(0xFFED1D7F),
+        ),
         duration: const Duration(milliseconds: 200),
       ),
     );
     expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.none);
     await tester.pumpWidget(
       AnimatedContainer(
-        decoration: const BoxDecoration(color: Color(0xFFED1D7F)),
+        decoration: const BoxDecoration(
+          color: Color(0xFFED1D7F),
+        ),
         duration: const Duration(milliseconds: 200),
         clipBehavior: Clip.antiAlias,
       ),

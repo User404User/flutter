@@ -161,7 +161,10 @@ class ScrollBehavior {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         assert(details.controller != null);
-        return RawScrollbar(controller: details.controller, child: child);
+        return RawScrollbar(
+          controller: details.controller,
+          child: child,
+        );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -220,16 +223,12 @@ class ScrollBehavior {
     }
   }
 
-  static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(
-    parent: RangeMaintainingScrollPhysics(),
-  );
+  static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
   static const ScrollPhysics _bouncingDesktopPhysics = BouncingScrollPhysics(
     decelerationRate: ScrollDecelerationRate.fast,
-    parent: RangeMaintainingScrollPhysics(),
+    parent: RangeMaintainingScrollPhysics()
   );
-  static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(
-    parent: RangeMaintainingScrollPhysics(),
-  );
+  static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
 
   /// The scroll physics to use for the platform given by [getPlatform].
   ///
@@ -294,8 +293,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
-  Set<LogicalKeyboardKey> get pointerAxisModifiers =>
-      _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
+  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
 
   @override
   MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) {
@@ -351,15 +349,15 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   bool shouldNotify(_WrappedScrollBehavior oldDelegate) {
-    return oldDelegate.delegate.runtimeType != delegate.runtimeType ||
-        oldDelegate.scrollbars != scrollbars ||
-        oldDelegate.overscroll != overscroll ||
-        !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices) ||
-        oldDelegate.multitouchDragStrategy != multitouchDragStrategy ||
-        !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers) ||
-        oldDelegate.physics != physics ||
-        oldDelegate.platform != platform ||
-        delegate.shouldNotify(oldDelegate.delegate);
+    return oldDelegate.delegate.runtimeType != delegate.runtimeType
+        || oldDelegate.scrollbars != scrollbars
+        || oldDelegate.overscroll != overscroll
+        || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
+        || oldDelegate.multitouchDragStrategy != multitouchDragStrategy
+        || !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers)
+        || oldDelegate.physics != physics
+        || oldDelegate.platform != platform
+        || delegate.shouldNotify(oldDelegate.delegate);
   }
 
   @override
@@ -377,7 +375,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 /// decorations used by descendants of [child].
 class ScrollConfiguration extends InheritedWidget {
   /// Creates a widget that controls how [Scrollable] widgets behave in a subtree.
-  const ScrollConfiguration({super.key, required this.behavior, required super.child});
+  const ScrollConfiguration({
+    super.key,
+    required this.behavior,
+    required super.child,
+  });
 
   /// How [Scrollable] widgets that are descendants of [child] should behave.
   final ScrollBehavior behavior;
@@ -387,15 +389,14 @@ class ScrollConfiguration extends InheritedWidget {
   /// If no [ScrollConfiguration] widget is in scope of the given `context`,
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
-    final ScrollConfiguration? configuration =
-        context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
+    final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
     return configuration?.behavior ?? const ScrollBehavior();
   }
 
   @override
   bool updateShouldNotify(ScrollConfiguration oldWidget) {
-    return behavior.runtimeType != oldWidget.behavior.runtimeType ||
-        (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
+    return behavior.runtimeType != oldWidget.behavior.runtimeType
+        || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }
 
   @override

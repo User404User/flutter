@@ -19,6 +19,7 @@ TaskFunction createMicrobenchmarkTask({
   bool? enableImpeller,
   Map<String, String> environment = const <String, String>{},
 }) {
+
   // Generate a seed for this test stable around the date.
   final DateTime seedDate = DateTime.now().toUtc().subtract(const Duration(hours: 7));
   final int seed = DateTime(seedDate.year, seedDate.month, seedDate.day).hashCode;
@@ -28,14 +29,21 @@ TaskFunction createMicrobenchmarkTask({
     await device.unlock();
     await device.clearLogs();
 
-    final Directory appDir = dir(
-      path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'),
-    );
+    final Directory appDir =
+        dir(path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
 
     // Hard-uninstall any prior apps.
     await inDirectory(appDir, () async {
       section('Uninstall previous microbenchmarks app');
-      await flutter('install', options: <String>['-v', '--uninstall-only', '-d', device.deviceId]);
+      await flutter(
+        'install',
+        options: <String>[
+          '-v',
+          '--uninstall-only',
+          '-d',
+          device.deviceId,
+        ],
+      );
     });
 
     Future<Map<String, double>> runMicrobench(String benchmarkPath) async {
@@ -55,7 +63,11 @@ TaskFunction createMicrobenchmarkTask({
             '--dart-define=seed=$seed',
             benchmarkPath,
           ];
-          return startFlutter('run', options: options, environment: environment);
+          return startFlutter(
+            'run',
+            options: options,
+            environment: environment,
+          );
         });
         return readJsonResults(flutterProcess);
       }
@@ -67,6 +79,7 @@ TaskFunction createMicrobenchmarkTask({
       ...await runMicrobench('lib/benchmark_collection.dart'),
     };
 
-    return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
+    return TaskResult.success(allResults,
+        benchmarkScoreKeys: allResults.keys.toList());
   };
 }

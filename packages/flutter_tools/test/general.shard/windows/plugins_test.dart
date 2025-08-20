@@ -17,12 +17,11 @@ import '../../src/common.dart';
 const TemplateRenderer renderer = MustacheTemplateRenderer();
 
 void main() {
+
   testWithoutContext('Win32 injects Win32 plugins', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     setUpProject(fileSystem);
-    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
-      fileSystem.currentDirectory,
-    );
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
     await writeWindowsPluginFiles(flutterProject, <Plugin>[
       Plugin(
@@ -39,7 +38,6 @@ void main() {
         },
         dependencies: <String>[],
         isDirectDependency: true,
-        isDevDependency: false,
       ),
     ], renderer);
 

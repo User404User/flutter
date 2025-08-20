@@ -21,17 +21,12 @@ extension HtmlElementViewImpl on HtmlElementView {
     required String tagName,
     bool isVisible = true,
     ElementCreatedCallback? onElementCreated,
-    required PlatformViewHitTestBehavior hitTestBehavior,
   }) {
     return HtmlElementView(
       key: key,
-      viewType:
-          isVisible
-              ? ui_web.PlatformViewRegistry.defaultVisibleViewType
-              : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
+      viewType: isVisible ? ui_web.PlatformViewRegistry.defaultVisibleViewType : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
       onPlatformViewCreated: _createPlatformViewCallbackForElementCallback(onElementCreated),
       creationParams: <dynamic, dynamic>{'tagName': tagName},
-      hitTestBehavior: hitTestBehavior,
     );
   }
 
@@ -50,14 +45,16 @@ extension HtmlElementViewImpl on HtmlElementView {
         return PlatformViewSurface(
           controller: controller,
           gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-          hitTestBehavior: hitTestBehavior,
+          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         );
       },
     );
   }
 
   /// Creates the controller and kicks off its initialization.
-  _HtmlElementViewController _createController(PlatformViewCreationParams params) {
+  _HtmlElementViewController _createController(
+    PlatformViewCreationParams params,
+  ) {
     final _HtmlElementViewController controller = _HtmlElementViewController(
       params.id,
       viewType,
@@ -83,7 +80,11 @@ PlatformViewCreatedCallback? _createPlatformViewCallbackForElementCallback(
 }
 
 class _HtmlElementViewController extends PlatformViewController {
-  _HtmlElementViewController(this.viewId, this.viewType, this.creationParams);
+  _HtmlElementViewController(
+    this.viewId,
+    this.viewType,
+    this.creationParams,
+  );
 
   @override
   final int viewId;
@@ -132,5 +133,4 @@ class _HtmlElementViewController extends PlatformViewController {
 /// This is used for testing view factory registration.
 @visibleForTesting
 ui_web.PlatformViewRegistry? debugOverridePlatformViewRegistry;
-ui_web.PlatformViewRegistry get _platformViewsRegistry =>
-    debugOverridePlatformViewRegistry ?? ui_web.platformViewRegistry;
+ui_web.PlatformViewRegistry get _platformViewsRegistry => debugOverridePlatformViewRegistry ?? ui_web.platformViewRegistry;

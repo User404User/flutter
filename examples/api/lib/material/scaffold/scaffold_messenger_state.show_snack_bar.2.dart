@@ -13,12 +13,13 @@ class SnackBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: SnackBarExample());
+    return const MaterialApp(
+      home: SnackBarExample(),
+    );
   }
 }
 
 enum AnimationStyles { defaultStyle, custom, none }
-
 const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
   (AnimationStyles.defaultStyle, 'Default'),
   (AnimationStyles.custom, 'Custom'),
@@ -59,12 +60,11 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                   _animationStyleSelection = styles;
                 });
               },
-              segments:
-                  animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
-                    (AnimationStyles, String) shirt,
-                  ) {
-                    return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                  }).toList(),
+              segments: animationStyleSegments
+                .map<ButtonSegment<AnimationStyles>>(((AnimationStyles, String) shirt) {
+                  return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
+                })
+                .toList(),
             ),
             const SizedBox(height: 10),
             Builder(
@@ -72,13 +72,16 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                 return ElevatedButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('I am a snack bar.'), showCloseIcon: true),
+                      const SnackBar(
+                        content: Text('I am a snack bar.'),
+                        showCloseIcon: true,
+                      ),
                       snackBarAnimationStyle: _animationStyle,
                     );
                   },
                   child: const Text('Show SnackBar'),
                 );
-              },
+              }
             ),
           ],
         ),

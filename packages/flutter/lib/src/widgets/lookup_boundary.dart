@@ -88,10 +88,7 @@ class LookupBoundary extends InheritedWidget {
   /// method. The root of the tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}
-  static T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(
-    BuildContext context, {
-    Object? aspect,
-  }) {
+  static T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(BuildContext context, { Object? aspect }) {
     // The following call makes sure that context depends on something so
     // Element.didChangeDependencies is called when context moves in the tree
     // even when requested dependency remains unfulfilled (i.e. null is
@@ -119,9 +116,7 @@ class LookupBoundary extends InheritedWidget {
   /// method. The root of the tree is treated as an implicit lookup boundary.
   ///
   /// {@macro flutter.widgets.BuildContext.getElementForInheritedWidgetOfExactType}
-  static InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>(
-    BuildContext context,
-  ) {
+  static InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>(BuildContext context) {
     final InheritedElement? candidate = context.getElementForInheritedWidgetOfExactType<T>();
     if (candidate == null) {
       return null;
@@ -278,7 +273,7 @@ class LookupBoundary extends InheritedWidget {
       });
       result = ancestorFound & hiddenByBoundary;
       return true;
-    }());
+    } ());
     return result!;
   }
 
@@ -301,7 +296,7 @@ class LookupBoundary extends InheritedWidget {
       });
       result = ancestorFound & hiddenByBoundary;
       return true;
-    }());
+    } ());
     return result!;
   }
 
@@ -310,9 +305,7 @@ class LookupBoundary extends InheritedWidget {
   /// from the provided [BuildContext].
   ///
   /// This method throws when asserts are disabled.
-  static bool debugIsHidingAncestorRenderObjectOfType<T extends RenderObject>(
-    BuildContext context,
-  ) {
+  static bool debugIsHidingAncestorRenderObjectOfType<T extends RenderObject>(BuildContext context) {
     bool? result;
     assert(() {
       bool hiddenByBoundary = false;
@@ -327,7 +320,7 @@ class LookupBoundary extends InheritedWidget {
       });
       result = ancestorFound & hiddenByBoundary;
       return true;
-    }());
+    } ());
     return result!;
   }
 

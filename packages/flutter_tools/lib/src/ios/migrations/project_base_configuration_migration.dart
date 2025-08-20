@@ -18,9 +18,7 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
   @override
   Future<void> migrate() async {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace(
-        'Xcode project not found, skipping Runner project build settings and configuration migration',
-      );
+      logger.printTrace('Xcode project not found, skipping Runner project build settings and configuration migration');
       return;
     }
 
@@ -56,10 +54,7 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
 		$debugIdentifier /* Debug */ = {
 			isa = XCBuildConfiguration;
 ''';
-    String newProjectContents = originalProjectContents.replaceAll(
-      debugBaseConfigurationOriginal,
-      debugBaseConfigurationReplacement,
-    );
+    String newProjectContents = originalProjectContents.replaceAll(debugBaseConfigurationOriginal, debugBaseConfigurationReplacement);
 
     // Profile
     final String profileBaseConfigurationOriginal = '''
@@ -71,10 +66,7 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
 		$profileIdentifier /* Profile */ = {
 			isa = XCBuildConfiguration;
 ''';
-    newProjectContents = newProjectContents.replaceAll(
-      profileBaseConfigurationOriginal,
-      profileBaseConfigurationReplacement,
-    );
+    newProjectContents = newProjectContents.replaceAll(profileBaseConfigurationOriginal, profileBaseConfigurationReplacement);
 
     // Release
     final String releaseBaseConfigurationOriginal = '''
@@ -87,10 +79,7 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
 			isa = XCBuildConfiguration;
 ''';
 
-    newProjectContents = newProjectContents.replaceAll(
-      releaseBaseConfigurationOriginal,
-      releaseBaseConfigurationReplacement,
-    );
+    newProjectContents = newProjectContents.replaceAll(releaseBaseConfigurationOriginal, releaseBaseConfigurationReplacement);
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('Project base configurations detected, removing.');
       _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);

@@ -52,14 +52,8 @@ void main() {
     final Platform platform = FakePlatform();
     final BufferLogger logger = BufferLogger.test();
     final List<FlutterCommand> commands = <FlutterCommand>[
-      BuildWindowsCommand(
-        logger: BufferLogger.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-      ),
-      BuildLinuxCommand(
-        logger: BufferLogger.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-      ),
+      BuildWindowsCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
+      BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
       BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false),
       BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
       BuildApkCommand(logger: BufferLogger.test()),
@@ -75,7 +69,11 @@ void main() {
       BuildIOSFrameworkCommand(
         logger: BufferLogger.test(),
         verboseHelp: false,
-        buildSystem: FlutterBuildSystem(fileSystem: fileSystem, platform: platform, logger: logger),
+        buildSystem: FlutterBuildSystem(
+          fileSystem: fileSystem,
+          platform: platform,
+          logger: logger,
+        ),
       ),
       AttachCommand(
         stdio: FakeStdio(),
@@ -99,7 +97,8 @@ void main() {
     }
   });
 
-  testUsingContext('BuildSubCommand displays current null safety mode', () async {
+  testUsingContext('BuildSubCommand displays current null safety mode',
+      () async {
     const BuildInfo unsound = BuildInfo(
       BuildMode.debug,
       '',
@@ -110,7 +109,8 @@ void main() {
 
     final BufferLogger logger = BufferLogger.test();
     FakeBuildSubCommand(logger).test(unsound);
-    expect(logger.statusText, contains('Building without sound null safety ⚠️'));
+    expect(logger.statusText,
+        contains('Building without sound null safety ⚠️'));
   });
 
   testUsingContext('Include only supported sub commands', () {

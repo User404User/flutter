@@ -15,7 +15,10 @@ import 'stdio.dart' show Stdio;
 /// Different frontends (e.g. CLI vs desktop) can share [Context]s, although
 /// methods for capturing user interaction may be overridden.
 abstract class Context {
-  const Context({required this.checkouts, required this.stateFile});
+  const Context({
+    required this.checkouts,
+    required this.stateFile,
+  });
 
   final Checkouts checkouts;
   final File stateFile;
@@ -35,7 +38,9 @@ abstract class Context {
     if (firstChar == 'N') {
       return false;
     }
-    throw ConductorException('Unknown user input (expected "y" or "n"): $response');
+    throw ConductorException(
+      'Unknown user input (expected "y" or "n"): $response',
+    );
   }
 
   /// Save the release's [state].

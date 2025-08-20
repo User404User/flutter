@@ -178,7 +178,11 @@ const String htmlSampleLegacyLoadEntrypoint = '''
 </html>
 ''';
 
-String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) => '''
+String htmlSample2Replaced({
+  required String baseHref,
+  required String serviceWorkerVersion,
+}) =>
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -236,8 +240,14 @@ void main() {
     expect(() => WebTemplate('<base href>').getBaseHref(), throwsToolExit());
     expect(() => WebTemplate('<base href="">').getBaseHref(), throwsToolExit());
     expect(() => WebTemplate('<base href="foo/111">').getBaseHref(), throwsToolExit());
-    expect(() => WebTemplate('<base href="foo/111/">').getBaseHref(), throwsToolExit());
-    expect(() => WebTemplate('<base href="/foo/111">').getBaseHref(), throwsToolExit());
+    expect(
+      () => WebTemplate('<base href="foo/111/">').getBaseHref(),
+      throwsToolExit(),
+    );
+    expect(
+      () => WebTemplate('<base href="/foo/111">').getBaseHref(),
+      throwsToolExit(),
+    );
   });
 
   test('applies substitutions', () {
@@ -249,7 +259,10 @@ void main() {
     );
     expect(
       indexHtml.content,
-      htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
+      htmlSample2Replaced(
+        baseHref: '/foo/333/',
+        serviceWorkerVersion: 'v123xyz',
+      ),
     );
   });
 
@@ -262,7 +275,10 @@ void main() {
     );
     expect(
       indexHtml.content,
-      htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
+      htmlSample2Replaced(
+        baseHref: '/foo/333/',
+        serviceWorkerVersion: 'v123xyz',
+      ),
     );
   });
 

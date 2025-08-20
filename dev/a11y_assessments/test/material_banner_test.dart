@@ -38,9 +38,7 @@ void main() {
 
     await tester.tap(find.byType(TextButton));
 
-    final ElevatedButton showButtonFinder = tester.widget<ElevatedButton>(
-      find.byType(ElevatedButton),
-    );
+    final ElevatedButton showButtonFinder = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
     expect(showButtonFinder.focusNode!.hasFocus, isTrue);
   });
 

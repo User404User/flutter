@@ -22,25 +22,23 @@ class SwiftPackageManager {
   const SwiftPackageManager({
     required FileSystem fileSystem,
     required TemplateRenderer templateRenderer,
-  }) : _fileSystem = fileSystem,
-       _templateRenderer = templateRenderer;
+  })  : _fileSystem = fileSystem,
+        _templateRenderer = templateRenderer;
 
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;
 
   static const String _defaultFlutterPluginsSwiftPackageName = 'FlutterGeneratedPluginSwiftPackage';
 
-  static final SwiftPackageSupportedPlatform iosSwiftPackageSupportedPlatform =
-      SwiftPackageSupportedPlatform(
-        platform: SwiftPackagePlatform.ios,
-        version: Version(12, 0, null),
-      );
+  static final SwiftPackageSupportedPlatform iosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
+    platform: SwiftPackagePlatform.ios,
+    version: Version(12, 0, null),
+  );
 
-  static final SwiftPackageSupportedPlatform macosSwiftPackageSupportedPlatform =
-      SwiftPackageSupportedPlatform(
-        platform: SwiftPackagePlatform.macos,
-        version: Version(10, 14, null),
-      );
+  static final SwiftPackageSupportedPlatform macosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
+    platform: SwiftPackagePlatform.macos,
+    version: Version(10, 14, null),
+  );
 
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
   /// has dependencies on Flutter plugins that are compatible with Swift
@@ -54,7 +52,7 @@ class SwiftPackageManager {
 
     final (
       List<SwiftPackagePackageDependency> packageDependencies,
-      List<SwiftPackageTargetDependency> targetDependencies,
+      List<SwiftPackageTargetDependency> targetDependencies
     ) = _dependenciesForPlugins(plugins, platform);
 
     // If there aren't any Swift Package plugins and the project hasn't been
@@ -104,7 +102,8 @@ class SwiftPackageManager {
   ) {
     final List<SwiftPackagePackageDependency> packageDependencies =
         <SwiftPackagePackageDependency>[];
-    final List<SwiftPackageTargetDependency> targetDependencies = <SwiftPackageTargetDependency>[];
+    final List<SwiftPackageTargetDependency> targetDependencies =
+        <SwiftPackageTargetDependency>[];
 
     for (final Plugin plugin in plugins) {
       final String? pluginSwiftPackageManifestPath = plugin.pluginSwiftPackageManifestPath(
@@ -117,30 +116,27 @@ class SwiftPackageManager {
         continue;
       }
 
-      packageDependencies.add(
-        SwiftPackagePackageDependency(
-          name: plugin.name,
-          path: _fileSystem.file(pluginSwiftPackageManifestPath).parent.path,
-        ),
-      );
+      packageDependencies.add(SwiftPackagePackageDependency(
+        name: plugin.name,
+        path: _fileSystem.file(pluginSwiftPackageManifestPath).parent.path,
+      ));
 
       // The target dependency product name is hyphen separated because it's
       // the dependency's library name, which Swift Package Manager will
       // automatically use as the CFBundleIdentifier if linked dynamically. The
       // CFBundleIdentifier cannot contain underscores.
-      targetDependencies.add(
-        SwiftPackageTargetDependency.product(
-          name: plugin.name.replaceAll('_', '-'),
-          packageName: plugin.name,
-        ),
-      );
+      targetDependencies.add(SwiftPackageTargetDependency.product(
+        name: plugin.name.replaceAll('_', '-'),
+        packageName: plugin.name,
+      ));
     }
     return (packageDependencies, targetDependencies);
   }
 
   /// Validates the platform is either iOS or macOS, otherwise throw an error.
   static void _validatePlatform(SupportedPlatform platform) {
-    if (platform != SupportedPlatform.ios && platform != SupportedPlatform.macos) {
+    if (platform != SupportedPlatform.ios &&
+        platform != SupportedPlatform.macos) {
       throwToolExit(
         'The platform ${platform.name} is not compatible with Swift Package Manager. '
         'Only iOS and macOS are allowed.',
@@ -188,11 +184,10 @@ class SwiftPackageManager {
 
     final String manifestContents = project.flutterPluginSwiftPackageManifest.readAsStringSync();
     final String oldSupportedPlatform = defaultPlatform.format();
-    final String newSupportedPlatform =
-        SwiftPackageSupportedPlatform(
-          platform: packagePlatform,
-          version: projectDeploymentTargetVersion,
-        ).format();
+    final String newSupportedPlatform = SwiftPackageSupportedPlatform(
+      platform: packagePlatform,
+      version: projectDeploymentTargetVersion,
+    ).format();
 
     project.flutterPluginSwiftPackageManifest.writeAsStringSync(
       manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),

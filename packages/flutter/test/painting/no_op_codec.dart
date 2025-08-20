@@ -17,7 +17,8 @@ Future<Codec> noOpDecoderBufferCallback(
   int? cacheWidth,
   int? cacheHeight,
   bool? allowUpscaling,
-}) async => _NoOpCodec();
+}) async =>
+    _NoOpCodec();
 
 class _NoOpCodec implements Codec {
   @override

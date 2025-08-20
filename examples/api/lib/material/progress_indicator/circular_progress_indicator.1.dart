@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [CircularProgressIndicator].
 
-void main() => runApp(const ProgressIndicatorExampleApp());
+void main() => runApp(const ProgressIndicatorApp());
 
-class ProgressIndicatorExampleApp extends StatelessWidget {
-  const ProgressIndicatorExampleApp({super.key});
+class ProgressIndicatorApp extends StatelessWidget {
+  const ProgressIndicatorApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +27,7 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
-    with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
   late AnimationController controller;
   bool determinate = false;
 
@@ -40,8 +39,8 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..addListener(() {
-      setState(() {});
-    });
+        setState(() {});
+      });
     controller.repeat(reverse: true);
     super.initState();
   }
@@ -58,18 +57,25 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
-          spacing: 16.0,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Circular progress indicator', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Circular progress indicator',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 30),
             CircularProgressIndicator(
               value: controller.value,
               semanticsLabel: 'Circular progress indicator',
             ),
+            const SizedBox(height: 10),
             Row(
               children: <Widget>[
                 Expanded(
-                  child: Text('determinate Mode', style: Theme.of(context).textTheme.titleSmall),
+                  child: Text(
+                    'determinate Mode',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
                 Switch(
                   value: determinate,

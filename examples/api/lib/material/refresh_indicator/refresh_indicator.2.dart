@@ -13,7 +13,9 @@ class RefreshIndicatorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: RefreshIndicatorExample());
+    return const MaterialApp(
+      home: RefreshIndicatorExample(),
+    );
   }
 }
 
@@ -30,7 +32,9 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('RefreshIndicator.noSpinner Sample')),
+      appBar: AppBar(
+        title: const Text('RefreshIndicator.noSpinner Sample'),
+      ),
       body: Stack(
         children: <Widget>[
           RefreshIndicator.noSpinner(
@@ -66,8 +70,8 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
                       title: const Text('Pull down here'),
                       subtitle: const Text('A custom refresh indicator will be shown'),
                     );
-                  },
-                ),
+                  }
+                )
               ],
             ),
           ),
@@ -84,7 +88,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
                 ),
               ),
             ),
-        ],
+        ]
       ),
     );
   }

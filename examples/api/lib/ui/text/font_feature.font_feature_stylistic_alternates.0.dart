@@ -31,7 +31,9 @@ class ExampleWidget extends StatelessWidget {
       r'Agile Game - $100 initial bet',
       style: TextStyle(
         fontFamily: 'Source Code Pro',
-        fontFeatures: <FontFeature>[FontFeature.stylisticAlternates()],
+        fontFeatures: <FontFeature>[
+          FontFeature.stylisticAlternates(),
+        ],
       ),
     );
   }

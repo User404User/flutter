@@ -17,9 +17,7 @@ class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
   @override
   Future<void> migrate() async {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace(
-        'Xcode project not found, skipping script build phase dependency analysis removal.',
-      );
+      logger.printTrace('Xcode project not found, skipping script build phase dependency analysis removal.');
       return;
     }
 
@@ -52,10 +50,7 @@ class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 ''';
-      newProjectContents = newProjectContents.replaceAll(
-        scriptBuildPhaseOriginal,
-        scriptBuildPhaseReplacement,
-      );
+      newProjectContents = newProjectContents.replaceAll(scriptBuildPhaseOriginal, scriptBuildPhaseReplacement);
     }
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('Removing script build phase dependency analysis.');

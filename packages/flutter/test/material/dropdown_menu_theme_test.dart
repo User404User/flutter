@@ -7,36 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Finder findMenuItemButton(String label) {
-    // For each menu items there are two MenuItemButton widgets.
-    // The last one is the real button item in the menu.
-    // The first one is not visible, it is part of _DropdownMenuBody
-    // which is used to compute the dropdown width.
-    return find.widgetWithText(MenuItemButton, label).last;
-  }
-
-  Material getButtonMaterial(WidgetTester tester, String itemLabel) {
-    return tester.widget<Material>(
-      find.descendant(of: findMenuItemButton(itemLabel), matching: find.byType(Material)),
-    );
-  }
-
-  Finder findMenuPanel() {
-    return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MenuPanel');
-  }
-
-  Material getMenuMaterial(WidgetTester tester) {
-    return tester.widget<Material>(
-      find.descendant(of: findMenuPanel(), matching: find.byType(Material)).first,
-    );
-  }
-
   test('DropdownMenuThemeData copyWith, ==, hashCode basics', () {
     expect(const DropdownMenuThemeData(), const DropdownMenuThemeData().copyWith());
-    expect(
-      const DropdownMenuThemeData().hashCode,
-      const DropdownMenuThemeData().copyWith().hashCode,
-    );
+    expect(const DropdownMenuThemeData().hashCode, const DropdownMenuThemeData().copyWith().hashCode);
 
     const DropdownMenuThemeData custom = DropdownMenuThemeData(
       menuStyle: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
@@ -61,11 +34,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -86,7 +58,7 @@ void main() {
             ),
           ),
         ),
-      ),
+      )
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -104,17 +76,23 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    Material material = getMenuMaterial(tester);
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).at(1);
+    Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
     expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
-    expect(
-      material.shape,
-      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
-    );
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
 
-    material = getButtonMaterial(tester, 'Item 0');
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).last;
+
+    material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
@@ -141,11 +119,8 @@ void main() {
             RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
           ),
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.lightGreen,
-        ),
-      ),
+        inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
+      )
     );
 
     await tester.pumpWidget(
@@ -161,8 +136,8 @@ void main() {
               ],
             ),
           ),
-        ),
-      ),
+        )
+      )
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -180,17 +155,23 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    Material material = getMenuMaterial(tester);
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).at(1);
+    Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.grey);
     expect(material.shadowColor, Colors.brown);
     expect(material.surfaceTintColor, Colors.amberAccent);
     expect(material.elevation, 10.0);
-    expect(
-      material.shape,
-      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-    );
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))));
 
-    material = getButtonMaterial(tester, 'Item 0');
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).last;
+
+    material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
@@ -257,8 +238,8 @@ void main() {
               ),
             ),
           ),
-        ),
-      ),
+        )
+      )
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -277,26 +258,30 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    Material material = getMenuMaterial(tester);
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).at(1);
+    Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.yellow);
     expect(material.shadowColor, Colors.green);
     expect(material.surfaceTintColor, Colors.teal);
     expect(material.elevation, 15.0);
-    expect(
-      material.shape,
-      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
-    );
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))));
 
-    material = getButtonMaterial(tester, 'Item 0');
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).last;
+
+    material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
@@ -365,10 +350,7 @@ void main() {
                     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
                   ),
                 ),
-                inputDecorationTheme: const InputDecorationTheme(
-                  filled: true,
-                  fillColor: Colors.deepPurple,
-                ),
+                inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.deepPurple),
                 dropdownMenuEntries: const <DropdownMenuEntry<int>>[
                   DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
                   DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
@@ -377,8 +359,8 @@ void main() {
               ),
             ),
           ),
-        ),
-      ),
+        )
+      )
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -397,17 +379,23 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    Material material = getMenuMaterial(tester);
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).at(1);
+    Material material = tester.widget<Material>(menuMaterial);
     expect(material.color, Colors.limeAccent);
     expect(material.shadowColor, Colors.deepOrangeAccent);
     expect(material.surfaceTintColor, Colors.lightBlue);
     expect(material.elevation, 21.0);
-    expect(
-      material.shape,
-      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
-    );
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))));
 
-    material = getButtonMaterial(tester, 'Item 0');
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, 'Item 0'),
+      matching: find.byType(Material),
+    ).last;
+
+    material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());

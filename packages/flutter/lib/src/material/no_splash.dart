@@ -68,7 +68,8 @@ class NoSplash extends InteractiveInkFeature {
   static const InteractiveInkFeatureFactory splashFactory = _NoSplashFactory();
 
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {}
+  void paintFeature(Canvas canvas, Matrix4 transform) {
+  }
 
   @override
   void confirm() {

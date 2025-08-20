@@ -48,11 +48,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description, <String>[]);
   });
@@ -72,11 +71,10 @@ void main() {
       padding: EdgeInsets.all(4.0),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
     expect(description[0], 'thumbColor: WidgetStatePropertyAll(${const Color(0xfffffff0)})');
     expect(description[1], 'trackColor: WidgetStatePropertyAll(${const Color(0xfffffff1)})');
@@ -181,7 +179,7 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
-        ..rrect(color: defaultThumbColor),
+        ..rrect(color: defaultThumbColor)
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
@@ -197,26 +195,20 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
-        ..rrect(color: selectedThumbColor),
+        ..rrect(color: selectedThumbColor)
     );
 
     // Switch with hover.
     await tester.pumpWidget(buildSwitch());
     await _pointGestureToSwitch(tester);
     await tester.pumpAndSettle();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.text,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getSwitchMaterial(tester), paints..circle(color: hoverOverlayColor));
 
     // Switch with focus.
     await tester.pumpWidget(buildSwitch(autofocus: true));
     await tester.pumpAndSettle();
-    expect(
-      _getSwitchMaterial(tester),
-      paints..circle(color: focusOverlayColor, radius: splashRadius),
-    );
+    expect(_getSwitchMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
   testWidgets('Material3 - Switch is themeable', (WidgetTester tester) async {
@@ -308,7 +300,7 @@ void main() {
         ..rrect(color: defaultTrackColor)
         ..rrect(color: defaultTrackOutlineColor, strokeWidth: defaultTrackOutlineWidth)
         ..rrect(color: defaultThumbColor)
-        ..paragraph(),
+        ..paragraph()
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), const Size(60.0, 40.0));
@@ -321,32 +313,23 @@ void main() {
       paints
         ..rrect(color: selectedTrackColor)
         ..rrect(color: selectedTrackOutlineColor, strokeWidth: selectedTrackOutlineWidth)
-        ..rrect(color: selectedThumbColor)
-        ..paragraph(),
+        ..rrect(color: selectedThumbColor)..paragraph()
     );
 
     // Switch with hover.
     await tester.pumpWidget(buildSwitch());
     await _pointGestureToSwitch(tester);
     await tester.pumpAndSettle();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.text,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getSwitchMaterial(tester), paints..circle(color: hoverOverlayColor));
 
     // Switch with focus.
     await tester.pumpWidget(buildSwitch(autofocus: true));
     await tester.pumpAndSettle();
-    expect(
-      _getSwitchMaterial(tester),
-      paints..circle(color: focusOverlayColor, radius: splashRadius),
-    );
+    expect(_getSwitchMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
-  testWidgets('Material2 - Switch properties are taken over the theme values', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Material2 - Switch properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -484,7 +467,7 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
-        ..rrect(color: defaultThumbColor),
+        ..rrect(color: defaultThumbColor)
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
@@ -500,17 +483,14 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
-        ..rrect(color: selectedThumbColor),
+        ..rrect(color: selectedThumbColor)
     );
 
     // Switch with hover.
     await tester.pumpWidget(buildSwitch());
     await _pointGestureToSwitch(tester);
     await tester.pumpAndSettle();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.text,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getSwitchMaterial(tester), paints..circle(color: hoverColor));
 
     // Switch with focus.
@@ -519,9 +499,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Material3 - Switch properties are taken over the theme values', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Material3 - Switch properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -656,8 +634,7 @@ void main() {
       paints
         ..rrect(color: defaultTrackColor)
         ..rrect(color: defaultOutlineColor, strokeWidth: defaultOutlineWidth)
-        ..rrect(color: defaultThumbColor)
-        ..paragraph(offset: const Offset(12, 12)),
+        ..rrect(color: defaultThumbColor)..paragraph(offset: const Offset(12, 12))
     );
     // Size from MaterialTapTargetSize.shrinkWrap.
     expect(tester.getSize(find.byType(Switch)), const Size(60.0, 40.0));
@@ -668,19 +645,15 @@ void main() {
     expect(
       _getSwitchMaterial(tester),
       paints
-        ..rrect(color: selectedTrackColor)
-        ..rrect(color: selectedOutlineColor, strokeWidth: selectedOutlineWidth)
-        ..rrect(color: selectedThumbColor),
+        ..rrect(color: selectedTrackColor)..rrect(color: selectedOutlineColor, strokeWidth: selectedOutlineWidth)
+        ..rrect(color: selectedThumbColor)
     );
 
     // Switch with hover.
     await tester.pumpWidget(buildSwitch());
     await _pointGestureToSwitch(tester);
     await tester.pumpAndSettle();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.text,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
     expect(_getSwitchMaterial(tester), paints..circle(color: hoverColor));
 
     // Switch with focus.
@@ -689,9 +662,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Material2 - Switch active and inactive properties are taken over the theme values', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Material2 - Switch active and inactive properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -750,7 +721,7 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
-        ..rrect(color: defaultThumbColor),
+        ..rrect(color: defaultThumbColor)
     );
 
     // Selected switch.
@@ -764,13 +735,11 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
-        ..rrect(color: selectedThumbColor),
+        ..rrect(color: selectedThumbColor)
     );
   });
 
-  testWidgets('Material3 - Switch active and inactive properties are taken over the theme values', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Material3 - Switch active and inactive properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -826,7 +795,7 @@ void main() {
       paints
         ..rrect(color: defaultTrackColor)
         ..rrect(color: themeData.colorScheme.outline)
-        ..rrect(color: defaultThumbColor),
+        ..rrect(color: defaultThumbColor)
     );
 
     // Selected switch.
@@ -837,13 +806,11 @@ void main() {
       paints
         ..rrect(color: selectedTrackColor)
         ..rrect()
-        ..rrect(color: selectedThumbColor),
+        ..rrect(color: selectedThumbColor)
     );
   });
 
-  testWidgets('Material2 - Switch theme overlay color resolves in active/pressed states', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Material2 - Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -856,7 +823,6 @@ void main() {
       }
       return null;
     }
-
     const double splashRadius = 24.0;
     final ThemeData themeData = ThemeData(
       useMaterial3: false,
@@ -869,7 +835,12 @@ void main() {
     Widget buildSwitch({required bool active}) {
       return MaterialApp(
         theme: themeData,
-        home: Scaffold(body: Switch(value: active, onChanged: (_) {})),
+        home: Scaffold(
+          body: Switch(
+            value: active,
+            onChanged: (_) { },
+          ),
+        ),
       );
     }
 
@@ -881,7 +852,10 @@ void main() {
       _getSwitchMaterial(tester),
       paints
         ..rrect()
-        ..circle(color: inactivePressedOverlayColor, radius: splashRadius),
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+      ),
       reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
     );
 
@@ -893,14 +867,15 @@ void main() {
       _getSwitchMaterial(tester),
       paints
         ..rrect()
-        ..circle(color: activePressedOverlayColor, radius: splashRadius),
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        ),
       reason: 'Active pressed Switch should have overlay color: $activePressedOverlayColor',
     );
   });
 
-  testWidgets('Material3 - Switch theme overlay color resolves in active/pressed states', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Material3 - Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -913,7 +888,6 @@ void main() {
       }
       return null;
     }
-
     const double splashRadius = 24.0;
     final ThemeData themeData = ThemeData(
       useMaterial3: true,
@@ -926,7 +900,12 @@ void main() {
     Widget buildSwitch({required bool active}) {
       return MaterialApp(
         theme: themeData,
-        home: Scaffold(body: Switch(value: active, onChanged: (_) {})),
+        home: Scaffold(
+          body: Switch(
+            value: active,
+            onChanged: (_) { },
+          ),
+        ),
       );
     }
 
@@ -937,9 +916,12 @@ void main() {
     expect(
       _getSwitchMaterial(tester),
       (paints
-          ..rrect()
-          ..rrect())
-        ..circle(color: inactivePressedOverlayColor, radius: splashRadius),
+        ..rrect()
+        ..rrect())
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: splashRadius,
+        ),
       reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
     );
 
@@ -951,14 +933,15 @@ void main() {
       _getSwitchMaterial(tester),
       paints
         ..rrect()
-        ..circle(color: activePressedOverlayColor, radius: splashRadius),
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: splashRadius,
+        ),
       reason: 'Active pressed Switch should have overlay color: $activePressedOverlayColor',
     );
   });
 
-  testWidgets('Material2 - Local SwitchTheme can override global SwitchTheme', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Material2 - Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
     const Color globalThemeThumbColor = Color(0xfffffff1);
     const Color globalThemeTrackColor = Color(0xfffffff2);
     const Color globalThemeOutlineColor = Color(0xfffffff3);
@@ -986,9 +969,13 @@ void main() {
               thumbColor: MaterialStatePropertyAll<Color>(localThemeThumbColor),
               trackColor: MaterialStatePropertyAll<Color>(localThemeTrackColor),
               trackOutlineColor: MaterialStatePropertyAll<Color>(localThemeOutlineColor),
-              trackOutlineWidth: MaterialStatePropertyAll<double>(localThemeOutlineWidth),
+              trackOutlineWidth: MaterialStatePropertyAll<double>(localThemeOutlineWidth)
             ),
-            child: Switch(value: selected, onChanged: (bool value) {}, autofocus: autofocus),
+            child: Switch(
+              value: selected,
+              onChanged: (bool value) {},
+              autofocus: autofocus,
+            ),
           ),
         ),
       );
@@ -1004,13 +991,11 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
-        ..rrect(color: localThemeThumbColor),
+        ..rrect(color: localThemeThumbColor)
     );
   });
 
-  testWidgets('Material3 - Local SwitchTheme can override global SwitchTheme', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Material3 - Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
     const Color globalThemeThumbColor = Color(0xfffffff1);
     const Color globalThemeTrackColor = Color(0xfffffff2);
     const Color globalThemeOutlineColor = Color(0xfffffff3);
@@ -1035,12 +1020,16 @@ void main() {
         home: Scaffold(
           body: SwitchTheme(
             data: const SwitchThemeData(
-              thumbColor: MaterialStatePropertyAll<Color>(localThemeThumbColor),
-              trackColor: MaterialStatePropertyAll<Color>(localThemeTrackColor),
-              trackOutlineColor: MaterialStatePropertyAll<Color>(localThemeOutlineColor),
-              trackOutlineWidth: MaterialStatePropertyAll<double>(localThemeOutlineWidth),
+                thumbColor: MaterialStatePropertyAll<Color>(localThemeThumbColor),
+                trackColor: MaterialStatePropertyAll<Color>(localThemeTrackColor),
+                trackOutlineColor: MaterialStatePropertyAll<Color>(localThemeOutlineColor),
+                trackOutlineWidth: MaterialStatePropertyAll<double>(localThemeOutlineWidth)
             ),
-            child: Switch(value: selected, onChanged: (bool value) {}, autofocus: autofocus),
+            child: Switch(
+              value: selected,
+              onChanged: (bool value) {},
+              autofocus: autofocus,
+            ),
           ),
         ),
       );
@@ -1053,15 +1042,26 @@ void main() {
       paints
         ..rrect(color: localThemeTrackColor)
         ..rrect(color: localThemeOutlineColor, strokeWidth: localThemeOutlineWidth)
-        ..rrect(color: localThemeThumbColor),
+        ..rrect(color: localThemeThumbColor)
     );
   });
 
   testWidgets('SwitchTheme padding is respected', (WidgetTester tester) async {
-    Widget buildSwitch({EdgeInsets? padding}) {
+    Widget buildSwitch({ EdgeInsets? padding }) {
       return MaterialApp(
-        theme: ThemeData(switchTheme: SwitchThemeData(padding: padding)),
-        home: Scaffold(body: Center(child: Switch(value: true, onChanged: (_) {}))),
+        theme: ThemeData(
+          switchTheme: SwitchThemeData(
+            padding: padding,
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: Switch(
+              value: true,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
       );
     }
 

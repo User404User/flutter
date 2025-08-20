@@ -12,7 +12,7 @@ import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
 
-void main() {
+void main () {
   group('Windows Flutter show window migration', () {
     late MemoryFileSystem memoryFileSystem;
     late BufferLogger testLogger;
@@ -32,7 +32,10 @@ void main() {
     });
 
     testWithoutContext('skipped if Flutter window file is missing', () async {
-      final ShowWindowMigration migration = ShowWindowMigration(mockProject, testLogger);
+      final ShowWindowMigration migration = ShowWindowMigration(
+        mockProject,
+        testLogger,
+      );
       await migration.migrate();
 
       expect(flutterWindowFile.existsSync(), isFalse);
@@ -41,7 +44,7 @@ void main() {
         testLogger.traceText,
         contains(
           'windows/runner/flutter_window.cpp file not found, '
-          'skipping show window migration',
+          'skipping show window migration'
         ),
       );
       expect(testLogger.statusText, isEmpty);
@@ -53,7 +56,10 @@ void main() {
       flutterWindowFile.writeAsStringSync(flutterWindowContents);
 
       final DateTime updatedAt = flutterWindowFile.lastModifiedSync();
-      final ShowWindowMigration migration = ShowWindowMigration(mockProject, testLogger);
+      final ShowWindowMigration migration = ShowWindowMigration(
+        mockProject,
+        testLogger,
+      );
       await migration.migrate();
 
       expect(flutterWindowFile.lastModifiedSync(), updatedAt);
@@ -64,21 +70,24 @@ void main() {
 
     testWithoutContext('skipped if already migrated', () async {
       const String flutterWindowContents =
-          '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\n'
-          '    this->Show();\n'
-          '  });\n'
-          '\n'
-          '  // Flutter can complete the first frame before the "show window" callback is\n'
-          '  // registered. The following call ensures a frame is pending to ensure the\n'
-          "  // window is shown. It is a no-op if the first frame hasn't completed yet.\n"
-          '  flutter_controller_->ForceRedraw();\n'
-          '\n'
-          '  return true;\n';
+        '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\n'
+        '    this->Show();\n'
+        '  });\n'
+        '\n'
+        '  // Flutter can complete the first frame before the "show window" callback is\n'
+        '  // registered. The following call ensures a frame is pending to ensure the\n'
+        "  // window is shown. It is a no-op if the first frame hasn't completed yet.\n"
+        '  flutter_controller_->ForceRedraw();\n'
+        '\n'
+        '  return true;\n';
 
       flutterWindowFile.writeAsStringSync(flutterWindowContents);
 
       final DateTime updatedAt = flutterWindowFile.lastModifiedSync();
-      final ShowWindowMigration migration = ShowWindowMigration(mockProject, testLogger);
+      final ShowWindowMigration migration = ShowWindowMigration(
+        mockProject,
+        testLogger,
+      );
       await migration.migrate();
 
       expect(flutterWindowFile.lastModifiedSync(), updatedAt);
@@ -89,21 +98,24 @@ void main() {
 
     testWithoutContext('skipped if already migrated (CRLF)', () async {
       const String flutterWindowContents =
-          '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\r\n'
-          '    this->Show();\r\n'
-          '  });\r\n'
-          '\r\n'
-          '  // Flutter can complete the first frame before the "show window" callback is\r\n'
-          '  // registered. The following call ensures a frame is pending to ensure the\r\n'
-          "  // window is shown. It is a no-op if the first frame hasn't completed yet.\r\n"
-          '  flutter_controller_->ForceRedraw();\r\n'
-          '\r\n'
-          '  return true;\r\n';
+        '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\r\n'
+        '    this->Show();\r\n'
+        '  });\r\n'
+        '\r\n'
+        '  // Flutter can complete the first frame before the "show window" callback is\r\n'
+        '  // registered. The following call ensures a frame is pending to ensure the\r\n'
+        "  // window is shown. It is a no-op if the first frame hasn't completed yet.\r\n"
+        '  flutter_controller_->ForceRedraw();\r\n'
+        '\r\n'
+        '  return true;\r\n';
 
       flutterWindowFile.writeAsStringSync(flutterWindowContents);
 
       final DateTime updatedAt = flutterWindowFile.lastModifiedSync();
-      final ShowWindowMigration migration = ShowWindowMigration(mockProject, testLogger);
+      final ShowWindowMigration migration = ShowWindowMigration(
+        mockProject,
+        testLogger,
+      );
       await migration.migrate();
 
       expect(flutterWindowFile.lastModifiedSync(), updatedAt);
@@ -118,14 +130,16 @@ void main() {
         '    this->Show();\n'
         '  });\n'
         '\n'
-        '  return true;\n',
+        '  return true;\n'
       );
 
-      final ShowWindowMigration migration = ShowWindowMigration(mockProject, testLogger);
+      final ShowWindowMigration migration = ShowWindowMigration(
+        mockProject,
+        testLogger,
+      );
       await migration.migrate();
 
-      expect(
-        flutterWindowFile.readAsStringSync(),
+      expect(flutterWindowFile.readAsStringSync(),
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\n'
         '    this->Show();\n'
         '  });\n'
@@ -135,15 +149,10 @@ void main() {
         "  // window is shown. It is a no-op if the first frame hasn't completed yet.\n"
         '  flutter_controller_->ForceRedraw();\n'
         '\n'
-        '  return true;\n',
+        '  return true;\n'
       );
 
-      expect(
-        testLogger.statusText,
-        contains(
-          'windows/runner/flutter_window.cpp does not ensure the show window callback is called, updating.',
-        ),
-      );
+      expect(testLogger.statusText, contains('windows/runner/flutter_window.cpp does not ensure the show window callback is called, updating.'));
     });
 
     testWithoutContext('migrates project to ensure window is shown (CRLF)', () async {
@@ -152,14 +161,16 @@ void main() {
         '    this->Show();\r\n'
         '  });\r\n'
         '\r\n'
-        '  return true;\r\n',
+        '  return true;\r\n'
       );
 
-      final ShowWindowMigration migration = ShowWindowMigration(mockProject, testLogger);
+      final ShowWindowMigration migration = ShowWindowMigration(
+        mockProject,
+        testLogger,
+      );
       await migration.migrate();
 
-      expect(
-        flutterWindowFile.readAsStringSync(),
+      expect(flutterWindowFile.readAsStringSync(),
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\r\n'
         '    this->Show();\r\n'
         '  });\r\n'
@@ -169,15 +180,10 @@ void main() {
         "  // window is shown. It is a no-op if the first frame hasn't completed yet.\r\n"
         '  flutter_controller_->ForceRedraw();\r\n'
         '\r\n'
-        '  return true;\r\n',
+        '  return true;\r\n'
       );
 
-      expect(
-        testLogger.statusText,
-        contains(
-          'windows/runner/flutter_window.cpp does not ensure the show window callback is called, updating.',
-        ),
-      );
+      expect(testLogger.statusText, contains('windows/runner/flutter_window.cpp does not ensure the show window callback is called, updating.'));
     });
   });
 }

@@ -21,7 +21,10 @@ const String kFirstFrameBuiltEventName = 'Widgets built first useful frame';
 const String kFirstFrameRasterizedEventName = 'Rasterized first useful frame';
 
 class Tracing {
-  Tracing({required this.vmService, required Logger logger}) : _logger = logger;
+  Tracing({
+    required this.vmService,
+    required Logger logger,
+  }) : _logger = logger;
 
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
 
@@ -61,8 +64,10 @@ class Tracing {
         final List<FlutterView> views = await vmService.getFlutterViews();
         for (final FlutterView view in views) {
           final String? uiIsolateId = view.uiIsolate?.id;
-          if (uiIsolateId != null &&
-              await vmService.flutterAlreadyPaintedFirstUsefulFrame(isolateId: uiIsolateId)) {
+          if (uiIsolateId != null && await vmService
+              .flutterAlreadyPaintedFirstUsefulFrame(
+                isolateId: uiIsolateId,
+              )) {
             done = true;
             break;
           }
@@ -96,9 +101,8 @@ class Tracing {
           await whenFirstFrameRendered.future;
           timer.cancel();
         }
-        // The exception is rethrown, so don't catch only Exceptions.
-      } catch (exception) {
-        // ignore: avoid_catches_without_on_clauses
+      // The exception is rethrown, so don't catch only Exceptions.
+      } catch (exception) { // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }
@@ -108,7 +112,9 @@ class Tracing {
     await vmService.setTimelineFlags(<String>[]);
     final Map<String, Object?>? timelineJson = timeline?.json;
     if (timelineJson == null) {
-      throwToolExit('The device disconnected before the timeline could be retrieved.');
+      throwToolExit(
+        'The device disconnected before the timeline could be retrieved.',
+      );
     }
     return timelineJson;
   }
@@ -116,8 +122,7 @@ class Tracing {
 
 /// Download the startup trace information from the given VM Service client and
 /// store it to `$output/start_up_info.json`.
-Future<void> downloadStartupTrace(
-  FlutterVmService vmService, {
+Future<void> downloadStartupTrace(FlutterVmService vmService, {
   bool awaitFirstFrame = true,
   required Logger logger,
   required Directory output,
@@ -158,9 +163,7 @@ Future<void> downloadStartupTrace(
 
   String message = 'No useful metrics were gathered.';
 
-  final int? engineEnterTimestampMicros = extractInstantEventTimestamp(
-    kFlutterEngineMainEnterEventName,
-  );
+  final int? engineEnterTimestampMicros = extractInstantEventTimestamp(kFlutterEngineMainEnterEventName);
   final int? frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
 
   if (engineEnterTimestampMicros == null) {
@@ -179,12 +182,8 @@ Future<void> downloadStartupTrace(
   }
 
   if (awaitFirstFrame) {
-    final int? firstFrameBuiltTimestampMicros = extractInstantEventTimestamp(
-      kFirstFrameBuiltEventName,
-    );
-    final int? firstFrameRasterizedTimestampMicros = extractInstantEventTimestamp(
-      kFirstFrameRasterizedEventName,
-    );
+    final int? firstFrameBuiltTimestampMicros = extractInstantEventTimestamp(kFirstFrameBuiltEventName);
+    final int? firstFrameRasterizedTimestampMicros = extractInstantEventTimestamp(kFirstFrameRasterizedEventName);
     if (firstFrameBuiltTimestampMicros == null || firstFrameRasterizedTimestampMicros == null) {
       logger.printTrace('First frame events are missing in the timeline: $timeline');
       throwToolExit('First frame events are missing in the timeline. Cannot compute startup time.');
@@ -194,14 +193,12 @@ Future<void> downloadStartupTrace(
     // timeToFirstFrameMicros as the firstFrameBuiltTimestampMicros.
     // Additionally, we add timeToFirstFrameRasterizedMicros for a more accurate
     // benchmark.
-    traceInfo['timeToFirstFrameRasterizedMicros'] =
-        firstFrameRasterizedTimestampMicros - engineEnterTimestampMicros;
+    traceInfo['timeToFirstFrameRasterizedMicros'] = firstFrameRasterizedTimestampMicros - engineEnterTimestampMicros;
     final int timeToFirstFrameMicros = firstFrameBuiltTimestampMicros - engineEnterTimestampMicros;
     traceInfo['timeToFirstFrameMicros'] = timeToFirstFrameMicros;
     message = 'Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.';
     if (frameworkInitTimestampMicros != null) {
-      traceInfo['timeAfterFrameworkInitMicros'] =
-          firstFrameBuiltTimestampMicros - frameworkInitTimestampMicros;
+      traceInfo['timeAfterFrameworkInitMicros'] = firstFrameBuiltTimestampMicros - frameworkInitTimestampMicros;
     }
   }
 

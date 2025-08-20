@@ -13,7 +13,13 @@ class ChipAnimationStyleExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: Center(child: ChipAnimationStyleExample())));
+    return const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: ChipAnimationStyleExample(),
+        ),
+      ),
+    );
   }
 }
 
@@ -21,7 +27,8 @@ class ChipAnimationStyleExample extends StatefulWidget {
   const ChipAnimationStyleExample({super.key});
 
   @override
-  State<ChipAnimationStyleExample> createState() => _ChipAnimationStyleExampleState();
+  State<ChipAnimationStyleExample> createState() =>
+      _ChipAnimationStyleExampleState();
 }
 
 class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
@@ -118,7 +125,8 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
                       showCheckmark = !showCheckmark;
                     });
                   },
-                  child: Text(showCheckmark ? 'Hide checkmark' : 'Show checkmark'),
+                  child:
+                      Text(showCheckmark ? 'Hide checkmark' : 'Show checkmark'),
                 ),
               ],
             ),
@@ -143,7 +151,8 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
                       showDeleteIcon = !showDeleteIcon;
                     });
                   },
-                  child: Text(showDeleteIcon ? 'Hide delete icon' : 'Show delete icon'),
+                  child: Text(
+                      showDeleteIcon ? 'Hide delete icon' : 'Show delete icon'),
                 ),
               ],
             ),

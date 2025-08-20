@@ -41,7 +41,9 @@ class FloatingActionButtonExample extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('FAB Additional Color Mappings')),
+      appBar: AppBar(
+        title: const Text('FAB Additional Color Mappings'),
+      ),
       body: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -19,10 +19,9 @@ class NativePluginLoader {
      *     "path": "/path/to/plugin-a",
      *     "dependencies": ["plugin-b", "plugin-c"],
      *     "native_build": true
-     *     "dev_dependency": false
      * }
      *
-     * Therefore the map value can either be a `String`, a `List<String>` or a `Boolean`.
+     * Therefore the map value can either be a `String`, a `List<String>` or a `boolean`.
      */
     List<Map<String, Object>> getPlugins(File flutterSourceDirectory) {
         List<Map<String, Object>> nativePlugins = []
@@ -41,7 +40,6 @@ class NativePluginLoader {
             assert(androidPlugin.name instanceof String)
             assert(androidPlugin.path instanceof String)
             assert(androidPlugin.dependencies instanceof List<String>)
-            assert(androidPlugin.dev_dependency instanceof Boolean)
             // Skip plugins that have no native build (such as a Dart-only implementation
             // of a federated plugin).
             def needsBuild = androidPlugin.containsKey(nativeBuildKey) ? androidPlugin[nativeBuildKey] : true
@@ -68,28 +66,18 @@ class NativePluginLoader {
         //           "path": "/path/to/plugin-a",
         //           "dependencies": ["plugin-b", "plugin-c"],
         //           "native_build": true
-        //           "dev_dependency": false
         //         },
         //         {
         //           "name": "plugin-b",
         //           "path": "/path/to/plugin-b",
         //           "dependencies": ["plugin-c"],
         //           "native_build": true
-        //           "dev_dependency": false
         //         },
         //         {
         //           "name": "plugin-c",
         //           "path": "/path/to/plugin-c",
         //           "dependencies": [],
         //           "native_build": true
-        //           "dev_dependency": false
-        //         },
-        //         {
-        //           "name": "plugin-d",
-        //           "path": "/path/to/plugin-d",
-        //           "dependencies": [],
-        //           "native_build": true
-        //           "dev_dependency": true
         //         },
         //       ],
         //     },
@@ -105,18 +93,12 @@ class NativePluginLoader {
         //       {
         //         "name": "plugin-c",
         //         "dependencies": []
-        //       },
-        //       {
-        //         "name": "plugin-d",
-        //         "dependencies": []
         //       }
         //     ]
         // }
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
-        // `plugin-d` also doesn't depend on anything, but it is a dev
-        // dependency to the Flutter project, so it is marked as such.
         if (parsedFlutterPluginsDependencies) {
             return parsedFlutterPluginsDependencies
         }

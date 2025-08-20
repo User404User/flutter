@@ -40,26 +40,31 @@ class _AccountPictures extends StatelessWidget {
           top: 0.0,
           end: 0.0,
           child: Row(
-            children:
-                (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
-                  return Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8.0),
-                    child: Semantics(
-                      container: true,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                        child: SizedBox.fromSize(size: otherAccountsPicturesSize, child: picture),
-                      ),
+            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
+              return Padding(
+                padding: const EdgeInsetsDirectional.only(start: 8.0),
+                child: Semantics(
+                  container: true,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    child: SizedBox.fromSize(
+                      size: otherAccountsPicturesSize,
+                      child: picture,
                     ),
-                  );
-                }).toList(),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ),
         Positioned(
           top: 0.0,
           child: Semantics(
             explicitChildNodes: true,
-            child: SizedBox.fromSize(size: currentAccountPictureSize, child: currentAccountPicture),
+            child: SizedBox.fromSize(
+              size: currentAccountPictureSize,
+              child: currentAccountPicture,
+            ),
           ),
         ),
       ],
@@ -90,7 +95,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   late final CurvedAnimation _animation;
   late final AnimationController _controller;
   @override
-  void initState() {
+  void initState () {
     super.initState();
     _controller = AnimationController(
       value: widget.isOpen ? 1.0 : 0.0,
@@ -101,11 +106,10 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
       parent: _controller,
       curve: Curves.fastOutSlowIn,
       reverseCurve: Curves.fastOutSlowIn.flipped,
-    )..addListener(
-      () => setState(() {
+    )
+      ..addListener(() => setState(() {
         // [animation]'s value has changed here.
-      }),
-    );
+      }));
   }
 
   @override
@@ -116,7 +120,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   }
 
   @override
-  void didUpdateWidget(_AccountDetails oldWidget) {
+  void didUpdateWidget (_AccountDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the state of the arrow did not change, there is no need to trigger the animation
     if (oldWidget.isOpen == widget.isOpen) {
@@ -140,7 +144,9 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     Widget accountDetails = CustomMultiChildLayout(
-      delegate: _AccountDetailsLayout(textDirection: Directionality.of(context)),
+      delegate: _AccountDetailsLayout(
+        textDirection: Directionality.of(context),
+      ),
       children: <Widget>[
         if (widget.accountName != null)
           LayoutId(
@@ -182,10 +188,9 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
                     child: Icon(
                       Icons.arrow_drop_down,
                       color: widget.arrowColor,
-                      semanticLabel:
-                          widget.isOpen
-                              ? localizations.hideAccountsLabel
-                              : localizations.showAccountsLabel,
+                      semanticLabel: widget.isOpen
+                          ? localizations.hideAccountsLabel
+                          : localizations.showAccountsLabel,
                     ),
                   ),
                 ),
@@ -203,14 +208,18 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
       );
     }
 
-    return SizedBox(height: _kAccountDetailsHeight, child: accountDetails);
+    return SizedBox(
+      height: _kAccountDetailsHeight,
+      child: accountDetails,
+    );
   }
 }
 
 const double _kAccountDetailsHeight = 56.0;
 
 class _AccountDetailsLayout extends MultiChildLayoutDelegate {
-  _AccountDetailsLayout({required this.textDirection});
+
+  _AccountDetailsLayout({ required this.textDirection });
 
   static const String accountName = 'accountName';
   static const String accountEmail = 'accountEmail';
@@ -227,12 +236,10 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
       positionChild(dropdownIcon, _offsetForIcon(size, iconSize));
     }
 
-    final String? bottomLine =
-        hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
+    final String? bottomLine = hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
-      final Size constraintSize =
-          iconSize == null ? size : Size(size.width - iconSize.width, size.height);
+      final Size constraintSize = iconSize == null ? size : Size(size.width - iconSize.width, size.height);
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);
 
       // place bottom line center at same height as icon center
@@ -360,8 +367,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,
       child: DrawerHeader(
-        decoration:
-            widget.decoration ?? BoxDecoration(color: Theme.of(context).colorScheme.primary),
+        decoration: widget.decoration ?? BoxDecoration(color: Theme.of(context).colorScheme.primary),
         margin: widget.margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
         child: SafeArea(

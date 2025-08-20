@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Tags(<String>['flutter-test-driver'])
-library;
-
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -45,10 +42,8 @@ void main() {
       // within the source code.
       final int expectedLine = project.lineForStep(i);
 
-      expect(
-        actualLine,
-        equals(expectedLine),
-        reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine',
+      expect(actualLine, equals(expectedLine),
+        reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
       );
     }
 

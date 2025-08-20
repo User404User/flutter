@@ -9,7 +9,8 @@ import 'deferred_components_project.dart';
 /// Project which can load native plugins
 class PluginProject extends BasicProject {
   @override
-  final DeferredComponentsConfig? deferredComponents = PluginDeferredComponentsConfig();
+  final DeferredComponentsConfig? deferredComponents =
+      PluginDeferredComponentsConfig();
 }
 
 class PluginDeferredComponentsConfig extends BasicDeferredComponentsConfig {
@@ -35,9 +36,9 @@ allprojects {
         mavenCentral()
     }
 }
-rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
+rootProject.buildDir = '../build'
 subprojects {
-    project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {
     project.evaluationDependsOn(':app')
@@ -50,7 +51,7 @@ subprojects {
     }
 }
 tasks.register("clean", Delete) {
-    delete rootProject.layout.buildDirectory
+    delete rootProject.buildDir
 }
 ''';
 

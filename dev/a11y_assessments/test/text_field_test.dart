@@ -31,21 +31,20 @@ void main() {
     }
   });
 
-  testWidgets('font size increase does not ellipsize hint text', (WidgetTester tester) async {
+  testWidgets('font size increase does not ellipsize hint text',
+      (WidgetTester tester) async {
     await pumpsUseCase(tester, TextFieldUseCase());
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery.withClampedTextScaling(
-          minScaleFactor: 3,
-          maxScaleFactor: 3,
-          child: Builder(
-            builder: (BuildContext context) {
-              return TextFieldUseCase().build(context);
-            },
-          ),
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery.withClampedTextScaling(
+        minScaleFactor: 3,
+        maxScaleFactor: 3,
+        child: Builder(
+          builder: (BuildContext context) {
+            return TextFieldUseCase().build(context);
+          },
         ),
       ),
-    );
+    ));
     // Test the enabled text field
     {
       final Finder finder = find.byKey(const Key('enabled text field'));
@@ -61,7 +60,8 @@ void main() {
     await pumpsUseCase(tester, TextFieldUseCase());
     const String textFieldLabel = 'Input field with suffix @gmail.com';
 
-    final Finder semanticsWidgets = find.bySemanticsLabel(RegExp(textFieldLabel));
+    final Finder semanticsWidgets =
+        find.bySemanticsLabel(RegExp(textFieldLabel));
     expect(semanticsWidgets, findsExactly(2));
   });
 

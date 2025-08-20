@@ -105,7 +105,11 @@ class MenuButtonThemeData with Diagnosticable {
 ///   [Theme].
 class MenuButtonTheme extends InheritedTheme {
   /// Create a [MenuButtonTheme].
-  const MenuButtonTheme({super.key, required this.data, required super.child});
+  const MenuButtonTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
 
   /// The configuration of this theme.
   final MenuButtonThemeData data;
@@ -121,8 +125,7 @@ class MenuButtonTheme extends InheritedTheme {
   /// MenuButtonThemeData theme = MenuButtonTheme.of(context);
   /// ```
   static MenuButtonThemeData of(BuildContext context) {
-    final MenuButtonTheme? buttonTheme =
-        context.dependOnInheritedWidgetOfExactType<MenuButtonTheme>();
+    final MenuButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<MenuButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).menuButtonTheme;
   }
 

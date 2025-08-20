@@ -4,24 +4,28 @@
 
 // Shared logic between iOS and macOS implementations of native assets.
 
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/io.dart';
-import '../../../build_info.dart';
+import '../../../build_info.dart' as build_info;
 import '../../../convert.dart';
 import '../../../globals.dart' as globals;
 
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
 ///
 /// The framework must be named [name].framework and the dylib [name].
-Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSVersion}) async {
+Future<void> createInfoPlist(
+  String name,
+  Directory target, {
+  String? minimumIOSVersion,
+}) async {
   final File infoPlistFile = target.childFile('Info.plist');
   final String bundleIdentifier = 'io.flutter.flutter.native_assets.$name'.replaceAll('_', '-');
-  await infoPlistFile.writeAsString(
-    <String>[
-      '''
+  await infoPlistFile.writeAsString(<String>[
+    '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -45,16 +49,15 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 ''',
-      if (minimumIOSVersion != null)
-        '''
+    if (minimumIOSVersion != null)
+      '''
 	<key>MinimumOSVersion</key>
 	<string>$minimumIOSVersion</string>
 ''',
-      '''
+    '''
 </dict>
-</plist>''',
-    ].join(),
-  );
+</plist>'''
+  ].join());
 }
 
 /// Combines dylibs from [sources] into a fat binary at [targetFullPath].
@@ -63,13 +66,15 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
 Future<void> lipoDylibs(File target, List<File> sources) async {
-  final ProcessResult lipoResult = await globals.processManager.run(<String>[
-    'lipo',
-    '-create',
-    '-output',
-    target.path,
-    for (final File source in sources) source.path,
-  ]);
+  final ProcessResult lipoResult = await globals.processManager.run(
+    <String>[
+      'lipo',
+      '-create',
+      '-output',
+      target.path,
+      for (final File source in sources) source.path,
+    ],
+  );
   if (lipoResult.exitCode != 0) {
     throwToolExit('Failed to create universal binary:\n${lipoResult.stderr}');
   }
@@ -94,17 +99,16 @@ Future<void> setInstallNamesDylib(
   String newInstallName,
   Map<String, String> oldToNewInstallNames,
 ) async {
-  final ProcessResult setInstallNamesResult = await globals.processManager.run(<String>[
-    'install_name_tool',
-    '-id',
-    newInstallName,
-    for (final MapEntry<String, String> entry in oldToNewInstallNames.entries) ...<String>[
-      '-change',
-      entry.key,
-      entry.value,
+  final ProcessResult setInstallNamesResult = await globals.processManager.run(
+    <String>[
+      'install_name_tool',
+      '-id',
+      newInstallName,
+      for (final MapEntry<String, String> entry in oldToNewInstallNames
+          .entries) ...<String>['-change', entry.key, entry.value],
+      dylibFile.path,
     ],
-    dylibFile.path,
-  ]);
+  );
   if (setInstallNamesResult.exitCode != 0) {
     throwToolExit(
       'Failed to change install names in $dylibFile:\n'
@@ -116,13 +120,17 @@ Future<void> setInstallNamesDylib(
 }
 
 Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
-  final ProcessResult installNameResult = await globals.processManager.run(<String>[
-    'otool',
-    '-D',
-    dylibFile.path,
-  ]);
+  final ProcessResult installNameResult = await globals.processManager.run(
+    <String>[
+      'otool',
+      '-D',
+      dylibFile.path,
+    ],
+  );
   if (installNameResult.exitCode != 0) {
-    throwToolExit('Failed to get the install name of $dylibFile:\n${installNameResult.stderr}');
+    throwToolExit(
+      'Failed to get the install name of $dylibFile:\n${installNameResult.stderr}',
+    );
   }
 
   return <String>{
@@ -136,7 +144,7 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 
 Future<void> codesignDylib(
   String? codesignIdentity,
-  BuildMode buildMode,
+  build_info.BuildMode buildMode,
   FileSystemEntity target,
 ) async {
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
@@ -147,14 +155,16 @@ Future<void> codesignDylib(
     '--force',
     '--sign',
     codesignIdentity,
-    if (buildMode != BuildMode.release) ...<String>[
+    if (buildMode != build_info.BuildMode.release) ...<String>[
       // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
       '--timestamp=none',
     ],
     target.path,
   ];
   globals.logger.printTrace(codesignCommand.join(' '));
-  final ProcessResult codesignResult = await globals.processManager.run(codesignCommand);
+  final ProcessResult codesignResult = await globals.processManager.run(
+    codesignCommand,
+  );
   if (codesignResult.exitCode != 0) {
     throwToolExit(
       'Failed to code sign binary: exit code: ${codesignResult.exitCode} '
@@ -168,20 +178,18 @@ Future<void> codesignDylib(
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-Future<CCompilerConfig> cCompilerConfigMacOS() async {
-  final ProcessResult xcrunResult = await globals.processManager.run(<String>[
-    'xcrun',
-    'clang',
-    '--version',
-  ]);
+Future<CCompilerConfigImpl> cCompilerConfigMacOS() async {
+  final ProcessResult xcrunResult = await globals.processManager.run(
+    <String>['xcrun', 'clang', '--version'],
+  );
   if (xcrunResult.exitCode != 0) {
     throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
   }
-  final String installPath =
-      LineSplitter.split(
-        xcrunResult.stdout as String,
-      ).firstWhere((String s) => s.startsWith('InstalledDir: ')).split(' ').last;
-  return CCompilerConfig(
+  final String installPath = LineSplitter.split(xcrunResult.stdout as String)
+      .firstWhere((String s) => s.startsWith('InstalledDir: '))
+      .split(' ')
+      .last;
+  return CCompilerConfigImpl(
     compiler: Uri.file('$installPath/clang'),
     archiver: Uri.file('$installPath/ar'),
     linker: Uri.file('$installPath/ld'),
@@ -260,7 +268,8 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   final RegExp architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
   final Iterator<String> lines = output.trim().split('\n').iterator;
   Architecture? currentArchitecture;
-  final Map<Architecture?, List<String>> architectureSections = <Architecture?, List<String>>{};
+  final Map<Architecture?, List<String>> architectureSections =
+      <Architecture?, List<String>>{};
 
   while (lines.moveNext()) {
     final String line = lines.current;

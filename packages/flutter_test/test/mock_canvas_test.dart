@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MyPainter extends CustomPainter {
-  const MyPainter({required this.color});
+  const MyPainter({
+    required this.color,
+  });
 
   final Color color;
 
@@ -68,11 +70,14 @@ void main() {
         }),
       );
 
-      expect(methodsAndArguments, <MethodAndArguments>[
-        const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
-        // The #restore call is never evaluated
-      ]);
+      expect(
+        methodsAndArguments,
+        <MethodAndArguments>[
+          const MethodAndArguments(#save, <dynamic>[]),
+          const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+          // The #restore call is never evaluated
+        ],
+      );
     });
 
     testWidgets('fails when the predicate always returns false', (WidgetTester tester) async {
@@ -95,11 +100,14 @@ void main() {
         ),
       );
 
-      expect(methodsAndArguments, <MethodAndArguments>[
-        const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
-        const MethodAndArguments(#restore, <dynamic>[]),
-      ]);
+      expect(
+        methodsAndArguments,
+        <MethodAndArguments>[
+          const MethodAndArguments(#save, <dynamic>[]),
+          const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+          const MethodAndArguments(#restore, <dynamic>[]),
+        ],
+      );
     });
 
     testWidgets('fails when the predicate throws', (WidgetTester tester) async {
@@ -128,11 +136,14 @@ void main() {
         ),
       );
 
-      expect(methodsAndArguments, <MethodAndArguments>[
-        const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
-        // The #restore call is never evaluated
-      ]);
+      expect(
+        methodsAndArguments,
+        <MethodAndArguments>[
+          const MethodAndArguments(#save, <dynamic>[]),
+          const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+          // The #restore call is never evaluated
+        ],
+      );
     });
   });
 
@@ -155,11 +166,14 @@ void main() {
         }),
       );
 
-      expect(methodsAndArguments, <MethodAndArguments>[
-        const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
-        const MethodAndArguments(#restore, <dynamic>[]),
-      ]);
+      expect(
+        methodsAndArguments,
+        <MethodAndArguments>[
+          const MethodAndArguments(#save, <dynamic>[]),
+          const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+          const MethodAndArguments(#restore, <dynamic>[]),
+        ],
+      );
     });
 
     testWidgets('fails when the predicate returns false', (WidgetTester tester) async {
@@ -183,11 +197,14 @@ void main() {
         ),
       );
 
-      expect(methodsAndArguments, <MethodAndArguments>[
-        const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
-        // The #restore call is never evaluated
-      ]);
+      expect(
+        methodsAndArguments,
+        <MethodAndArguments>[
+          const MethodAndArguments(#save, <dynamic>[]),
+          const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+          // The #restore call is never evaluated
+        ],
+      );
     });
 
     testWidgets('fails if the predicate ever throws', (WidgetTester tester) async {
@@ -213,11 +230,14 @@ void main() {
         ),
       );
 
-      expect(methodsAndArguments, <MethodAndArguments>[
-        const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
-        // The #restore call is never evaluated
-      ]);
+      expect(
+        methodsAndArguments,
+        <MethodAndArguments>[
+          const MethodAndArguments(#save, <dynamic>[]),
+          const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+          // The #restore call is never evaluated
+        ],
+      );
     });
   });
 }

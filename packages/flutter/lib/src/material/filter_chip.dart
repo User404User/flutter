@@ -113,7 +113,6 @@ class FilterChip extends StatelessWidget
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
-    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -161,7 +160,6 @@ class FilterChip extends StatelessWidget
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
-    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -236,8 +234,6 @@ class FilterChip extends StatelessWidget
   final BoxConstraints? deleteIconBoxConstraints;
   @override
   final ChipAnimationStyle? chipAnimationStyle;
-  @override
-  final MouseCursor? mouseCursor;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -247,12 +243,11 @@ class FilterChip extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ChipThemeData? defaults =
-        Theme.of(context).useMaterial3
-            ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
-            : null;
-    final Widget? resolvedDeleteIcon =
-        deleteIcon ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
+    final ChipThemeData? defaults = Theme.of(context).useMaterial3
+      ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
+      : null;
+    final Widget? resolvedDeleteIcon = deleteIcon
+      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -291,7 +286,6 @@ class FilterChip extends StatelessWidget
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
-      mouseCursor: mouseCursor,
     );
   }
 }
@@ -303,7 +297,6 @@ class FilterChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// dart format off
 class _FilterChipDefaultsM3 extends ChipThemeData {
   _FilterChipDefaultsM3(
     this.context,
@@ -423,6 +416,5 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
-// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilterChip

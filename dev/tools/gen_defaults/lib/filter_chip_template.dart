@@ -5,12 +5,9 @@
 import 'template.dart';
 
 class FilterChipTemplate extends TokenTemplate {
-  const FilterChipTemplate(
-    super.blockName,
-    super.fileName,
-    super.tokens, {
+  const FilterChipTemplate(super.blockName, super.fileName, super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.',
+    super.textThemePrefix = '_textTheme.'
   });
 
   static const String tokenGroup = 'md.comp.filter-chip';

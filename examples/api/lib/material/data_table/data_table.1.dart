@@ -37,7 +37,11 @@ class _DataTableExampleState extends State<DataTableExample> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: DataTable(
-        columns: const <DataColumn>[DataColumn(label: Text('Number'))],
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Number'),
+          ),
+        ],
         rows: List<DataRow>.generate(
           numItems,
           (int index) => DataRow(

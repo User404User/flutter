@@ -25,26 +25,18 @@ import '../utils.dart';
 ///
 /// If a compilation unit can not be resolved, this function ignores the
 /// corresponding dart source file and logs an error using [foundError].
-Future<void> analyzeWithRules(
-  String flutterRootDirectory,
-  List<AnalyzeRule> rules, {
+Future<void> analyzeWithRules(String flutterRootDirectory, List<AnalyzeRule> rules, {
   Iterable<String>? includePaths,
   Iterable<String>? excludePaths,
 }) async {
   if (!Directory(flutterRootDirectory).existsSync()) {
     foundError(<String>['Analyzer error: the specified $flutterRootDirectory does not exist.']);
   }
-  final Iterable<String> includes =
-      includePaths?.map(
-        (String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath'),
-      ) ??
-      <String>[path.canonicalize(flutterRootDirectory)];
+  final Iterable<String> includes = includePaths?.map((String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath'))
+                                 ?? <String>[path.canonicalize(flutterRootDirectory)];
   final AnalysisContextCollection collection = AnalysisContextCollection(
     includedPaths: includes.toList(),
-    excludedPaths:
-        excludePaths
-            ?.map((String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath'))
-            .toList(),
+    excludedPaths: excludePaths?.map((String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath')).toList(),
   );
 
   final List<String> analyzerErrors = <String>[];
@@ -59,9 +51,7 @@ Future<void> analyzeWithRules(
           rule.applyTo(unit);
         }
       } else {
-        analyzerErrors.add(
-          'Analyzer error: file $unit could not be resolved. Expected "ResolvedUnitResult", got ${unit.runtimeType}.',
-        );
+        analyzerErrors.add('Analyzer error: file $unit could not be resolved. Expected "ResolvedUnitResult", got ${unit.runtimeType}.');
       }
     }
   }

@@ -46,7 +46,10 @@ void main() {
       // kIsWeb.
       kIsWeb
           ? ImageFilter.blur().runtimeType
-          : ImageFilter.compose(outer: ImageFilter.blur(), inner: ImageFilter.blur()).runtimeType,
+          : ImageFilter.compose(
+              outer: ImageFilter.blur(),
+              inner: ImageFilter.blur(),
+            ).runtimeType,
     );
   });
 
@@ -74,7 +77,10 @@ void main() {
       ),
     );
 
-    expect((decoratedBox.decoration as BoxDecoration).boxShadow, isNotNull);
+    expect(
+      (decoratedBox.decoration as BoxDecoration).boxShadow,
+      isNotNull,
+    );
   });
 
   testWidgets('is translucent', (WidgetTester tester) async {
@@ -104,7 +110,10 @@ void main() {
         // The second DecoratedBox should be the one with color.
         .elementAt(1);
 
-    expect((decoratedBox.decoration as BoxDecoration).color!.opacity, lessThan(1.0));
+    expect(
+      (decoratedBox.decoration as BoxDecoration).color!.opacity,
+      lessThan(1.0),
+    );
   });
 
   testWidgets('positions itself at the anchor', (WidgetTester tester) async {
@@ -128,7 +137,8 @@ void main() {
     );
 
     expect(
-      tester.getTopLeft(find.byType(CupertinoDesktopTextSelectionToolbarButton)),
+      tester
+          .getTopLeft(find.byType(CupertinoDesktopTextSelectionToolbarButton)),
       // Greater than due to padding internal to the toolbar.
       greaterThan(anchor),
     );

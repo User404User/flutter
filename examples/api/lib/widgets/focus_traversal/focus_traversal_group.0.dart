@@ -13,7 +13,9 @@ class FocusTraversalGroupExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: FocusTraversalGroupExample());
+    return const MaterialApp(
+      home: FocusTraversalGroupExample(),
+    );
   }
 }
 
@@ -43,7 +45,10 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
   @override
   void initState() {
     super.initState();
-    focusNode = FocusNode(debugLabel: widget.name, canRequestFocus: widget.canRequestFocus);
+    focusNode = FocusNode(
+      debugLabel: widget.name,
+      canRequestFocus: widget.canRequestFocus,
+    );
   }
 
   @override
@@ -67,7 +72,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
   @override
   Widget build(BuildContext context) {
     final FocusOrder order = switch (widget.order) {
-      final num number => NumericFocusOrder(number.toDouble()),
+      final num number     => NumericFocusOrder(number.toDouble()),
       final Object? object => LexicalFocusOrder(object.toString()),
     };
 
@@ -139,7 +144,10 @@ class FocusTraversalGroupExample extends StatelessWidget {
                 children: List<Widget>.generate(3, (int index) {
                   // Order as "C" "B", "A".
                   final String order = String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
-                  return OrderedButton<String>(name: 'String: $order', order: order);
+                  return OrderedButton<String>(
+                    name: 'String: $order',
+                    order: order,
+                  );
                 }),
               ),
             ),
@@ -154,7 +162,10 @@ class FocusTraversalGroupExample extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List<Widget>.generate(3, (int index) {
-                  return OrderedButton<num>(name: 'ignored num: ${3 - index}', order: 3 - index);
+                  return OrderedButton<num>(
+                    name: 'ignored num: ${3 - index}',
+                    order: 3 - index,
+                  );
                 }),
               ),
             ),

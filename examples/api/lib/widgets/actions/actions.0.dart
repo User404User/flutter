@@ -16,7 +16,9 @@ class ActionsExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Actions Sample')),
-        body: const Center(child: ActionsExample()),
+        body: const Center(
+          child: ActionsExample(),
+        ),
       ),
     );
   }

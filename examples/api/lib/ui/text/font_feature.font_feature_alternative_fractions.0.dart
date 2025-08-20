@@ -31,7 +31,9 @@ class ExampleWidget extends StatelessWidget {
       'Fractions: 1/2 2/3 3/4 4/5',
       style: TextStyle(
         fontFamily: 'Ubuntu Mono',
-        fontFeatures: <FontFeature>[FontFeature.alternativeFractions()],
+        fontFeatures: <FontFeature>[
+          FontFeature.alternativeFractions(),
+        ],
       ),
     );
   }

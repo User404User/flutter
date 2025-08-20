@@ -200,7 +200,6 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-    this.radioScaleFactor = 1.0,
     this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
@@ -241,7 +240,6 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-    this.radioScaleFactor = 1.0,
     this.useCupertinoCheckmarkStyle = false,
     this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.adaptive,
@@ -288,7 +286,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
@@ -470,14 +468,9 @@ class RadioListTile<T> extends StatelessWidget {
   /// Defaults to false.
   final bool useCupertinoCheckmarkStyle;
 
-  /// Controls the scaling factor applied to the [Radio] within the [RadioListTile].
-  ///
-  /// Defaults to 1.0.
-  final double radioScaleFactor;
-
   @override
   Widget build(BuildContext context) {
-    Widget control;
+    final Widget control;
     switch (_radioType) {
       case _RadioType.material:
         control = ExcludeFocus(
@@ -516,10 +509,6 @@ class RadioListTile<T> extends StatelessWidget {
         );
     }
 
-    if (radioScaleFactor != 1.0) {
-      control = Transform.scale(scale: radioScaleFactor, child: control);
-    }
-
     final ListTileThemeData listTileTheme = ListTileTheme.of(context);
     final ListTileControlAffinity effectiveControlAffinity =
         controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
@@ -531,9 +520,12 @@ class RadioListTile<T> extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (selected) MaterialState.selected};
-    final Color effectiveActiveColor =
-        activeColor ?? radioThemeData.fillColor?.resolve(states) ?? theme.colorScheme.secondary;
+    final Set<MaterialState> states = <MaterialState>{
+      if (selected) MaterialState.selected,
+    };
+    final Color effectiveActiveColor = activeColor
+      ?? radioThemeData.fillColor?.resolve(states)
+      ?? theme.colorScheme.secondary;
     return MergeSemantics(
       child: ListTile(
         selectedColor: effectiveActiveColor,
@@ -547,18 +539,15 @@ class RadioListTile<T> extends StatelessWidget {
         shape: shape,
         tileColor: tileColor,
         selectedTileColor: selectedTileColor,
-        onTap:
-            onChanged != null
-                ? () {
-                  if (toggleable && checked) {
-                    onChanged!(null);
-                    return;
-                  }
-                  if (!checked) {
-                    onChanged!(value);
-                  }
-                }
-                : null,
+        onTap: onChanged != null ? () {
+          if (toggleable && checked) {
+            onChanged!(null);
+            return;
+          }
+          if (!checked) {
+            onChanged!(value);
+          }
+        } : null,
         selected: selected,
         autofocus: autofocus,
         contentPadding: contentPadding,

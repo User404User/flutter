@@ -8,7 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Hero flight animation with default rect tween', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.HeroApp());
+    await tester.pumpWidget(
+      const example.HeroApp(),
+    );
 
     expect(find.text('Hero Sample'), findsOneWidget);
     await tester.tap(find.byType(ElevatedButton));
@@ -69,7 +71,9 @@ void main() {
   });
 
   testWidgets('Hero flight animation with custom rect tween', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.HeroApp());
+    await tester.pumpWidget(
+      const example.HeroApp(),
+    );
 
     expect(find.text('Hero Sample'), findsOneWidget);
     await tester.tap(find.byType(ElevatedButton));

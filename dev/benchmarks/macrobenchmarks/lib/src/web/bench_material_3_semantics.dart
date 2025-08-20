@@ -39,9 +39,7 @@ class BenchMaterial3Semantics extends WidgetBuildRecorder {
       final AggregatedTimings timings = FlutterTimeline.debugCollect();
       final AggregatedTimedBlock semanticsBlock = timings.getAggregated('SEMANTICS');
       final AggregatedTimedBlock getFragmentBlock = timings.getAggregated('Semantics.GetFragment');
-      final AggregatedTimedBlock compileChildrenBlock = timings.getAggregated(
-        'Semantics.compileChildren',
-      );
+      final AggregatedTimedBlock compileChildrenBlock = timings.getAggregated('Semantics.compileChildren');
       profile!.addTimedBlock(semanticsBlock, reported: true);
       profile!.addTimedBlock(getFragmentBlock, reported: true);
       profile!.addTimedBlock(compileChildrenBlock, reported: true);
@@ -91,9 +89,7 @@ class BenchMaterial3ScrollSemantics extends WidgetRecorder {
     final AggregatedTimings timings = FlutterTimeline.debugCollect();
     final AggregatedTimedBlock semanticsBlock = timings.getAggregated('SEMANTICS');
     final AggregatedTimedBlock getFragmentBlock = timings.getAggregated('Semantics.GetFragment');
-    final AggregatedTimedBlock compileChildrenBlock = timings.getAggregated(
-      'Semantics.compileChildren',
-    );
+    final AggregatedTimedBlock compileChildrenBlock = timings.getAggregated('Semantics.compileChildren');
     profile!.addTimedBlock(semanticsBlock, reported: true);
     profile!.addTimedBlock(getFragmentBlock, reported: true);
     profile!.addTimedBlock(compileChildrenBlock, reported: true);
@@ -144,6 +140,8 @@ class _ScrollTestState extends State<_ScrollTest> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
-    return SingleColumnMaterial3Components(scrollController: scrollController);
+    return SingleColumnMaterial3Components(
+      scrollController: scrollController,
+    );
   }
 }

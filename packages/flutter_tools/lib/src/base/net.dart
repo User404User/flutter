@@ -22,10 +22,14 @@ typedef UrlTunneller = Future<String> Function(String url);
 
 /// If [httpClientFactory] is null, a default [HttpClient] is used.
 class Net {
-  Net({HttpClientFactory? httpClientFactory, required Logger logger, required Platform platform})
-    : _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
-      _logger = logger,
-      _platform = platform;
+  Net({
+    HttpClientFactory? httpClientFactory,
+    required Logger logger,
+    required Platform platform,
+  }) :
+    _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
+    _logger = logger,
+    _platform = platform;
 
   final HttpClientFactory _httpClientFactory;
 
@@ -41,8 +45,7 @@ class Net {
   /// returns an empty list.
   ///
   /// If [maxAttempts] is exceeded, returns null.
-  Future<List<int>?> fetchUrl(
-    Uri url, {
+  Future<List<int>?> fetchUrl(Uri url, {
     int? maxAttempts,
     File? destFile,
     @visibleForTesting Duration? durationOverride,
@@ -60,7 +63,10 @@ class Net {
         sink = destFile.openWrite();
       }
 
-      final bool result = await _attempt(url, destSink: sink);
+      final bool result = await _attempt(
+        url,
+        destSink: sink,
+      );
       if (result) {
         return memorySink?.writes.takeBytes() ?? <int>[];
       }
@@ -71,7 +77,7 @@ class Net {
       }
       _logger.printStatus(
         'Download failed -- attempting retry $attempts in '
-        '$durationSeconds second${durationSeconds == 1 ? "" : "s"}...',
+        '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...',
       );
       await Future<void>.delayed(durationOverride ?? Duration(seconds: durationSeconds));
       if (durationSeconds < 64) {
@@ -84,7 +90,10 @@ class Net {
   Future<bool> doesRemoteFileExist(Uri url) => _attempt(url, onlyHeaders: true);
 
   // Returns true on success and false on failure.
-  Future<bool> _attempt(Uri url, {IOSink? destSink, bool onlyHeaders = false}) async {
+  Future<bool> _attempt(Uri url, {
+    IOSink? destSink,
+    bool onlyHeaders = false,
+  }) async {
     assert(onlyHeaders || destSink != null);
     _logger.printTrace('Downloading: $url');
     final HttpClient httpClient = _httpClientFactory();
@@ -190,12 +199,12 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeln([Object? obj = '']) {
+  void writeln([ Object? obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
     bool addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
@@ -207,7 +216,7 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [StackTrace? stackTrace]) {
+  void addError(dynamic error, [ StackTrace? stackTrace ]) {
     throw UnimplementedError();
   }
 
@@ -215,10 +224,10 @@ class _MemoryIOSink implements IOSink {
   Future<void> get done => close();
 
   @override
-  Future<void> close() async {}
+  Future<void> close() async { }
 
   @override
-  Future<void> flush() async {}
+  Future<void> flush() async { }
 }
 
 /// Returns [true] if [address] is an IPv6 address.

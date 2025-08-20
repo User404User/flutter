@@ -12,10 +12,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ListTile displays correct mouse cursor when disabled', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.WidgetStateMouseCursorExampleApp());
+    await tester.pumpWidget(
+      const example.WidgetStateMouseCursorExampleApp(),
+    );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer(
+      location: tester.getCenter(find.byType(ListTile)),
+    );
     addTearDown(gesture.removePointer);
 
     expect(
@@ -25,7 +31,9 @@ void main() {
   });
 
   testWidgets('Switch enables ListTile', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.WidgetStateMouseCursorExampleApp());
+    await tester.pumpWidget(
+      const example.WidgetStateMouseCursorExampleApp(),
+    );
 
     ListTile listTile = tester.widget(find.byType(ListTile));
     expect(listTile.enabled, isFalse);
@@ -39,14 +47,20 @@ void main() {
   });
 
   testWidgets('ListTile displays correct mouse cursor when enabled', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.WidgetStateMouseCursorExampleApp());
+    await tester.pumpWidget(
+      const example.WidgetStateMouseCursorExampleApp(),
+    );
 
     // Enable ListTile using Switch.
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: tester.getCenter(find.byType(ListTile)));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer(
+      location: tester.getCenter(find.byType(ListTile)),
+    );
     addTearDown(gesture.removePointer);
 
     expect(

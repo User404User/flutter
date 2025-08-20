@@ -18,7 +18,8 @@ import '../../project.dart';
 /// endif()
 /// ```
 class CmakeAndroid16kPagesMigration extends ProjectMigrator {
-  CmakeAndroid16kPagesMigration(AndroidProject project, super.logger) : _project = project;
+  CmakeAndroid16kPagesMigration(AndroidProject project, super.logger)
+      : _project = project;
 
   final AndroidProject _project;
 
@@ -32,8 +33,7 @@ class CmakeAndroid16kPagesMigration extends ProjectMigrator {
 
     if (!cmakeLists.existsSync()) {
       logger.printTrace(
-        'CMake project not found, skipping support Android 15 16k page size migration.',
-      );
+          'CMake project not found, skipping support Android 15 16k page size migration.');
       return;
     }
 
@@ -44,7 +44,8 @@ class CmakeAndroid16kPagesMigration extends ProjectMigrator {
       return;
     }
 
-    final RegExp regex = RegExp(r'target_compile_definitions\(([^ ]*) PUBLIC DART_SHARED_LIB\)');
+    final RegExp regex =
+        RegExp(r'target_compile_definitions\(([^ ]*) PUBLIC DART_SHARED_LIB\)');
     final String? projectName = regex.firstMatch(original)?.group(1);
     const String before = '''
  PUBLIC DART_SHARED_LIB)
@@ -59,10 +60,14 @@ if (ANDROID)
 endif()
 ''';
 
-    final String updated = original.replaceFirst(before, '$before$linkerFlags');
+    final String updated = original.replaceFirst(
+      before,
+      '$before$linkerFlags',
+    );
 
     if (original != updated) {
-      logger.printStatus('CMake missing support Android 15 16k page size, updating.');
+      logger.printStatus(
+          'CMake missing support Android 15 16k page size, updating.');
       cmakeLists.writeAsStringSync(updated);
     }
   }

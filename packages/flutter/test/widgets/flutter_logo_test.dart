@@ -15,6 +15,9 @@ void main() {
     final Key logo = UniqueKey();
     await tester.pumpWidget(FlutterLogo(key: logo));
 
-    await expectLater(find.byKey(logo), matchesGoldenFile('flutter_logo.png'));
+    await expectLater(
+      find.byKey(logo),
+      matchesGoldenFile('flutter_logo.png'),
+    );
   });
 }

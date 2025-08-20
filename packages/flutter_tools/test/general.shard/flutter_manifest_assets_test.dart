@@ -44,8 +44,10 @@ flutter:
     - a/bar
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
 
       expect(flutterManifest.assets, <AssetsEntry>[
         AssetsEntry(uri: Uri.parse('a/foo')),
@@ -67,7 +69,10 @@ flutter:
     -
 ''';
 
-      FlutterManifest.createFromString(manifest, logger: logger);
+      FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      );
 
       expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
     });
@@ -88,8 +93,10 @@ flutter:
     - lib/gallery/aaa bbb
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
       final List<AssetsEntry> assets = flutterManifest.assets;
 
       expect(assets, <AssetsEntry>[
@@ -115,11 +122,16 @@ flutter:
         - strawberry
 ''';
 
-      final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
 
       expect(flutterManifest.assets, <AssetsEntry>[
-        AssetsEntry(uri: Uri.parse('a/foo'), flavors: const <String>{'apple', 'strawberry'}),
+        AssetsEntry(
+          uri: Uri.parse('a/foo'),
+          flavors: const <String>{'apple', 'strawberry'},
+        ),
       ]);
     });
 
@@ -141,14 +153,11 @@ flutter:
           key2: value2
 ''';
       FlutterManifest.createFromString(manifest, logger: logger);
-      expect(
-        logger.errorText,
-        contains(
-          'Unable to parse assets section.\n'
-          'In flavors section of asset "assets/vanilla/": Expected flavors '
-          'to be a list of String, but element at index 0 was a YamlMap.\n',
-        ),
-      );
+      expect(logger.errorText, contains(
+        'Unable to parse assets section.\n'
+        'In flavors section of asset "assets/vanilla/": Expected flavors '
+        'to be a list of String, but element at index 0 was a YamlMap.\n'
+      ));
     });
   });
 }

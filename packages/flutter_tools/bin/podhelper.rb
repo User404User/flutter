@@ -304,7 +304,7 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
   plugins_file = File.join(application_path, '..', '.flutter-plugins-dependencies')
   dependencies_hash = flutter_parse_plugins_file(plugins_file)
   plugin_pods = flutter_get_plugins_list(dependencies_hash, platform)
-  swift_package_manager_enabled = flutter_get_swift_package_manager_enabled(dependencies_hash, platform)
+  swift_package_manager_enabled = flutter_get_swift_package_manager_enabled(dependencies_hash)
 
   plugin_pods.each do |plugin_hash|
     plugin_name = plugin_hash['name']
@@ -353,12 +353,10 @@ def flutter_get_plugins_list(dependencies_hash, platform)
   dependencies_hash['plugins'][platform] || []
 end
 
-def flutter_get_swift_package_manager_enabled(dependencies_hash, platform)
+def flutter_get_swift_package_manager_enabled(dependencies_hash)
   return false unless dependencies_hash.any?
   return false unless dependencies_hash.has_key?('swift_package_manager_enabled')
-  return false unless dependencies_hash['swift_package_manager_enabled'].has_key?(platform)
-
-  dependencies_hash['swift_package_manager_enabled'][platform] == true
+  dependencies_hash['swift_package_manager_enabled'] == true
 end
 
 def flutter_relative_path_from_podfile(path)

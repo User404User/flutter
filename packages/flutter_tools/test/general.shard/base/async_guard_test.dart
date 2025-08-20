@@ -26,6 +26,7 @@ class _CustomException implements Exception {
   String toString() => message;
 }
 
+
 Future<void> syncError() {
   throw _CustomException('Sync Doom');
 }
@@ -37,11 +38,11 @@ Future<void> syncAndAsyncError() {
 }
 
 Future<void> delayedThrow(FakeAsync time) {
-  final Future<void> result = Future<void>.delayed(const Duration(milliseconds: 10)).then((
-    _,
-  ) async {
-    throw _CustomException('Delayed Doom');
-  });
+  final Future<void> result =
+    Future<void>.delayed(const Duration(milliseconds: 10))
+      .then((_) async {
+        throw _CustomException('Delayed Doom');
+      });
   time.elapse(const Duration(seconds: 1));
   time.flushMicrotasks();
   return result;
@@ -57,22 +58,20 @@ void main() {
     caughtInZone = Completer<void>();
     caughtByZone = false;
     caughtByHandler = false;
-    zone = Zone.current.fork(
-      specification: ZoneSpecification(
-        handleUncaughtError: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Object error,
-          StackTrace stackTrace,
-        ) {
-          caughtByZone = true;
-          if (!caughtInZone.isCompleted) {
-            caughtInZone.complete();
-          }
-        },
-      ),
-    );
+    zone = Zone.current.fork(specification: ZoneSpecification(
+      handleUncaughtError: (
+        Zone self,
+        ZoneDelegate parent,
+        Zone zone,
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        caughtByZone = true;
+        if (!caughtInZone.isCompleted) {
+          caughtInZone.complete();
+        }
+      },
+    ));
   });
 
   test('asyncError percolates through zone', () async {
@@ -129,6 +128,7 @@ void main() {
     expect(caughtByHandler, true);
   });
 
+
   test('asyncError is caught by asyncGuard', () async {
     await zone.run(() async {
       try {
@@ -162,32 +162,28 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      unawaited(
-        runZonedGuarded(
-          () async {
-            final Future<void> f = asyncGuard<void>(() => delayedThrow(time)).then(
-              (Object? obj) => obj,
-              onError: (Object e, StackTrace s) {
-                caughtByCatchError = true;
-              },
-            );
-            try {
-              await f;
-            } on _CustomException {
-              caughtByHandler = true;
-            }
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
-          },
-          (Object e, StackTrace s) {
-            caughtByZone = true;
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
-          },
-        ),
-      );
+      unawaited(runZonedGuarded(() async {
+        final Future<void> f = asyncGuard<void>(() => delayedThrow(time))
+          .then(
+            (Object? obj) => obj,
+            onError: (Object e, StackTrace s) {
+              caughtByCatchError = true;
+            },
+          );
+        try {
+          await f;
+        } on _CustomException {
+          caughtByHandler = true;
+        }
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }, (Object e, StackTrace s) {
+        caughtByZone = true;
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }));
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -205,32 +201,27 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      unawaited(
-        runZonedGuarded(
-          () async {
-            final Future<void> f = asyncGuard<void>(
-              () => delayedThrow(time),
-              onError: (Object e, StackTrace s) {
-                caughtByOnError = true;
-              },
-            );
-            try {
-              await f;
-            } on _CustomException {
-              caughtByHandler = true;
-            }
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
+      unawaited(runZonedGuarded(() async {
+        final Future<void> f = asyncGuard<void>(
+          () => delayedThrow(time),
+          onError: (Object e, StackTrace s) {
+            caughtByOnError = true;
           },
-          (Object e, StackTrace s) {
-            caughtByZone = true;
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
-          },
-        ),
-      );
+        );
+        try {
+          await f;
+        } on _CustomException {
+          caughtByHandler = true;
+        }
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }, (Object e, StackTrace s) {
+        caughtByZone = true;
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }));
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -248,32 +239,27 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      unawaited(
-        runZonedGuarded(
-          () async {
-            final Future<void> f = asyncGuard<void>(
-              () => delayedThrow(time),
-              onError: (Object e) {
-                caughtByOnError = true;
-              },
-            );
-            try {
-              await f;
-            } on _CustomException {
-              caughtByHandler = true;
-            }
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
+      unawaited(runZonedGuarded(() async {
+        final Future<void> f = asyncGuard<void>(
+          () => delayedThrow(time),
+          onError: (Object e) {
+            caughtByOnError = true;
           },
-          (Object e, StackTrace s) {
-            caughtByZone = true;
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
-          },
-        ),
-      );
+        );
+        try {
+          await f;
+        } on _CustomException {
+          caughtByHandler = true;
+        }
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }, (Object e, StackTrace s) {
+        caughtByZone = true;
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }));
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;
@@ -292,33 +278,28 @@ void main() {
 
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      unawaited(
-        runZonedGuarded(
-          () async {
-            final Future<void> f = asyncGuard<void>(
-              () => delayedThrow(time),
-              onError: (Object e, [StackTrace? s]) {
-                caughtByOnError = true;
-                nonNullStackTrace = s != null;
-              },
-            );
-            try {
-              await f;
-            } on _CustomException {
-              caughtByHandler = true;
-            }
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
+      unawaited(runZonedGuarded(() async {
+        final Future<void> f = asyncGuard<void>(
+          () => delayedThrow(time),
+          onError: (Object e, [StackTrace? s]) {
+            caughtByOnError = true;
+            nonNullStackTrace = s != null;
           },
-          (Object e, StackTrace s) {
-            caughtByZone = true;
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
-          },
-        ),
-      );
+        );
+        try {
+          await f;
+        } on _CustomException {
+          caughtByHandler = true;
+        }
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }, (Object e, StackTrace s) {
+        caughtByZone = true;
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }));
       time.elapse(const Duration(seconds: 1));
       time.flushMicrotasks();
       return completer.future;

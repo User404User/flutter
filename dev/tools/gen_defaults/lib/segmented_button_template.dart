@@ -5,11 +5,7 @@
 import 'template.dart';
 
 class SegmentedButtonTemplate extends TokenTemplate {
-  const SegmentedButtonTemplate(
-    this.tokenGroup,
-    super.blockName,
-    super.fileName,
-    super.tokens, {
+  const SegmentedButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 

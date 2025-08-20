@@ -29,7 +29,13 @@ class InputDecoratorExample extends StatelessWidget {
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: 'Enter password',
-        suffixIcon: Align(widthFactor: 1.0, heightFactor: 1.0, child: Icon(Icons.remove_red_eye)),
+        suffixIcon: Align(
+          widthFactor: 1.0,
+          heightFactor: 1.0,
+          child: Icon(
+            Icons.remove_red_eye,
+          ),
+        ),
       ),
     );
   }

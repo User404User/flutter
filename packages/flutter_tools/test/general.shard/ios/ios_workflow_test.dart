@@ -52,14 +52,15 @@ void main() {
   testWithoutContext('iOS workflow applies on macOS, no Xcode or simctl', () {
     final FakeProcessManager xcodeProcessManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
+        command: <String>[
+          'xcrun', 'simctl', 'list', 'devices', 'booted',
+        ],
         exitCode: 1,
       ),
     ]);
     final IOSWorkflow iosWorkflow = IOSWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
-      xcode: Xcode.test(
-        processManager: xcodeProcessManager,
+      xcode: Xcode.test(processManager: xcodeProcessManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: FakeProcessManager.any(),
           version: null,
@@ -79,8 +80,8 @@ void main() {
     final Xcode xcode = Xcode.test(
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: FakeProcessManager.any(),
-        version: Version(1, 0, 0),
+          processManager: FakeProcessManager.any(),
+          version: Version(1, 0, 0)
       ),
     );
 
@@ -103,7 +104,7 @@ void main() {
       processManager: FakeProcessManager.any(),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
         processManager: FakeProcessManager.any(),
-        version: Version(1000, 0, 0),
+        version: Version(1000, 0, 0)
       ),
     );
 

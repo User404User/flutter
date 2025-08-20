@@ -111,12 +111,11 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
 
   UndoHistoryController? _controller;
 
-  UndoHistoryController get _effectiveController =>
-      widget.controller ?? (_controller ??= UndoHistoryController());
+  UndoHistoryController get _effectiveController => widget.controller ?? (_controller ??= UndoHistoryController());
 
   @override
   void undo() {
-    if (_stack.currentValue == null) {
+    if (_stack.currentValue == null)  {
       // Returns early if there is not a first value registered in the history.
       // This is important because, if an undo is received while the initial
       // value is being pushed (a.k.a when the field gets the focus but the
@@ -226,7 +225,6 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     }
   }
 
-  @protected
   @override
   void initState() {
     super.initState();
@@ -245,7 +243,6 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     _effectiveController.onRedo.addListener(redo);
   }
 
-  @protected
   @override
   void didUpdateWidget(UndoHistory<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -268,7 +265,6 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     }
   }
 
-  @protected
   @override
   void dispose() {
     if (UndoManager.client == this) {
@@ -284,19 +280,12 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     super.dispose();
   }
 
-  @protected
   @override
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
-        UndoTextIntent: Action<UndoTextIntent>.overridable(
-          context: context,
-          defaultAction: CallbackAction<UndoTextIntent>(onInvoke: _undoFromIntent),
-        ),
-        RedoTextIntent: Action<RedoTextIntent>.overridable(
-          context: context,
-          defaultAction: CallbackAction<RedoTextIntent>(onInvoke: _redoFromIntent),
-        ),
+        UndoTextIntent: Action<UndoTextIntent>.overridable(context: context, defaultAction: CallbackAction<UndoTextIntent>(onInvoke: _undoFromIntent)),
+        RedoTextIntent: Action<RedoTextIntent>.overridable(context: context, defaultAction: CallbackAction<RedoTextIntent>(onInvoke: _redoFromIntent)),
       },
       child: widget.child,
     );
@@ -322,8 +311,7 @@ class UndoHistoryValue {
   final bool canRedo;
 
   @override
-  String toString() =>
-      '${objectRuntimeType(this, 'UndoHistoryValue')}(canUndo: $canUndo, canRedo: $canRedo)';
+  String toString() => '${objectRuntimeType(this, 'UndoHistoryValue')}(canUndo: $canUndo, canRedo: $canRedo)';
 
   @override
   bool operator ==(Object other) {
@@ -334,7 +322,10 @@ class UndoHistoryValue {
   }
 
   @override
-  int get hashCode => Object.hash(canUndo.hashCode, canRedo.hashCode);
+  int get hashCode => Object.hash(
+    canUndo.hashCode,
+    canRedo.hashCode,
+  );
 }
 
 /// A controller for the undo history, for example for an editable text field.
@@ -499,7 +490,10 @@ typedef _Throttled<T> = Timer Function(T currentArg);
 /// maximum of once per duration.
 ///
 /// Only works for functions that take exactly one argument and return void.
-_Throttled<T> _throttle<T>({required Duration duration, required _Throttleable<T> function}) {
+_Throttled<T> _throttle<T>({
+  required Duration duration,
+  required _Throttleable<T> function,
+}) {
   Timer? timer;
   late T arg;
 

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class TabBarViewUseCase extends UseCase {
+
   @override
   String get name => 'TabBarView';
 
@@ -16,6 +17,7 @@ class TabBarViewUseCase extends UseCase {
   @override
   Widget build(BuildContext context) => const TabBarViewExample();
 }
+
 
 class TabBarViewExample extends StatelessWidget {
   const TabBarViewExample({super.key});
@@ -30,17 +32,32 @@ class TabBarViewExample extends StatelessWidget {
           title: Semantics(headingLevel: 1, child: const Text('TabBarView Sample')),
           bottom: const TabBar(
             tabs: <Widget>[
-              Tab(icon: Icon(Icons.cloud_outlined), text: 'Cloudy'),
-              Tab(icon: Icon(Icons.beach_access_sharp), text: 'Rainy'),
-              Tab(icon: Icon(Icons.brightness_5_sharp), text: 'Sunny'),
+              Tab(
+                icon: Icon(Icons.cloud_outlined),
+                text: 'Cloudy',
+              ),
+              Tab(
+                icon: Icon(Icons.beach_access_sharp),
+                text: 'Rainy',
+              ),
+              Tab(
+                icon: Icon(Icons.brightness_5_sharp),
+                text: 'Sunny',
+              ),
             ],
           ),
         ),
         body: const TabBarView(
           children: <Widget>[
-            Center(child: Text("It's cloudy here")),
-            Center(child: Text("It's rainy here")),
-            Center(child: Text("It's sunny here")),
+            Center(
+              child: Text("It's cloudy here"),
+            ),
+            Center(
+              child: Text("It's rainy here"),
+            ),
+            Center(
+              child: Text("It's sunny here"),
+            ),
           ],
         ),
       ),
