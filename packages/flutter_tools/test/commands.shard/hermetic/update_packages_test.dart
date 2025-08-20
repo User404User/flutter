@@ -14,7 +14,6 @@ import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/context.dart';
-import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
@@ -117,7 +116,7 @@ void main() {
         ..writeAsStringSync(kExamplesPubspecYaml);
       flutter.childFile('pubspec.yaml').writeAsStringSync(kFlutterPubspecYaml);
       Cache.flutterRoot = flutterSdk.absolute.path;
-      pub = FakePub();
+      pub = FakePub(fileSystem);
       processManager = FakeProcessManager.empty();
     });
 
@@ -368,8 +367,9 @@ void main() {
 }
 
 class FakePub extends Fake implements Pub {
-  FakePub();
+  FakePub(this.fileSystem);
 
+  final FileSystem fileSystem;
   final List<String> pubGetDirectories = <String>[];
   final List<String> pubBatchDirectories = <String>[];
   final List<String> pubspecYamls = <String>[];
@@ -405,7 +405,9 @@ packages:
 sdks:
   dart: ">=2.14.0 <3.0.0"
 ''');
-    writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
+    fileSystem.currentDirectory.childDirectory('.dart_tool').childFile('package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   }
 
   @override

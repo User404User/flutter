@@ -362,7 +362,7 @@ class SkwasmRenderer implements Renderer {
     }
     final SkwasmImageDecoder decoder = SkwasmImageDecoder(
       contentType: contentType,
-      dataSource: response.body,
+      dataSource: response.body as JSObject,
       debugSource: uri.toString(),
     );
     await decoder.initialize();
@@ -435,9 +435,9 @@ class SkwasmRenderer implements Renderer {
   ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
     return SkwasmImage(
       imageCreateFromTextureSource(
-        imageSource,
-        imageSource.width,
-        imageSource.height,
+        imageSource as JSObject,
+        imageSource.width.toDartInt,
+        imageSource.height.toDartInt,
         surface.handle,
       ),
     );
@@ -462,13 +462,6 @@ class SkwasmRenderer implements Renderer {
     return SkwasmImage(
       imageCreateFromTextureSource(textureSource as JSObject, width, height, surface.handle),
     );
-  }
-
-  @override
-  void dumpDebugInfo() {
-    for (final view in _sceneViews.values) {
-      view.dumpDebugInfo();
-    }
   }
 }
 

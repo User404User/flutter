@@ -20,10 +20,10 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
+import 'package:flutter_tools/src/preview_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
@@ -33,7 +33,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart' hide FakeOperatingSystemUtils;
-import '../src/package_config.dart';
 import '../src/pubspec_schema.dart';
 
 /// Information for a platform entry in the 'platforms' section of a plugin's
@@ -104,8 +103,6 @@ void main() {
     late FakeLinuxProject linuxProject;
     late FakeSystemClock systemClock;
     late FlutterVersion flutterVersion;
-    late FakeCocoaPodsCapturesInvalidate cocoaPods;
-
     // A Windows-style filesystem. This is not populated by default, so tests
     // using it instead of fs must re-run any necessary setup (e.g.,
     // setUpProject).
@@ -194,11 +191,17 @@ void main() {
       fsWindows = MemoryFileSystem(style: FileSystemStyle.windows);
       systemClock = FakeSystemClock()..currentTime = DateTime(1970);
       flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
-      cocoaPods = FakeCocoaPodsCapturesInvalidate();
 
       // Add basic properties to the Flutter project and subprojects
       setUpProject(fs);
-      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+      flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
     });
 
     void addToPackageConfig(String name, Directory packageDir) {
@@ -248,7 +251,14 @@ void main() {
 
       final List<Directory> directories = <Directory>[];
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
-      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+      flutterProject.directory.childDirectory('.dart_tool').childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
       for (final String nameOrPath in pluginNamesOrPaths) {
         final String name = fileSystem.path.basename(nameOrPath);
         final Directory pluginDirectory =
@@ -409,7 +419,7 @@ dependencies:
         () async {
           await refreshPluginsList(flutterProject);
 
-          expect(flutterProject.flutterPluginsDependenciesFile, isNot(exists));
+          expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -426,7 +436,7 @@ dependencies:
 
           await refreshPluginsList(flutterProject);
 
-          expect(flutterProject.flutterPluginsDependenciesFile, isNot(exists));
+          expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -450,8 +460,12 @@ dependencies:
 
           await refreshPluginsList(flutterProject);
 
-          expect(flutterProject.flutterPluginsFile, isNot(exists), reason: 'No longer emitted');
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          expect(
+            flutterProject.flutterPluginsFile.existsSync(),
+            false,
+            reason: 'No longer emitted',
+          );
+          expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
 
           final String pluginsFileContents =
               flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
@@ -523,8 +537,8 @@ dependencies:
           await refreshPluginsList(flutterProject);
 
           // Verify .flutter-plugins-dependencies is configured correctly.
-          expect(flutterProject.flutterPluginsFile, exists);
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          expect(flutterProject.flutterPluginsFile.existsSync(), true);
+          expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
           expect(
             flutterProject.flutterPluginsFile.readAsStringSync(),
             '# This is a generated file; do not edit or check into version control.\n'
@@ -616,126 +630,6 @@ dependencies:
       );
 
       testUsingContext(
-        'Refreshing the plugin list updates .flutter-plugins-dependencies if the plugins changed',
-        () async {
-          // Refresh the plugin list (we have no plugins).
-          await refreshPluginsList(flutterProject);
-          expect(flutterProject.flutterPluginsDependenciesFile, isNot(exists));
-
-          // Create an initial plugin (we previously had none).
-          createLegacyPluginWithDependencies(name: 'plugin-a', dependencies: <String>[]);
-          await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
-          final FileStat stat1 = flutterProject.flutterPluginsDependenciesFile.statSync();
-
-          // Add a new plugin.
-          createLegacyPluginWithDependencies(name: 'plugin-b', dependencies: <String>[]);
-          await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
-          final FileStat stat2 = flutterProject.flutterPluginsDependenciesFile.statSync();
-          expect(
-            stat2.modified.isAfter(stat1.modified),
-            isTrue,
-            reason: 'A new plugin was added, .flutter-plugins-dependencies file should be updated.',
-          );
-
-          // Do not add new plugins.
-          await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
-          final FileStat stat3 = flutterProject.flutterPluginsDependenciesFile.statSync();
-          expect(
-            stat3.modified,
-            stat2.modified,
-            reason: 'No plugins changed, .flutter-plugins-dependencies should not be changed',
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          SystemClock: () => systemClock,
-          FlutterVersion: () => flutterVersion,
-          Pub: FakePubWithPrimedDeps.new,
-          // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/160257.
-          // Not necessary, you can observe this bug by calling `generateLegacyPlugins: false`,
-          // but since this flag is about to be enabled, and enabling it implicitly sets that
-          // argument to false, this is a more "honest" test.
-          FeatureFlags: enableExplicitPackageDependencies,
-        },
-      );
-
-      testUsingContext(
-        'Refreshing the plugin list for iOS/macOS projects invokes invalidatePodInstallOutput if the plugins changed',
-        () async {
-          // Refresh the plugin list (we have no plugins).
-          await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
-          expect(
-            cocoaPods.capturedInvocations,
-            isEmpty,
-            reason: 'No plugins exist, so no invalidatePodInstallOutput calls expected.',
-          );
-
-          // Create an initial plugin (we previously had none).
-          createPlugin(
-            name: 'plugin-a',
-            platforms: const <String, _PluginPlatformInfo>{
-              'ios': _PluginPlatformInfo(
-                pluginClass: 'Foo',
-                dartPluginClass: 'Bar',
-                sharedDarwinSource: true,
-              ),
-            },
-          );
-          await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
-          expect(
-            cocoaPods.capturedInvocations,
-            containsAll(<Matcher>[isA<IosProject>(), isA<MacOSProject>()]),
-            reason: 'A new plugin was added, so it should cause invalidatePodInstallOutput calls.',
-          );
-          cocoaPods.capturedInvocations.clear();
-
-          // Add a new plugin.
-          createPlugin(
-            name: 'plugin-b',
-            platforms: const <String, _PluginPlatformInfo>{
-              'ios': _PluginPlatformInfo(
-                pluginClass: 'Foo',
-                dartPluginClass: 'Bar',
-                sharedDarwinSource: true,
-              ),
-            },
-          );
-          await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
-          expect(
-            cocoaPods.capturedInvocations,
-            containsAll(<Matcher>[isA<IosProject>(), isA<MacOSProject>()]),
-            reason: 'A new plugin was added, so it should cause invalidatePodInstallOutput calls.',
-          );
-          cocoaPods.capturedInvocations.clear();
-
-          // Do not add new plugins.
-          await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
-          expect(
-            cocoaPods.capturedInvocations,
-            isEmpty,
-            reason: 'No plugins changed, so no updates expected',
-          );
-        },
-        overrides: <Type, Generator>{
-          CocoaPods: () => cocoaPods,
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          SystemClock: () => systemClock,
-          FlutterVersion: () => flutterVersion,
-          Pub: FakePubWithPrimedDeps.new,
-          // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/160257.
-          // Not necessary, you can observe this bug by calling `generateLegacyPlugins: false`,
-          // but since this flag is about to be enabled, and enabling it implicitly sets that
-          // argument to false, this is a more "honest" test.
-          FeatureFlags: enableExplicitPackageDependencies,
-        },
-      );
-
-      testUsingContext(
         '.flutter-plugins-dependencies contains plugin platform info',
         () async {
           createPlugin(
@@ -762,7 +656,7 @@ dependencies:
 
           await refreshPluginsList(flutterProject);
 
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
           final String pluginsString =
               flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
           final Map<String, dynamic> jsonContent =
@@ -852,7 +746,7 @@ dependencies:
 
           await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
 
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
           final String pluginsString =
               flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
           final Map<String, dynamic> jsonContent =
@@ -904,7 +798,7 @@ dependencies:
 
           await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true);
 
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
           final String pluginsString =
               flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
           final Map<String, dynamic> jsonContent =
@@ -956,7 +850,7 @@ dependencies:
 
           await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
 
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
           final String pluginsString =
               flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
           final Map<String, dynamic> jsonContent =
@@ -988,8 +882,8 @@ dependencies:
           macosProject.exists = true;
 
           await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
-          expect(iosProject.podManifestLock, isNot(exists));
-          expect(macosProject.podManifestLock, isNot(exists));
+          expect(iosProject.podManifestLock.existsSync(), false);
+          expect(macosProject.podManifestLock.existsSync(), false);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1017,8 +911,8 @@ dependencies:
           simulatePodInstallRun(macosProject);
 
           await refreshPluginsList(flutterProject);
-          expect(iosProject.podManifestLock, exists);
-          expect(macosProject.podManifestLock, exists);
+          expect(iosProject.podManifestLock.existsSync(), true);
+          expect(macosProject.podManifestLock.existsSync(), true);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1043,7 +937,7 @@ dependencies:
         () async {
           androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+          await injectPlugins(flutterProject, androidPlatform: true);
 
           final File registrant = flutterProject.directory
               .childDirectory(
@@ -1051,7 +945,7 @@ dependencies:
               )
               .childFile('GeneratedPluginRegistrant.java');
 
-          expect(registrant, exists);
+          expect(registrant.existsSync(), isTrue);
           expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
           expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
           expect(
@@ -1077,7 +971,7 @@ dependencies:
 
           await expectLater(
             () async {
-              await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+              await injectPlugins(flutterProject, androidPlatform: true);
             },
             throwsToolExit(
               message:
@@ -1106,7 +1000,7 @@ dependencies:
 
           createDualSupportJavaPlugin4();
 
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+          await injectPlugins(flutterProject, androidPlatform: true);
 
           final File registrant = flutterProject.directory
               .childDirectory(
@@ -1114,7 +1008,7 @@ dependencies:
               )
               .childFile('GeneratedPluginRegistrant.java');
 
-          expect(registrant, exists);
+          expect(registrant.existsSync(), isTrue);
           expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
           expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
           expect(
@@ -1137,7 +1031,7 @@ dependencies:
           flutterProject.isModule = true;
           androidProject.embeddingVersion = AndroidEmbeddingVersion.v2;
 
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+          await injectPlugins(flutterProject, androidPlatform: true);
 
           final File registrant = flutterProject.directory
               .childDirectory(
@@ -1145,7 +1039,7 @@ dependencies:
               )
               .childFile('GeneratedPluginRegistrant.java');
 
-          expect(registrant, exists);
+          expect(registrant.existsSync(), isTrue);
           expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
           expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
           expect(
@@ -1169,7 +1063,7 @@ dependencies:
 
           createNewJavaPlugin1();
 
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+          await injectPlugins(flutterProject, androidPlatform: true);
 
           final File registrant = flutterProject.directory
               .childDirectory(
@@ -1200,7 +1094,7 @@ dependencies:
 
           createDualSupportJavaPlugin4();
 
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+          await injectPlugins(flutterProject, androidPlatform: true);
 
           final File registrant = flutterProject.directory
               .childDirectory(
@@ -1231,7 +1125,7 @@ dependencies:
 
           createDualSupportJavaPlugin4();
 
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+          await injectPlugins(flutterProject, androidPlatform: true);
 
           final File registrant = flutterProject.directory
               .childDirectory(
@@ -1259,7 +1153,7 @@ dependencies:
         () async {
           final File manifest = fs.file('AndroidManifest.xml');
           androidProject.appManifestFile = manifest;
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+          await injectPlugins(flutterProject, androidPlatform: true);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1303,7 +1197,7 @@ dependencies:
                 .childDirectory('lib')
                 .childFile('web_plugin_registrant.dart');
 
-            expect(registrant, exists);
+            expect(registrant.existsSync(), isTrue);
             expect(
               registrant.readAsStringSync(),
               contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"),
@@ -1348,7 +1242,7 @@ flutter:
 
             final FlutterManifest manifest =
                 FlutterManifest.createFromString('''
-name: my_app
+name: test
 version: 1.0.0
 
 dependencies:
@@ -1369,7 +1263,7 @@ dependencies:
                 .childDirectory('lib')
                 .childFile('web_plugin_registrant.dart');
 
-            expect(registrant, exists);
+            expect(registrant.existsSync(), isTrue);
             expect(
               registrant.readAsStringSync(),
               contains(
@@ -1403,7 +1297,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
+          await injectPlugins(flutterProject, androidPlatform: true);
 
           final File registrantFile = androidProject.pluginRegistrantHost
               .childDirectory(fs.path.join('src', 'main', 'java', 'io', 'flutter', 'plugins'))
@@ -1437,7 +1331,6 @@ flutter:
               FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
-            releaseMode: false,
             iosPlatform: true,
             darwinDependencyManagement: dependencyManagement,
           );
@@ -1472,7 +1365,6 @@ flutter:
               FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
-            releaseMode: false,
             macOSPlatform: true,
             darwinDependencyManagement: dependencyManagement,
           );
@@ -1510,7 +1402,6 @@ flutter:
               FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
-            releaseMode: false,
             macOSPlatform: true,
             darwinDependencyManagement: dependencyManagement,
           );
@@ -1544,7 +1435,6 @@ flutter:
               FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
-            releaseMode: false,
             macOSPlatform: true,
             darwinDependencyManagement: dependencyManagement,
           );
@@ -1568,7 +1458,7 @@ flutter:
         () async {
           createFakePlugin(fs);
 
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+          await injectPlugins(flutterProject, linuxPlatform: true);
 
           final File registrantHeader = linuxProject.managedDirectory.childFile(
             'generated_plugin_registrant.h',
@@ -1577,8 +1467,8 @@ flutter:
             'generated_plugin_registrant.cc',
           );
 
-          expect(registrantHeader, exists);
-          expect(registrantImpl, exists);
+          expect(registrantHeader.existsSync(), isTrue);
+          expect(registrantImpl.existsSync(), isTrue);
           expect(
             registrantImpl.readAsStringSync(),
             contains('some_plugin_register_with_registrar'),
@@ -1621,7 +1511,7 @@ flutter:
 
           final FlutterManifest manifest =
               FlutterManifest.createFromString('''
-name: my_app
+name: test
 version: 1.0.0
 
 dependencies:
@@ -1631,13 +1521,13 @@ dependencies:
 
           flutterProject.manifest = manifest;
 
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+          await injectPlugins(flutterProject, linuxPlatform: true);
 
           final File registrantImpl = linuxProject.managedDirectory.childFile(
             'generated_plugin_registrant.cc',
           );
 
-          expect(registrantImpl, exists);
+          expect(registrantImpl.existsSync(), isTrue);
           expect(
             registrantImpl.readAsStringSync(),
             contains('user_selected_url_launcher_linux_register_with_registrar'),
@@ -1694,7 +1584,7 @@ flutter:
 
           final FlutterManifest manifest =
               FlutterManifest.createFromString('''
-name: my_app
+name: test
 version: 1.0.0
 
 dependencies:
@@ -1704,13 +1594,13 @@ dependencies:
 
           flutterProject.manifest = manifest;
 
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+          await injectPlugins(flutterProject, linuxPlatform: true);
 
           final File registrantImpl = linuxProject.managedDirectory.childFile(
             'generated_plugin_registrant.cc',
           );
 
-          expect(registrantImpl, exists);
+          expect(registrantImpl.existsSync(), isTrue);
           expect(
             registrantImpl.readAsStringSync(),
             contains('user_selected_url_launcher_linux_register_with_registrar'),
@@ -1741,7 +1631,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+          await injectPlugins(flutterProject, linuxPlatform: true);
 
           final File registrantImpl = linuxProject.managedDirectory.childFile(
             'generated_plugin_registrant.cc',
@@ -1773,7 +1663,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+          await injectPlugins(flutterProject, linuxPlatform: true);
 
           final File registrantImpl = linuxProject.managedDirectory.childFile(
             'generated_plugin_registrant.cc',
@@ -1796,11 +1686,11 @@ flutter:
         () async {
           createFakePlugin(fs);
 
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+          await injectPlugins(flutterProject, linuxPlatform: true);
 
           final File pluginMakefile = linuxProject.generatedPluginCmakeFile;
 
-          expect(pluginMakefile, exists);
+          expect(pluginMakefile.existsSync(), isTrue);
           final String contents = pluginMakefile.readAsStringSync();
           expect(contents, contains('some_plugin'));
           expect(
@@ -1834,7 +1724,7 @@ flutter:
             '/local_plugins/plugin_b',
           ]);
 
-          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+          await injectPlugins(flutterProject, linuxPlatform: true);
 
           final File pluginCmakeFile = linuxProject.generatedPluginCmakeFile;
           final File pluginRegistrant = linuxProject.managedDirectory.childFile(
@@ -1860,7 +1750,7 @@ flutter:
         () async {
           createFakePlugin(fs);
 
-          await injectPlugins(flutterProject, releaseMode: false, windowsPlatform: true);
+          await injectPlugins(flutterProject, windowsPlatform: true);
 
           final File registrantHeader = windowsProject.managedDirectory.childFile(
             'generated_plugin_registrant.h',
@@ -1869,8 +1759,8 @@ flutter:
             'generated_plugin_registrant.cc',
           );
 
-          expect(registrantHeader, exists);
-          expect(registrantImpl, exists);
+          expect(registrantHeader.existsSync(), isTrue);
+          expect(registrantImpl.existsSync(), isTrue);
           expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
         },
         overrides: <Type, Generator>{
@@ -1894,7 +1784,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-          await injectPlugins(flutterProject, releaseMode: false, windowsPlatform: true);
+          await injectPlugins(flutterProject, windowsPlatform: true);
 
           final File registrantImpl = windowsProject.managedDirectory.childFile(
             'generated_plugin_registrant.cc',
@@ -1925,7 +1815,7 @@ flutter:
         dartPluginClass: SomePlugin
     ''');
 
-          await injectPlugins(flutterProject, releaseMode: false, windowsPlatform: true);
+          await injectPlugins(flutterProject, windowsPlatform: true);
 
           final File registrantImpl = windowsProject.managedDirectory.childFile(
             'generated_plugin_registrant.cc',
@@ -1953,7 +1843,7 @@ flutter:
             '/local_plugins/plugin_b',
           ]);
 
-          await injectPlugins(flutterProject, releaseMode: false, windowsPlatform: true);
+          await injectPlugins(flutterProject, windowsPlatform: true);
 
           final File pluginCmakeFile = windowsProject.generatedPluginCmakeFile;
           final File pluginRegistrant = windowsProject.managedDirectory.childFile(
@@ -1981,12 +1871,7 @@ flutter:
           setUpProject(fsWindows);
           createFakePlugin(fsWindows);
 
-          await injectPlugins(
-            flutterProject,
-            releaseMode: false,
-            linuxPlatform: true,
-            windowsPlatform: true,
-          );
+          await injectPlugins(flutterProject, linuxPlatform: true, windowsPlatform: true);
 
           for (final CmakeBasedProject? project in <CmakeBasedProject?>[
             linuxProject,
@@ -1994,7 +1879,7 @@ flutter:
           ]) {
             final File pluginCmakefile = project!.generatedPluginCmakeFile;
 
-            expect(pluginCmakefile, exists);
+            expect(pluginCmakefile.existsSync(), isTrue);
             final String contents = pluginCmakefile.readAsStringSync();
             expect(contents, contains('add_subdirectory(flutter/ephemeral/.plugin_symlinks'));
           }
@@ -2008,13 +1893,43 @@ flutter:
       );
 
       testUsingContext(
+        'injectPlugins will validate if all plugins in the project are part of the passed allowedPlugins',
+        () async {
+          // Re-run the setup using the Windows filesystem.
+          setUpProject(fsWindows);
+          createFakePlugins(fsWindows, const <String>['plugin_one', 'plugin_two']);
+
+          expect(
+            () => injectPlugins(
+              flutterProject,
+              linuxPlatform: true,
+              windowsPlatform: true,
+              allowedPlugins: PreviewDevice.supportedPubPlugins,
+            ),
+            throwsToolExit(
+              message: '''
+The Flutter Preview device does not support the following plugins from your pubspec.yaml:
+
+[plugin_one, plugin_two]
+''',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fsWindows,
+          ProcessManager: () => FakeProcessManager.empty(),
+          FeatureFlags: enableExplicitPackageDependencies,
+          Pub: FakePubWithPrimedDeps.new,
+        },
+      );
+
+      testUsingContext(
         'iOS and macOS project setup up Darwin Dependency Management',
         () async {
           final FakeDarwinDependencyManagement dependencyManagement =
               FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
-            releaseMode: false,
             iosPlatform: true,
             macOSPlatform: true,
             darwinDependencyManagement: dependencyManagement,
@@ -2037,11 +1952,7 @@ flutter:
         () async {
           final FakeDarwinDependencyManagement dependencyManagement =
               FakeDarwinDependencyManagement();
-          await injectPlugins(
-            flutterProject,
-            releaseMode: false,
-            darwinDependencyManagement: dependencyManagement,
-          );
+          await injectPlugins(flutterProject, darwinDependencyManagement: dependencyManagement);
           expect(dependencyManagement.setupPlatforms, <SupportedPlatform>[]);
         },
         overrides: <Type, Generator>{
@@ -2068,7 +1979,7 @@ flutter:
           // refreshPluginsList should call createPluginSymlinks.
           await refreshPluginsList(flutterProject);
 
-          expect(linuxProject.pluginSymlinkDirectory.childLink('some_plugin'), exists);
+          expect(linuxProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2085,7 +1996,7 @@ flutter:
           // refreshPluginsList should call createPluginSymlinks.
           await refreshPluginsList(flutterProject);
 
-          expect(windowsProject.pluginSymlinkDirectory.childLink('some_plugin'), exists);
+          expect(windowsProject.pluginSymlinkDirectory.childLink('some_plugin').existsSync(), true);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2111,7 +2022,7 @@ flutter:
           createPluginSymlinks(flutterProject, force: true);
 
           for (final File file in dummyFiles) {
-            expect(file, isNot(exists));
+            expect(file.existsSync(), false);
           }
         },
         overrides: <Type, Generator>{
@@ -2140,7 +2051,7 @@ flutter:
           await refreshPluginsList(flutterProject);
 
           for (final File file in dummyFiles) {
-            expect(file, isNot(exists));
+            expect(file.existsSync(), false);
           }
         },
         overrides: <Type, Generator>{
@@ -2168,7 +2079,7 @@ flutter:
           createPluginSymlinks(flutterProject);
 
           for (final File file in dummyFiles) {
-            expect(file, exists);
+            expect(file.existsSync(), true);
           }
         },
         overrides: <Type, Generator>{
@@ -2196,7 +2107,7 @@ flutter:
           createPluginSymlinks(flutterProject);
 
           for (final Link link in links) {
-            expect(link, exists);
+            expect(link.existsSync(), true);
           }
         },
         overrides: <Type, Generator>{
@@ -2476,7 +2387,10 @@ flutter:
           ..flutterPluginsDependenciesFile = dependenciesFile
           ..windows = windowsProject;
 
-        writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+        flutterProject.directory
+            .childDirectory('.dart_tool')
+            .childFile('package_config.json')
+            .createSync(recursive: true);
 
         const String dependenciesFileContents = r'''
 {
@@ -2596,226 +2510,6 @@ flutter:
         returnsNormally,
       );
     });
-
-    group('injectPlugins in release mode', () {
-      const String testPluginName = 'test_plugin';
-
-      // Fake pub to override dev dependencies of flutterProject.
-      final Pub fakePubWithTestPluginDevDependency = FakePubWithPrimedDeps(
-        devDependencies: <String>{testPluginName},
-      );
-
-      testUsingContext(
-        'excludes dev dependencies from Android plugin registrant',
-        () async {
-          final Directory pluginDir = createPlugin(
-            name: testPluginName,
-            platforms: const <String, _PluginPlatformInfo>{
-              'android': _PluginPlatformInfo(pluginClass: 'Foo', androidPackage: 'bar.foo'),
-            },
-          );
-
-          // injectPlugins will fail if main native class not found in expected spot, so add
-          // it first.
-          pluginDir
-              .childDirectory('android')
-              .childDirectory('src')
-              .childDirectory('main')
-              .childDirectory('java')
-              .childDirectory('bar')
-              .childDirectory('foo')
-              .childFile('Foo.java')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
-
-          // Test non-release mode.
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: false);
-          final File generatedPluginRegistrant =
-              flutterProject.android.generatedPluginRegistrantFile;
-          expect(generatedPluginRegistrant, exists);
-          expect(generatedPluginRegistrant.readAsStringSync(), contains('bar.foo.Foo'));
-
-          // Test release mode.
-          await injectPlugins(flutterProject, androidPlatform: true, releaseMode: true);
-          expect(generatedPluginRegistrant, exists);
-          expect(generatedPluginRegistrant.readAsStringSync(), isNot(contains('bar.foo.Foo')));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: () => fakePubWithTestPluginDevDependency,
-        },
-      );
-
-      testUsingContext(
-        'includes dev dependencies from iOS plugin registrant',
-        () async {
-          createPlugin(
-            name: testPluginName,
-            platforms: const <String, _PluginPlatformInfo>{
-              'ios': _PluginPlatformInfo(pluginClass: 'Foo'),
-            },
-          );
-
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
-          const String devDepImport = '#import <$testPluginName/Foo.h>';
-
-          // Test non-release mode.
-          await injectPlugins(
-            flutterProject,
-            iosPlatform: true,
-            darwinDependencyManagement: dependencyManagement,
-            releaseMode: false,
-          );
-          final File generatedPluginRegistrantImpl =
-              flutterProject.ios.pluginRegistrantImplementation;
-          expect(generatedPluginRegistrantImpl, exists);
-          expect(generatedPluginRegistrantImpl.readAsStringSync(), contains(devDepImport));
-
-          // Test release mode.
-          await injectPlugins(
-            flutterProject,
-            iosPlatform: true,
-            darwinDependencyManagement: dependencyManagement,
-            releaseMode: true,
-          );
-          expect(generatedPluginRegistrantImpl, exists);
-          expect(generatedPluginRegistrantImpl.readAsStringSync(), contains(devDepImport));
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: () => fakePubWithTestPluginDevDependency,
-        },
-      );
-
-      testUsingContext(
-        'excludes dev dependencies from Linux plugin registrant',
-        () async {
-          createPlugin(
-            name: testPluginName,
-            platforms: const <String, _PluginPlatformInfo>{
-              'linux': _PluginPlatformInfo(pluginClass: 'Foo'),
-            },
-          );
-
-          const String expectedDevDepImport = '#include <$testPluginName/foo.h>';
-
-          // Test non-release mode.
-          await injectPlugins(flutterProject, linuxPlatform: true, releaseMode: false);
-          final File generatedPluginRegistrant = flutterProject.linux.managedDirectory.childFile(
-            'generated_plugin_registrant.cc',
-          );
-          expect(generatedPluginRegistrant, exists);
-          expect(generatedPluginRegistrant.readAsStringSync(), contains(expectedDevDepImport));
-
-          // Test release mode.
-          await injectPlugins(flutterProject, linuxPlatform: true, releaseMode: true);
-          expect(generatedPluginRegistrant, exists);
-          expect(
-            generatedPluginRegistrant.readAsStringSync(),
-            isNot(contains(expectedDevDepImport)),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: () => fakePubWithTestPluginDevDependency,
-        },
-      );
-
-      testUsingContext(
-        'includes dev dependencies from MacOS plugin registrant',
-        () async {
-          createPlugin(
-            name: testPluginName,
-            platforms: const <String, _PluginPlatformInfo>{
-              'macos': _PluginPlatformInfo(pluginClass: 'Foo'),
-            },
-          );
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
-          const String expectedDevDepRegistration = 'Foo.register';
-
-          // Test non-release mode.
-          await injectPlugins(
-            flutterProject,
-            macOSPlatform: true,
-            darwinDependencyManagement: dependencyManagement,
-            releaseMode: false,
-          );
-          final File generatedPluginRegistrant = flutterProject.macos.managedDirectory.childFile(
-            'GeneratedPluginRegistrant.swift',
-          );
-          expect(generatedPluginRegistrant, exists);
-          expect(
-            generatedPluginRegistrant.readAsStringSync(),
-            contains(expectedDevDepRegistration),
-          );
-
-          // Test release mode.
-          await injectPlugins(
-            flutterProject,
-            macOSPlatform: true,
-            darwinDependencyManagement: dependencyManagement,
-            releaseMode: true,
-          );
-          expect(generatedPluginRegistrant, exists);
-          expect(
-            generatedPluginRegistrant.readAsStringSync(),
-            contains(expectedDevDepRegistration),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: () => fakePubWithTestPluginDevDependency,
-        },
-      );
-
-      testUsingContext(
-        'excludes dev dependencies from Windows plugin registrant',
-        () async {
-          createPlugin(
-            name: testPluginName,
-            platforms: const <String, _PluginPlatformInfo>{
-              'windows': _PluginPlatformInfo(pluginClass: 'Foo'),
-            },
-          );
-
-          const String expectedDevDepRegistration = '#include <$testPluginName/foo.h>';
-
-          // Test non-release mode.
-          await injectPlugins(flutterProject, windowsPlatform: true, releaseMode: false);
-          final File generatedPluginRegistrantImpl = flutterProject.windows.managedDirectory
-              .childFile('generated_plugin_registrant.cc');
-          expect(generatedPluginRegistrantImpl, exists);
-          expect(
-            generatedPluginRegistrantImpl.readAsStringSync(),
-            contains(expectedDevDepRegistration),
-          );
-
-          // Test release mode.
-          await injectPlugins(flutterProject, windowsPlatform: true, releaseMode: true);
-          expect(generatedPluginRegistrantImpl, exists);
-          expect(
-            generatedPluginRegistrantImpl.readAsStringSync(),
-            isNot(contains(expectedDevDepRegistration)),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
-          Pub: () => fakePubWithTestPluginDevDependency,
-        },
-      );
-    });
   });
 
   testUsingContext(
@@ -2845,7 +2539,10 @@ flutter:
         )
         ..windows = windowsProject;
 
-      writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+      flutterProject.directory
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
 
       createPluginSymlinks(
         flutterProject,
@@ -3021,17 +2718,6 @@ class FakeAndroidProject extends Fake implements AndroidProject {
   AndroidEmbeddingVersionResult computeEmbeddingVersion() {
     return AndroidEmbeddingVersionResult(embeddingVersion, 'reasons for version');
   }
-
-  @override
-  File get generatedPluginRegistrantFile => hostAppGradleRoot
-      .childDirectory('app')
-      .childDirectory('src')
-      .childDirectory('main')
-      .childDirectory('java')
-      .childDirectory('io')
-      .childDirectory('flutter')
-      .childDirectory('plugins')
-      .childFile('GeneratedPluginRegistrant.java');
 }
 
 class FakeWebProject extends Fake implements WebProject {
@@ -3117,15 +2803,5 @@ class FakeDarwinDependencyManagement extends Fake implements DarwinDependencyMan
   @override
   Future<void> setUp({required SupportedPlatform platform}) async {
     setupPlatforms.add(platform);
-  }
-}
-
-/// A fake of [CocoaPods] that writes calls to [invalidatePodInstallOutput] to [capturedInvocations].
-final class FakeCocoaPodsCapturesInvalidate extends Fake implements CocoaPods {
-  final List<XcodeBasedProject> capturedInvocations = <XcodeBasedProject>[];
-
-  @override
-  void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {
-    capturedInvocations.add(xcodeProject);
   }
 }

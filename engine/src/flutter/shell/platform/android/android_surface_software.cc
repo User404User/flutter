@@ -150,8 +150,7 @@ bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) {
 }
 
 bool AndroidSurfaceSoftware::SetNativeWindow(
-    fml::RefPtr<AndroidNativeWindow> window,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    fml::RefPtr<AndroidNativeWindow> window) {
   native_window_ = std::move(window);
   if (!(native_window_ && native_window_->IsValid())) {
     return false;

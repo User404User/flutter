@@ -17,7 +17,6 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
-import '../../../src/package_config.dart';
 
 const String _kEmptyPubspecFile = '''
 name: path_provider_example
@@ -25,6 +24,40 @@ name: path_provider_example
 dependencies:
   flutter:
     sdk: flutter
+''';
+
+const String _kEmptyPackageJson = '''
+{
+  "configVersion": 2,
+  "packages": [
+     {
+      "name": "path_provider_example",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''';
+
+const String _kSamplePackageJson = '''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "/path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "path_provider_example",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
 ''';
 
 const String _kSamplePubspecFile = '''
@@ -141,15 +174,11 @@ void main() {
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
-          directory: projectDir,
-          mainLibName: 'path_provider_example',
-          packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
-        );
+        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePackageJson);
 
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
-name: path_provider_example
-''');
+        projectDir.childFile('pubspec.yaml').createSync();
 
         final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
         await DartPluginRegistrantTarget.test(testProject).build(environment);
@@ -184,12 +213,9 @@ name: path_provider_example
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
-          directory: projectDir,
-          mainLibName: 'path_provider_example',
-          packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
-          languageVersions: <String, String>{'path_provider_example': '2.12'},
-        );
+        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePackageJson);
 
         projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
 
@@ -270,11 +296,10 @@ name: path_provider_example
           },
           generateDartPluginRegistry: true,
         );
-        writePackageConfigFile(
-          directory: projectDir,
-          mainLibName: 'path_provider_example',
-          packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
-        );
+        final File config =
+            projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+              ..createSync(recursive: true)
+              ..writeAsStringSync(_kSamplePackageJson);
 
         final File pubspec = projectDir.childFile('pubspec.yaml')
           ..writeAsStringSync(_kSamplePubspecFile);
@@ -296,7 +321,7 @@ name: path_provider_example
 
         // Simulate a user removing everything from pubspec.yaml.
         pubspec.writeAsStringSync(_kEmptyPubspecFile);
-        writePackageConfigFile(directory: projectDir, mainLibName: 'path_provider_example');
+        config.writeAsStringSync(_kEmptyPackageJson);
 
         await DartPluginRegistrantTarget.test(testProject).build(environment);
         expect(generatedMain.existsSync(), isFalse);
@@ -325,11 +350,9 @@ name: path_provider_example
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
-          directory: projectDir,
-          mainLibName: 'path_provider_example',
-          packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
-        );
+        projectDir.childDirectory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePackageJson);
 
         projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
 

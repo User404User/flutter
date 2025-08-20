@@ -9,7 +9,6 @@
 precision highp float;
 
 #include <impeller/gaussian.glsl>
-#include <impeller/math.glsl>
 #include <impeller/types.glsl>
 
 uniform FragInfo {
@@ -45,9 +44,9 @@ float computeErf7(float x) {
 
 // The length formula, but with an exponent other than 2
 float powerDistance(vec2 p) {
-  float xp = POW(p.x, frag_info.exponent);
-  float yp = POW(p.y, frag_info.exponent);
-  return POW(xp + yp, frag_info.exponentInv);
+  float xp = pow(p.x, frag_info.exponent);
+  float yp = pow(p.y, frag_info.exponent);
+  return pow(xp + yp, frag_info.exponentInv);
 }
 
 void main() {

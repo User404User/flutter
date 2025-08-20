@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -36,16 +37,66 @@ import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/logging_logger.dart';
-import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+final String _flutterToolsPackageConfigContents = json.encode(<String, Object>{
+  'configVersion': 2,
+  'packages': <Map<String, Object>>[
+    <String, String>{
+      'name': 'ffi',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/ffi-2.1.2',
+      'packageUri': 'lib/',
+      'languageVersion': '3.3',
+    },
+    <String, String>{
+      'name': 'test',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test-1.24.9',
+      'packageUri': 'lib/',
+      'languageVersion': '3.0',
+    },
+    <String, String>{
+      'name': 'test_api',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_api-0.6.1',
+      'packageUri': 'lib/',
+      'languageVersion': '3.0',
+    },
+    <String, String>{
+      'name': 'test_core',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_core-0.5.9',
+      'packageUri': 'lib/',
+      'languageVersion': '3.0',
+    },
+  ],
+  'generated': '2021-02-24T07:55:20.084834Z',
+  'generator': 'pub',
+  'generatorVersion': '2.13.0-68.0.dev',
+});
 const String _pubspecContents = '''
-name: my_app
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter''';
+final String _packageConfigContents = json.encode(<String, Object>{
+  'configVersion': 2,
+  'packages': <Map<String, Object>>[
+    <String, String>{
+      'name': 'test_api',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+      'packageUri': 'lib/',
+      'languageVersion': '2.12',
+    },
+    <String, String>{
+      'name': 'integration_test',
+      'rootUri': 'file:///path/to/flutter/packages/integration_test',
+      'packageUri': 'lib/',
+      'languageVersion': '2.12',
+    },
+  ],
+  'generated': '2021-02-24T07:55:20.084834Z',
+  'generator': 'pub',
+  'generatorVersion': '2.13.0-68.0.dev',
+});
 
 void main() {
   Cache.disableLocking();
@@ -60,30 +111,20 @@ void main() {
     final Directory package = fs.directory('package');
     package.childFile('pubspec.yaml').createSync(recursive: true);
     package.childFile('pubspec.yaml').writeAsStringSync(_pubspecContents);
-    writePackageConfigFile(
-      directory: package,
-      packages: <String, String>{
-        'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
-        'integration_test': 'file:///path/to/flutter/packages/integration_test',
-      },
-      mainLibName: 'my_app',
-    );
+    (package.childDirectory('.dart_tool').childFile('package_config.json')
+      ..createSync(recursive: true)).writeAsStringSync(_packageConfigContents);
     package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
     package
         .childDirectory('integration_test')
         .childFile('some_integration_test.dart')
         .createSync(recursive: true);
 
-    writePackageConfigFile(
-      directory: fs.directory(fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools')),
-      packages: <String, String>{
-        'ffi': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/ffi-2.1.2',
-        'test': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test-1.24.9',
-        'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_api-0.6.1',
-        'test_core': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_core-0.5.9',
-      },
-      mainLibName: 'my_app',
-    );
+    final File flutterToolsPackageConfigFile = fs
+        .directory(fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools'))
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
+    flutterToolsPackageConfigFile.createSync(recursive: true);
+    flutterToolsPackageConfigFile.writeAsStringSync(_flutterToolsPackageConfigContents);
 
     fs.currentDirectory = package.path;
 
@@ -120,14 +161,26 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
     ''');
-      writePackageConfigFile(
-        directory: fs.currentDirectory,
-        packages: <String, String>{
-          'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
-        },
-        mainLibName: 'my_app',
-      );
-
+      fs
+          .directory('.dart_tool')
+          .childFile('package_config.json')
+          .writeAsStringSync(
+            json.encode(<String, Object>{
+              'configVersion': 2,
+              'packages': <Map<String, Object>>[
+                <String, String>{
+                  'name': 'test_api',
+                  'rootUri':
+                      'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+                  'packageUri': 'lib/',
+                  'languageVersion': '2.12',
+                },
+              ],
+              'generated': '2021-02-24T07:55:20.084834Z',
+              'generator': 'pub',
+              'generatorVersion': '2.13.0-68.0.dev',
+            }),
+          );
       final FakePackageTest fakePackageTest = FakePackageTest();
       final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
@@ -157,7 +210,6 @@ dev_dependencies:
       expect(fakePackageTest.lastArgs, isNot(contains('compact')));
       expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
       expect(fakePackageTest.lastArgs, isNot(contains('30s')));
-      expect(fakePackageTest.lastArgs, isNot(contains('--ignore-timeouts')));
       expect(fakePackageTest.lastArgs, isNot(contains('--concurrency')));
     },
     overrides: <Type, Generator>{
@@ -309,7 +361,7 @@ dev_dependencies:
   testUsingContext(
     'Coverage provides current library name to Coverage Collector by default',
     () async {
-      const String currentPackageName = 'my_app';
+      const String currentPackageName = '';
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
@@ -349,98 +401,6 @@ dev_dependencies:
       expect(fakeVmServiceHost.hasRemainingExpectations, false);
       expect((testRunner.lastTestWatcher! as CoverageCollector).libraryNames, <String>{
         currentPackageName,
-      });
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-    },
-  );
-
-  testUsingContext(
-    'Coverage provides current library name and workspace names to Coverage Collector by default',
-    () async {
-      final Directory package = fs.currentDirectory;
-      package.childFile('pubspec.yaml').writeAsStringSync('''
-name: my_app
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  integration_test:
-    sdk: flutter
-workspace:
-- child1
-- child2
-''');
-      package.childDirectory('child1').childFile('pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-name: child1
-resolution: workspace
-''');
-      package.childDirectory('child2').childFile('pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-name: child2
-resolution: workspace
-workspace:
-- example
-''');
-      package.childDirectory('child2').childDirectory('example').childFile('pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-name: child2_example
-resolution: workspace
-''');
-
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse:
-                (VM.parse(<String, Object>{})!
-                      ..isolates = <IsolateRef>[
-                        IsolateRef.parse(<String, Object>{'id': '1'})!,
-                      ])
-                    .toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'getSourceReport',
-            args: <String, Object>{
-              'isolateId': '1',
-              'reports': <Object>['Coverage'],
-              'forceCompile': true,
-              'reportLines': true,
-              'libraryFilters': <String>[
-                'package:my_app/',
-                'package:child1/',
-                'package:child2/',
-                'package:child2_example/',
-              ],
-              'librariesAlreadyCompiled': <Object>[],
-            },
-            jsonResponse: SourceReport(ranges: <SourceReportRange>[]).toJson(),
-          ),
-        ],
-      );
-      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
-
-      final TestCommand testCommand = TestCommand(testRunner: testRunner);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-      await commandRunner.run(const <String>[
-        'test',
-        '--no-pub',
-        '--coverage',
-        '--',
-        'test/some_test.dart',
-      ]);
-      expect(fakeVmServiceHost.hasRemainingExpectations, false);
-      expect((testRunner.lastTestWatcher! as CoverageCollector).libraryNames, <String>{
-        'my_app',
-        'child1',
-        'child2',
-        'child2_example',
       });
     },
     overrides: <Type, Generator>{
@@ -676,7 +636,6 @@ resolution: workspace
           '--reporter=compact',
           '--file-reporter=json:reports/tests.json',
           '--timeout=100',
-          '--ignore-timeouts',
           '--concurrency=3',
           '--name=name1',
           '--plain-name=name2',
@@ -710,7 +669,6 @@ const List<String> packageTestArgs = <String>[
   '--file-reporter=json:reports/tests.json',
   '--timeout',
   '100',
-  '--ignore-timeouts',
   '--concurrency=3',
   '--name',
   'name1',
@@ -1252,7 +1210,6 @@ const List<String> packageTestArgs = <String>[
       fs.file('vanilla.txt').writeAsStringSync('vanilla');
       fs.file('orange.txt').writeAsStringSync('orange');
       fs.file('pubspec.yaml').writeAsStringSync('''
-name: my_app
 flutter:
   assets:
     - path: vanilla.txt
@@ -1294,7 +1251,6 @@ dev_dependencies:
       fs.file('vanilla.txt').writeAsStringSync('vanilla');
       fs.file('flavorless.txt').writeAsStringSync('flavorless');
       fs.file('pubspec.yaml').writeAsStringSync('''
-name: my_app
 flutter:
   assets:
     - path: vanilla.txt
@@ -1365,7 +1321,6 @@ dev_dependencies:
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
       fs.file('asset.txt').writeAsStringSync('1');
       fs.file('pubspec.yaml').writeAsStringSync('''
-name: my_app
 flutter:
   assets:
     - asset.txt
@@ -1570,6 +1525,45 @@ dev_dependencies:
     );
   });
 
+  // Tests whether using a deprecated webRenderer toggles a warningText.
+  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
+    testUsingContext(
+      'Using --web-renderer=${webRenderer.name} triggers a warningText.',
+      () async {
+        // Run the command so it parses --web-renderer, but ignore all errors.
+        // We only care about the logger.
+        try {
+          final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+          final TestCommand testCommand = TestCommand(testRunner: testRunner);
+          await createTestCommandRunner(testCommand).run(<String>[
+            'test',
+            'web',
+            '--no-pub',
+            '--platform=chrome',
+            ...webRenderer.toCliDartDefines,
+          ]);
+        } on ToolExit catch (error) {
+          expect(error, isA<ToolExit>());
+        }
+        expect(
+          logger.warningText,
+          contains('See: https://docs.flutter.dev/to/web-html-renderer-deprecation'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+      },
+    );
+  }
+
+  /// Do test all the deprecated WebRendererModes
+  WebRendererMode.values
+      .where((WebRendererMode mode) => mode.isDeprecated)
+      .forEach(testWebRendererDeprecationMessage);
+
   testUsingContext(
     'Can test in a pub workspace',
     () async {
@@ -1657,7 +1651,6 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
-    bool ignoreTimeouts = false,
     bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
@@ -1707,7 +1700,6 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
-    bool ignoreTimeouts = false,
     bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,

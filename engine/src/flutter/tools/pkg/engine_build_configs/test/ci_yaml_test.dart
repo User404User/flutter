@@ -43,7 +43,6 @@ targets:
     recipe: engine_v2/engine_v2
     properties:
       config_name: linux_build
-      release_build: "true"
 ''';
     final y.YamlNode yamlNode = y.loadYamlNode(yamlData, sourceUrl: Uri.file(ciYamlPath));
     final CiConfig config = CiConfig.fromYaml(yamlNode);
@@ -58,7 +57,6 @@ targets:
     expect(config.ciTargets['Linux linux_build']!.recipe, equals('engine_v2/engine_v2'));
     expect(config.ciTargets['Linux linux_build']!.properties.valid, isTrue);
     expect(config.ciTargets['Linux linux_build']!.properties.configName, equals('linux_build'));
-    expect(config.ciTargets['Linux linux_build']!.properties.isReleaseBuilder, isTrue);
   });
 
   test('Invalid when targets is malformed', () {

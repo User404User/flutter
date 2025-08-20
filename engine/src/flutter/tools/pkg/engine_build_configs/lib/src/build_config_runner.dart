@@ -583,7 +583,8 @@ final class BuildRunner extends Runner {
     bool success = false;
     try {
       final String ninjaPath = p.join(
-        engineSrcDir.parent.parent.path,
+        engineSrcDir.path,
+        'flutter',
         'third_party',
         'ninja',
         'ninja',

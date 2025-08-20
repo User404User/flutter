@@ -49,8 +49,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.trackGap,
     this.circularTrackPadding,
     @Deprecated(
-      'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
-      'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
+      'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
       'This feature was deprecated after v3.27.0-0.2.pre.',
     )
     this.year2023,
@@ -132,8 +131,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
-    'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
-    'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
+    'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
     'This feature was deprecated after v3.27.0-0.2.pre.',
   )
   final bool? year2023;

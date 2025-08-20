@@ -154,6 +154,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           body: Stack(
             fit: StackFit.expand,
@@ -241,6 +242,7 @@ void main() {
   testWidgets('Material3 - BackdropFilter blendMode on saveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           body: Opacity(
             opacity: 0.9,

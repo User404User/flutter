@@ -340,12 +340,12 @@ void main() {
         lintTarget: const LintChanged(),
       ),
       processManager: FakeProcessManager(
-        onStart: (FakeCommandLogEntry entry) {
-          if (entry.command.first == 'git') {
+        onStart: (List<String> command) {
+          if (command.first == 'git') {
             // This just allows git to not actually be called.
             return FakeProcess();
           }
-          return FakeProcessManager.unhandledStart(entry);
+          return FakeProcessManager.unhandledStart(command);
         },
       ),
     );
@@ -360,12 +360,12 @@ void main() {
         lintTarget: const LintRegex(r'.*test.*\.cc$'),
       ),
       processManager: FakeProcessManager(
-        onStart: (FakeCommandLogEntry entry) {
-          if (entry.command.first == 'git') {
+        onStart: (List<String> command) {
+          if (command.first == 'git') {
             // This just allows git to not actually be called.
             return FakeProcess();
           }
-          return FakeProcessManager.unhandledStart(entry);
+          return FakeProcessManager.unhandledStart(command);
         },
       ),
     );
@@ -377,12 +377,12 @@ void main() {
     final Fixture fixture = Fixture.fromOptions(
       Options(buildCommandsPath: io.File(buildCommands), lintTarget: const LintAll()),
       processManager: FakeProcessManager(
-        onStart: (FakeCommandLogEntry entry) {
-          if (entry.command.first == 'git') {
+        onStart: (List<String> command) {
+          if (command.first == 'git') {
             // This just allows git to not actually be called.
             return FakeProcess();
           }
-          return FakeProcessManager.unhandledStart(entry);
+          return FakeProcessManager.unhandledStart(command);
         },
       ),
     );
@@ -622,11 +622,11 @@ void main() {
     final String firstFilePath = (await fileListFixture.tool.computeFilesOfInterest()).first.path;
 
     final FakeProcessManager fakeProcessManager = FakeProcessManager(
-      onStart: (FakeCommandLogEntry entry) {
-        if (entry.command.first.endsWith('clang-tidy')) {
+      onStart: (List<String> command) {
+        if (command.first.endsWith('clang-tidy')) {
           return FakeProcess(exitCode: -io.ProcessSignal.sigsegv.signalNumber);
         }
-        return FakeProcessManager.unhandledStart(entry);
+        return FakeProcessManager.unhandledStart(command);
       },
     );
 

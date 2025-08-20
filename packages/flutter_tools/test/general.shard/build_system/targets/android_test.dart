@@ -12,11 +12,11 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/android.dart';
+import 'package:flutter_tools/src/convert.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
-import '../../../src/package_config.dart';
 
 void main() {
   late FakeProcessManager processManager;
@@ -84,6 +84,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'debug'},
+      inputs: <String, String>{kBundleSkSLPath: 'bundle.sksl'},
       processManager: processManager,
       artifacts: artifacts,
       fileSystem: fileSystem,
@@ -91,6 +92,15 @@ void main() {
       engineVersion: '2',
     );
     environment.buildDir.createSync(recursive: true);
+    fileSystem
+        .file('bundle.sksl')
+        .writeAsStringSync(
+          json.encode(<String, Object>{
+            'engineRevision': '2',
+            'platform': 'android',
+            'data': <String, Object>{'A': 'B'},
+          }),
+        );
 
     // create pre-requisites.
     environment.buildDir.childFile('app.dill').writeAsStringSync('abcd');
@@ -114,6 +124,10 @@ void main() {
     );
     expect(
       fileSystem.file(fileSystem.path.join('out', 'flutter_assets', 'kernel_blob.bin')),
+      exists,
+    );
+    expect(
+      fileSystem.file(fileSystem.path.join('out', 'flutter_assets', 'io.flutter.shaders.json')),
       exists,
     );
   });
@@ -553,7 +567,10 @@ void main() {
       fileSystem
           .file('pubspec.yaml')
           .writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'hello');
+      fileSystem
+          .directory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
       fileSystem.file('shader.glsl').writeAsStringSync('test');
 
       processManager.addCommands(<FakeCommand>[

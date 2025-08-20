@@ -21,7 +21,6 @@ import 'package:package_config/package_config_types.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
-import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -31,7 +30,6 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
-  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -48,7 +46,6 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
-    runPackageName = environment.projectDir.basename;
   });
 
   testUsingContext(
@@ -104,20 +101,22 @@ void main() {
       await fileSystem.file('/some/path/to/llvm-ar').create();
       await fileSystem.file('/some/path/to/ld.lld').create();
 
-      final File packageConfigFile = writePackageConfigFile(
-        directory: fileSystem.directory(projectUri),
-        mainLibName: 'my_app',
-      );
+      final File packageConfigFile = fileSystem
+          .directory(projectUri)
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json');
+      await packageConfigFile.parent.create();
+      await packageConfigFile.create();
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packageConfigFile,
         logger: environment.logger,
       );
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
+        projectUri,
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
-        runPackageName,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(result.compiler, Uri.file('/some/path/to/clang'));

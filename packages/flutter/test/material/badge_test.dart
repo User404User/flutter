@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Builder(
@@ -40,7 +42,10 @@ void main() {
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
     expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
 
-    expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
+    if (!kIsWeb || isSkiaWeb) {
+      // https://github.com/flutter/flutter/issues/99933
+      expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
+    }
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
     final RRect rrect = RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8));
@@ -52,6 +57,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Align(
@@ -76,7 +82,10 @@ void main() {
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
     expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
 
-    expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
+    if (!kIsWeb || isSkiaWeb) {
+      // https://github.com/flutter/flutter/issues/99933
+      expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
+    }
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
     final RRect rrect = RRect.fromLTRBR(-4, -4, 15.5, 12, const Radius.circular(8));
@@ -89,6 +98,7 @@ void main() {
 
     Widget buildFrame(int count) {
       return MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Builder(
@@ -122,7 +132,10 @@ void main() {
 
     // x = alignment.start + padding.left
     // y = alignment.top
-    expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
+    if (!kIsWeb || isSkiaWeb) {
+      // https://github.com/flutter/flutter/issues/99933
+      expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
+    }
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
     // '0'.width = 12
@@ -138,7 +151,7 @@ void main() {
   });
 
   testWidgets('Small Badge defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData.light(useMaterial3: true);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -170,7 +183,7 @@ void main() {
   });
 
   testWidgets('Small Badge RTL defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData.light(useMaterial3: true);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -204,7 +217,7 @@ void main() {
   });
 
   testWidgets('Large Badge textStyle and colors', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData.light(useMaterial3: true);
     const Color green = Color(0xff00ff00);
     const Color black = Color(0xff000000);
 
@@ -232,8 +245,9 @@ void main() {
 
   testWidgets('isLabelVisible', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Align(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
+        home: const Align(
           alignment: Alignment.topLeft,
           child: Badge(label: Text('0'), isLabelVisible: false, child: Icon(Icons.add)),
         ),
@@ -254,6 +268,7 @@ void main() {
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Badge(
@@ -351,6 +366,7 @@ void main() {
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Badge(
@@ -420,6 +436,7 @@ void main() {
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Badge(

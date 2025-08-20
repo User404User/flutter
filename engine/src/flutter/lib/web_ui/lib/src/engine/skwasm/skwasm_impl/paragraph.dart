@@ -51,9 +51,7 @@ class SkwasmLineMetrics extends SkwasmObjectWrapper<RawLineMetrics> implements u
   SkwasmLineMetrics._(LineMetricsHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawLineMetrics> _registry =
-      SkwasmFinalizationRegistry<RawLineMetrics>(
-        (LineMetricsHandle handle) => lineMetricsDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawLineMetrics>(lineMetricsDispose);
 
   @override
   bool get hardBreak => lineMetricsGetHardBreak(handle);
@@ -90,9 +88,7 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   SkwasmParagraph(ParagraphHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawParagraph> _registry =
-      SkwasmFinalizationRegistry<RawParagraph>(
-        (ParagraphHandle handle) => paragraphDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawParagraph>(paragraphDispose);
 
   bool _hasCheckedForMissingCodePoints = false;
 
@@ -305,9 +301,7 @@ class SkwasmNativeTextStyle extends SkwasmObjectWrapper<RawTextStyle> {
   factory SkwasmNativeTextStyle.defaultTextStyle() => SkwasmNativeTextStyle(textStyleCreate());
 
   static final SkwasmFinalizationRegistry<RawTextStyle> _registry =
-      SkwasmFinalizationRegistry<RawTextStyle>(
-        (TextStyleHandle handle) => textStyleDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawTextStyle>(textStyleDispose);
 
   SkwasmNativeTextStyle copy() {
     return SkwasmNativeTextStyle(textStyleCopy(handle));
@@ -650,9 +644,7 @@ final class SkwasmStrutStyle extends SkwasmObjectWrapper<RawStrutStyle> implemen
   ) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawStrutStyle> _registry =
-      SkwasmFinalizationRegistry<RawStrutStyle>(
-        (StrutStyleHandle handle) => strutStyleDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawStrutStyle>(strutStyleDispose);
 
   final String? _fontFamily;
   final List<String>? _fontFamilyFallback;
@@ -843,9 +835,7 @@ class SkwasmParagraphStyle extends SkwasmObjectWrapper<RawParagraphStyle>
   ) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawParagraphStyle> _registry =
-      SkwasmFinalizationRegistry<RawParagraphStyle>(
-        (ParagraphStyleHandle handle) => paragraphStyleDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawParagraphStyle>(paragraphStyleDispose);
 
   final SkwasmNativeTextStyle textStyle;
   final String? defaultFontFamily;
@@ -939,9 +929,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
   SkwasmParagraphBuilder._(ParagraphBuilderHandle handle, this.style) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawParagraphBuilder> _registry =
-      SkwasmFinalizationRegistry<RawParagraphBuilder>(
-        (ParagraphBuilderHandle handle) => paragraphBuilderDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawParagraphBuilder>(paragraphBuilderDispose);
 
   final SkwasmParagraphStyle style;
   final List<SkwasmNativeTextStyle> textStyleStack = <SkwasmNativeTextStyle>[];
@@ -1006,9 +994,9 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
         // than a slice, but the TextDecoder API doesn't work on shared buffer
         // sources yet.
         // See https://bugs.chromium.org/p/chromium/issues/detail?id=1012656
-        JSUint8Array(
+        createUint8ArrayFromBuffer(
           skwasmInstance.wasmMemory.buffer,
-        ).slice(utf8Data.address, utf8Data.address + outSize.value),
+        ).slice(utf8Data.address.toJS, (utf8Data.address + outSize.value).toJS),
       );
     }
 

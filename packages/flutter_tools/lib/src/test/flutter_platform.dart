@@ -148,6 +148,7 @@ String generateTestBootstrap({
   Uri? packageConfigUri,
   bool updateGoldens = false,
   String languageVersionHeader = '',
+  bool nullSafety = false,
   bool flutterTestDep = true,
   bool integrationTest = false,
 }) {
@@ -243,11 +244,6 @@ void main() {
     buffer.write('''
     goldenFileComparator = LocalFileComparator(Uri.parse('$testUrl'));
     autoUpdateGoldenFiles = $updateGoldens;
-''');
-  }
-  if (integrationTest) {
-    buffer.write('''
-    VmServiceProxyGoldenFileComparator.useIfRunningOnDevice();
 ''');
   }
   if (testConfigFile != null) {

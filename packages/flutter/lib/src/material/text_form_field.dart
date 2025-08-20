@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -151,7 +150,6 @@ class TextFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
-    super.errorBuilder,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     bool? ignorePointers,
@@ -211,17 +209,8 @@ class TextFormField extends FormField<String> {
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {
            final _TextFormFieldState state = field as _TextFormFieldState;
-           InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+           final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
-
-           final String? errorText = field.errorText;
-           if (errorText != null) {
-             effectiveDecoration =
-                 errorBuilder != null
-                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
-                     : effectiveDecoration.copyWith(errorText: errorText);
-           }
-
            void onChangedHandler(String value) {
              field.didChange(value);
              onChanged?.call(value);
@@ -234,7 +223,7 @@ class TextFormField extends FormField<String> {
                restorationId: restorationId,
                controller: state._effectiveController,
                focusNode: focusNode,
-               decoration: effectiveDecoration,
+               decoration: effectiveDecoration.copyWith(errorText: field.errorText),
                keyboardType: keyboardType,
                textInputAction: textInputAction,
                style: style,
@@ -327,9 +316,6 @@ class TextFormField extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
-      return SystemContextMenu.editableText(editableTextState: editableTextState);
-    }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 

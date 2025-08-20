@@ -464,7 +464,7 @@ void main() {
             },
           );
 
-          testWithoutContext('fails if cannot find BuildAction in scheme', () async {
+          testWithoutContext('fails if cannot find BuildActionEntries in scheme', () async {
             final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
             final FakeXcodeProject project = FakeXcodeProject(
@@ -490,7 +490,7 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(
-                message: 'Failed to parse Runner.xcscheme: Could not find BuildAction',
+                message: 'Failed to parse Runner.xcscheme: Could not find BuildActionEntries',
               ),
             );
           });
@@ -522,42 +522,6 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(message: 'Failed to parse Runner.xcscheme: Invalid xml:'),
-            );
-          });
-
-          testWithoutContext('successfully updates scheme with no BuildActionEntries', () async {
-            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-            final BufferLogger testLogger = BufferLogger.test();
-            final FakeXcodeProject project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: memoryFileSystem,
-              logger: testLogger,
-            );
-            _createProjectFiles(project, platform);
-            project.xcodeProjectSchemeFile().writeAsStringSync(
-              _validBuildActions(platform, hasBuildEntries: false),
-            );
-
-            final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
-              _plutilOutput(_allSectionsMigratedAsJson(platform)),
-              _plutilOutput(_allSectionsMigratedAsJson(platform)),
-            ]);
-            final SwiftPackageManagerIntegrationMigration projectMigration =
-                SwiftPackageManagerIntegrationMigration(
-                  project,
-                  platform,
-                  BuildInfo.debug,
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  logger: testLogger,
-                  fileSystem: memoryFileSystem,
-                  plistParser: plistParser,
-                  features: swiftPackageManagerFullyEnabledFlags,
-                );
-
-            await projectMigration.migrate();
-            expect(
-              project.xcodeProjectSchemeFile().readAsStringSync(),
-              _validBuildActions(platform, hasFrameworkScript: true, hasBuildEntries: false),
             );
           });
 
@@ -2657,7 +2621,6 @@ String _validBuildActions(
   SupportedPlatform platform, {
   bool hasPreActions = false,
   bool hasFrameworkScript = false,
-  bool hasBuildEntries = true,
 }) {
   final String scriptText;
   if (platform == SupportedPlatform.ios) {
@@ -2693,11 +2656,11 @@ String _validBuildActions(
 \n      <PreActions>
       </PreActions>''';
   }
-
-  String buildEntries = '';
-  if (hasBuildEntries) {
-    buildEntries = '''
-\n      <BuildActionEntries>
+  return '''
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">$preActions
+      <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
@@ -2707,23 +2670,7 @@ String _validBuildActions(
 ${_validBuildableReference(platform)}
          </BuildActionEntry>
       </BuildActionEntries>
-''';
-  }
-  return '''
-<Scheme
-   LastUpgradeVersion = "1510"
-   version = "1.3">
-   <BuildAction
-      parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES">$preActions$buildEntries
    </BuildAction>
-   <LaunchAction>
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-${_validBuildableReference(platform)}
-      </BuildableProductRunnable>
-   </LaunchAction>
-</Scheme>
 ''';
 }
 

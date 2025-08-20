@@ -29,11 +29,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     final DomEventTarget resizeEventTarget = domWindow.visualViewport ?? domWindow;
 
     // Subscribe to the 'resize' event, and convert it to a ui.Size stream.
-    _domResizeSubscription = DomSubscription(
-      resizeEventTarget,
-      'resize',
-      createDomEventListener(_onVisualViewportResize),
-    );
+    _domResizeSubscription = DomSubscription(resizeEventTarget, 'resize', _onVisualViewportResize);
   }
 
   late DomSubscription _domResizeSubscription;
@@ -55,6 +51,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
   void close() {
     super.close();
     _domResizeSubscription.cancel();
+    // ignore:unawaited_futures
     _onResizeStreamController.close();
   }
 

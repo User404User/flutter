@@ -126,28 +126,22 @@ void DlSkCanvasDispatcher::transformReset() {
 }
 
 void DlSkCanvasDispatcher::clipRect(const DlRect& rect,
-                                    DlClipOp clip_op,
+                                    ClipOp clip_op,
                                     bool is_aa) {
   canvas_->clipRect(ToSkRect(rect), ToSk(clip_op), is_aa);
 }
 void DlSkCanvasDispatcher::clipOval(const DlRect& bounds,
-                                    DlClipOp clip_op,
+                                    ClipOp clip_op,
                                     bool is_aa) {
   canvas_->clipRRect(SkRRect::MakeOval(ToSkRect(bounds)), ToSk(clip_op), is_aa);
 }
 void DlSkCanvasDispatcher::clipRoundRect(const DlRoundRect& rrect,
-                                         DlClipOp clip_op,
+                                         ClipOp clip_op,
                                          bool is_aa) {
   canvas_->clipRRect(ToSkRRect(rrect), ToSk(clip_op), is_aa);
 }
-void DlSkCanvasDispatcher::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
-                                                 DlClipOp clip_op,
-                                                 bool is_aa) {
-  // Skia doesn't support round superellipse, thus fall back to round rectangle.
-  canvas_->clipRRect(ToApproximateSkRRect(rse), ToSk(clip_op), is_aa);
-}
 void DlSkCanvasDispatcher::clipPath(const DlPath& path,
-                                    DlClipOp clip_op,
+                                    ClipOp clip_op,
                                     bool is_aa) {
   path.WillRenderSkPath();
   canvas_->clipPath(path.GetSkPath(), ToSk(clip_op), is_aa);
@@ -198,11 +192,6 @@ void DlSkCanvasDispatcher::drawDiffRoundRect(const DlRoundRect& outer,
                                              const DlRoundRect& inner) {
   canvas_->drawDRRect(ToSkRRect(outer), ToSkRRect(inner), paint());
 }
-void DlSkCanvasDispatcher::drawRoundSuperellipse(
-    const DlRoundSuperellipse& rse) {
-  // Skia doesn't support round superellipse, thus fall back to round rectangle.
-  canvas_->drawRRect(ToApproximateSkRRect(rse), paint());
-}
 void DlSkCanvasDispatcher::drawPath(const DlPath& path) {
   path.WillRenderSkPath();
   canvas_->drawPath(path.GetSkPath(), paint());
@@ -213,7 +202,7 @@ void DlSkCanvasDispatcher::drawArc(const DlRect& bounds,
                                    bool useCenter) {
   canvas_->drawArc(ToSkRect(bounds), start, sweep, useCenter, paint());
 }
-void DlSkCanvasDispatcher::drawPoints(DlPointMode mode,
+void DlSkCanvasDispatcher::drawPoints(PointMode mode,
                                       uint32_t count,
                                       const DlPoint pts[]) {
   canvas_->drawPoints(ToSk(mode), count, ToSkPoints(pts), paint());
@@ -235,7 +224,7 @@ void DlSkCanvasDispatcher::drawImageRect(const sk_sp<DlImage> image,
                                          const DlRect& dst,
                                          DlImageSampling sampling,
                                          bool render_with_attributes,
-                                         DlSrcRectConstraint constraint) {
+                                         SrcRectConstraint constraint) {
   canvas_->drawImageRect(image ? image->skia_image() : nullptr, ToSkRect(src),
                          ToSkRect(dst), ToSk(sampling),
                          safe_paint(render_with_attributes), ToSk(constraint));

@@ -10,6 +10,7 @@ void main() {
   testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: Stepper(
             onStepTapped: (int i) {},
@@ -185,6 +186,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: Stepper(
             type: StepperType.horizontal,
@@ -776,7 +778,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2)),
     );
 
-    final ThemeData themeLight = ThemeData();
+    final ThemeData themeLight = ThemeData(useMaterial3: true);
     await tester.pumpWidget(buildFrame(themeLight));
 
     const String continueStr = 'Continue';
@@ -799,7 +801,7 @@ void main() {
       rectMoreOrLessEquals(cancelButtonRect, epsilon: 0.001),
     );
 
-    final ThemeData themeDark = ThemeData.dark();
+    final ThemeData themeDark = ThemeData.dark(useMaterial3: true);
     await tester.pumpWidget(buildFrame(themeDark));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
@@ -893,7 +895,7 @@ void main() {
       );
     }
 
-    final ThemeData themeLight = ThemeData();
+    final ThemeData themeLight = ThemeData(useMaterial3: true);
     final ColorScheme colorsLight = themeLight.colorScheme;
     await tester.pumpWidget(buildFrame(themeLight));
 
@@ -911,7 +913,7 @@ void main() {
       colorsLight.onSurface.withOpacity(0.38).value,
     );
 
-    final ThemeData themeDark = ThemeData.dark();
+    final ThemeData themeDark = ThemeData.dark(useMaterial3: true);
     final ColorScheme colorsDark = themeDark.colorScheme;
     await tester.pumpWidget(buildFrame(themeDark));
     await tester.pumpAndSettle(); // Complete the theme animation.
@@ -983,7 +985,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/pull/77732
     Widget buildFrame({bool isActive = true, Brightness? brightness}) {
       return MaterialApp(
-        theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData(),
+        theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light(),
         home: Scaffold(
           body: Center(
             child: Stepper(
@@ -1003,7 +1005,7 @@ void main() {
     }
 
     // Light theme
-    final ColorScheme light = ThemeData().colorScheme;
+    final ColorScheme light = ThemeData.light().colorScheme;
     await tester.pumpWidget(buildFrame(brightness: Brightness.light));
     expect(circleFillColor(), light.primary);
     await tester.pumpWidget(buildFrame(isActive: false, brightness: Brightness.light));

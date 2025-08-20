@@ -9,9 +9,9 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
-#include "flutter/txt/src/txt/font_style.h"
-#include "flutter/txt/src/txt/font_weight.h"
-#include "flutter/txt/src/txt/paragraph_style.h"
+#include "flutter/third_party/txt/src/txt/font_style.h"
+#include "flutter/third_party/txt/src/txt/font_weight.h"
+#include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
@@ -126,25 +126,25 @@ constexpr flutter::DlBlendMode ToDisplayListType(BlendMode mode) {
   switch (mode) {
     case BlendMode::kClear:
       return Mode::kClear;
-    case BlendMode::kSrc:
+    case BlendMode::kSource:
       return Mode::kSrc;
-    case BlendMode::kDst:
+    case BlendMode::kDestination:
       return Mode::kDst;
-    case BlendMode::kSrcOver:
+    case BlendMode::kSourceOver:
       return Mode::kSrcOver;
-    case BlendMode::kDstOver:
+    case BlendMode::kDestinationOver:
       return Mode::kDstOver;
-    case BlendMode::kSrcIn:
+    case BlendMode::kSourceIn:
       return Mode::kSrcIn;
-    case BlendMode::kDstIn:
+    case BlendMode::kDestinationIn:
       return Mode::kDstIn;
-    case BlendMode::kSrcOut:
+    case BlendMode::kSourceOut:
       return Mode::kSrcOut;
-    case BlendMode::kDstOut:
+    case BlendMode::kDestinationOut:
       return Mode::kDstOut;
-    case BlendMode::kSrcATop:
+    case BlendMode::kSourceATop:
       return Mode::kSrcATop;
-    case BlendMode::kDstATop:
+    case BlendMode::kDestinationATop:
       return Mode::kDstATop;
     case BlendMode::kXor:
       return Mode::kXor;
@@ -274,14 +274,14 @@ constexpr FillType ToImpellerType(ImpellerFillType type) {
   return FillType::kNonZero;
 }
 
-constexpr flutter::DlClipOp ToImpellerType(ImpellerClipOperation op) {
+constexpr flutter::DlCanvas::ClipOp ToImpellerType(ImpellerClipOperation op) {
   switch (op) {
     case kImpellerClipOperationDifference:
-      return flutter::DlClipOp::kDifference;
+      return flutter::DlCanvas::ClipOp::kDifference;
     case kImpellerClipOperationIntersect:
-      return flutter::DlClipOp::kIntersect;
+      return flutter::DlCanvas::ClipOp::kIntersect;
   }
-  return flutter::DlClipOp::kDifference;
+  return flutter::DlCanvas::ClipOp::kDifference;
 }
 
 constexpr Color ToImpellerType(const ImpellerColor& color) {
@@ -298,25 +298,25 @@ constexpr BlendMode ToImpellerType(ImpellerBlendMode mode) {
     case kImpellerBlendModeClear:
       return BlendMode::kClear;
     case kImpellerBlendModeSource:
-      return BlendMode::kSrc;
+      return BlendMode::kSource;
     case kImpellerBlendModeDestination:
-      return BlendMode::kDst;
+      return BlendMode::kDestination;
     case kImpellerBlendModeSourceOver:
-      return BlendMode::kSrcOver;
+      return BlendMode::kSourceOver;
     case kImpellerBlendModeDestinationOver:
-      return BlendMode::kDstOver;
+      return BlendMode::kDestinationOver;
     case kImpellerBlendModeSourceIn:
-      return BlendMode::kSrcIn;
+      return BlendMode::kSourceIn;
     case kImpellerBlendModeDestinationIn:
-      return BlendMode::kDstIn;
+      return BlendMode::kDestinationIn;
     case kImpellerBlendModeSourceOut:
-      return BlendMode::kSrcOut;
+      return BlendMode::kSourceOut;
     case kImpellerBlendModeDestinationOut:
-      return BlendMode::kDstOut;
+      return BlendMode::kDestinationOut;
     case kImpellerBlendModeSourceATop:
-      return BlendMode::kSrcATop;
+      return BlendMode::kSourceATop;
     case kImpellerBlendModeDestinationATop:
-      return BlendMode::kDstATop;
+      return BlendMode::kDestinationATop;
     case kImpellerBlendModeXor:
       return BlendMode::kXor;
     case kImpellerBlendModePlus:
@@ -354,7 +354,7 @@ constexpr BlendMode ToImpellerType(ImpellerBlendMode mode) {
     case kImpellerBlendModeLuminosity:
       return BlendMode::kLuminosity;
   }
-  return BlendMode::kSrcOver;
+  return BlendMode::kSourceOver;
 }
 
 constexpr flutter::DlDrawStyle ToDisplayListType(ImpellerDrawStyle style) {

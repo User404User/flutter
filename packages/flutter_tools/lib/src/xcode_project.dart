@@ -4,11 +4,9 @@
 
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
-import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'build_info.dart';
-import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
 import 'features.dart';
@@ -285,42 +283,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
     return null;
   }
-
-  /// When flutter assemble runs within an Xcode run script, it does not know
-  /// the scheme and therefore doesn't know what flavor is being used. This
-  /// makes a best effort to parse the scheme name from the [kXcodeConfiguration].
-  /// Most flavor's [kXcodeConfiguration] should follow the naming convention
-  /// of '$baseConfiguration-$scheme'. This is only semi-enforced by
-  /// [buildXcodeProject], so it may not work. Also check if separated by a
-  /// space instead of a `-`. Once parsed, match it with a scheme/flavor name.
-  /// If the flavor cannot be parsed or matched, use the [kFlavor] environment
-  /// variable, which may or may not be set/correct, as a fallback.
-  Future<String?> parseFlavorFromConfiguration(Environment environment) async {
-    final String? configuration = environment.defines[kXcodeConfiguration];
-    final String? flavor = environment.defines[kFlavor];
-    if (configuration == null) {
-      return flavor;
-    }
-    List<String> splitConfiguration = configuration.split('-');
-    if (splitConfiguration.length == 1) {
-      splitConfiguration = configuration.split(' ');
-    }
-    if (splitConfiguration.length == 1) {
-      return flavor;
-    }
-    final String parsedScheme = splitConfiguration[1];
-
-    final XcodeProjectInfo? info = await projectInfo();
-    if (info == null) {
-      return flavor;
-    }
-    for (final String schemeName in info.schemes) {
-      if (schemeName.toLowerCase() == parsedScheme.toLowerCase()) {
-        return schemeName;
-      }
-    }
-    return flavor;
-  }
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -349,51 +311,6 @@ class IosProject extends XcodeBasedProject {
 
   // The string starts with `applinks:` and ignores the query param which starts with `?`.
   static final RegExp _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
-
-  static const String _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
-
-  static const String _lldbInitTemplate = '''
-#
-# Generated file, do not edit.
-#
-
-command script import --relative-to-command-file $_lldbPythonHelperTemplateName
-''';
-
-  static const String _lldbPythonHelperTemplate = r'''
-#
-# Generated file, do not edit.
-#
-
-import lldb
-
-def handle_new_rx_page(frame: lldb.SBFrame, bp_loc, extra_args, intern_dict):
-    """Intercept NOTIFY_DEBUGGER_ABOUT_RX_PAGES and touch the pages."""
-    base = frame.register["x0"].GetValueAsAddress()
-    page_len = frame.register["x1"].GetValueAsUnsigned()
-
-    # Note: NOTIFY_DEBUGGER_ABOUT_RX_PAGES will check contents of the
-    # first page to see if handled it correctly. This makes diagnosing
-    # misconfiguration (e.g. missing breakpoint) easier.
-    data = bytearray(page_len)
-    data[0:8] = b'IHELPED!'
-
-    error = lldb.SBError()
-    frame.GetThread().GetProcess().WriteMemory(base, data, error)
-    if not error.Success():
-        print(f'Failed to write into {base}[+{page_len}]', error)
-        return
-
-def __lldb_init_module(debugger: lldb.SBDebugger, _):
-    target = debugger.GetDummyTarget()
-    # Caveat: must use BreakpointCreateByRegEx here and not
-    # BreakpointCreateByName. For some reasons callback function does not
-    # get carried over from dummy target for the later.
-    bp = target.BreakpointCreateByRegex("^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$")
-    bp.SetScriptCallbackFunction('{}.handle_new_rx_page'.format(__name__))
-    bp.SetAutoContinue(True)
-    print("-- LLDB integration loaded --")
-''';
 
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
@@ -656,8 +573,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
-    await _regenerateModuleFromTemplateIfNeeded();
-    await _updateLLDBIfNeeded();
+    await _regenerateFromTemplateIfNeeded();
     if (!_flutterLibRoot.existsSync()) {
       return;
     }
@@ -760,45 +676,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     }
   }
 
-  Future<void> _updateLLDBIfNeeded() async {
-    if (globals.cache.isOlderThanToolsStamp(lldbInitFile) ||
-        globals.cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
-      if (isModule) {
-        // When building a module project for Add-to-App, provide instructions
-        // to manually add the LLDB Init File to their native Xcode project.
-        globals.logger.printWarning(
-          'Debugging Flutter on new iOS versions requires an LLDB Init File. '
-          'To ensure debug mode works, please complete one of the following in '
-          'your native Xcode project:\n'
-          '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and Test actions, set LLDB Init File to: \n\n'
-          '    ${lldbInitFile.path}\n\n'
-          '  * If you are already using an LLDB Init File, please append the '
-          'following to your LLDB Init File:\n\n'
-          '    command source ${lldbInitFile.path}\n',
-        );
-      }
-      await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, globals.templateRenderer);
-      await _renderTemplateToFile(
-        _lldbPythonHelperTemplate,
-        null,
-        lldbHelperPythonFile,
-        globals.templateRenderer,
-      );
-    }
-  }
-
-  Future<void> _renderTemplateToFile(
-    String template,
-    Object? context,
-    File file,
-    TemplateRenderer templateRenderer,
-  ) async {
-    final String renderedTemplate = templateRenderer.renderString(template, context);
-    await file.create(recursive: true);
-    await file.writeAsString(renderedTemplate);
-  }
-
-  Future<void> _regenerateModuleFromTemplateIfNeeded() async {
+  Future<void> _regenerateFromTemplateIfNeeded() async {
     if (!isModule) {
       return;
     }
@@ -868,14 +746,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
   }
 
-  File get lldbInitFile {
-    return ephemeralDirectory.childFile('flutter_lldbinit');
-  }
-
-  File get lldbHelperPythonFile {
-    return ephemeralDirectory.childFile(_lldbPythonHelperTemplateName);
-  }
-
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
     final Template template = await Template.fromName(
       path,
@@ -893,9 +763,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
-      fileSystem: globals.fs,
-      fileSystemUtils: globals.fsUtils,
-      plistParser: globals.plistParser,
     );
 
     final String projectName = parent.manifest.appName;

@@ -78,7 +78,6 @@ typedef CanvasPath Path;
   V(PathMeasure::Create)                                           \
   V(Path::Create)                                                  \
   V(PictureRecorder::Create)                                       \
-  V(RSuperellipse::Create)                                         \
   V(SceneBuilder::Create)                                          \
   V(SemanticsUpdateBuilder::Create)                                \
   /* Other */                                                      \
@@ -108,7 +107,6 @@ typedef CanvasPath Path;
   V(PlatformConfigurationNativeApi::GetRootIsolateToken)           \
   V(PlatformConfigurationNativeApi::RegisterBackgroundIsolate)     \
   V(PlatformConfigurationNativeApi::SendPortPlatformMessage)       \
-  V(PlatformConfigurationNativeApi::RequestViewFocusChange)        \
   V(PlatformConfigurationNativeApi::SendChannelUpdate)             \
   V(PlatformConfigurationNativeApi::GetScaledFontSize)             \
   V(PlatformIsolateNativeApi::IsRunningOnPlatformThread)           \
@@ -140,13 +138,11 @@ typedef CanvasPath Path;
   V(Canvas, clipPath)                            \
   V(Canvas, clipRect)                            \
   V(Canvas, clipRRect)                           \
-  V(Canvas, clipRSuperellipse)                   \
   V(Canvas, drawArc)                             \
   V(Canvas, drawAtlas)                           \
   V(Canvas, drawCircle)                          \
   V(Canvas, drawColor)                           \
   V(Canvas, drawDRRect)                          \
-  V(Canvas, drawRSuperellipse)                   \
   V(Canvas, drawImage)                           \
   V(Canvas, drawImageNine)                       \
   V(Canvas, drawImageRect)                       \
@@ -209,7 +205,6 @@ typedef CanvasPath Path;
   V(ImageFilter, initComposeFilter)              \
   V(ImageFilter, initShader)                     \
   V(ImageFilter, initMatrix)                     \
-  V(ImageFilter, equals)                         \
   V(ImageShader, dispose)                        \
   V(ImageShader, initWithImage)                  \
   V(ImmutableBuffer, dispose)                    \
@@ -253,7 +248,6 @@ typedef CanvasPath Path;
   V(Path, addPathWithMatrix)                     \
   V(Path, addPolygon)                            \
   V(Path, addRRect)                              \
-  V(Path, addRSuperellipse)                      \
   V(Path, addRect)                               \
   V(Path, arcTo)                                 \
   V(Path, arcToPoint)                            \
@@ -285,7 +279,6 @@ typedef CanvasPath Path;
   V(Picture, dispose)                            \
   V(Picture, toImage)                            \
   V(Picture, toImageSync)                        \
-  V(RSuperellipse, contains)                     \
   V(SceneBuilder, addPerformanceOverlay)         \
   V(SceneBuilder, addPicture)                    \
   V(SceneBuilder, addPlatformView)               \
@@ -295,9 +288,8 @@ typedef CanvasPath Path;
   V(SceneBuilder, pop)                           \
   V(SceneBuilder, pushBackdropFilter)            \
   V(SceneBuilder, pushClipPath)                  \
-  V(SceneBuilder, pushClipRect)                  \
   V(SceneBuilder, pushClipRRect)                 \
-  V(SceneBuilder, pushClipRSuperellipse)         \
+  V(SceneBuilder, pushClipRect)                  \
   V(SceneBuilder, pushColorFilter)               \
   V(SceneBuilder, pushImageFilter)               \
   V(SceneBuilder, pushOffset)                    \

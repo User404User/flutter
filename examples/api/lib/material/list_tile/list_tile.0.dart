@@ -14,7 +14,10 @@ class ListTileApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(listTileTheme: const ListTileThemeData(textColor: Colors.white)),
+      theme: ThemeData(
+        listTileTheme: const ListTileThemeData(textColor: Colors.white),
+        useMaterial3: true,
+      ),
       home: const ListTileExample(),
     );
   }

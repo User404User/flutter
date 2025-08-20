@@ -102,18 +102,18 @@ abstract class BrowserImageDecoder implements ui.Codec {
     try {
       final ImageDecoder webDecoder = ImageDecoder(
         ImageDecoderOptions(
-          type: contentType,
+          type: contentType.toJS,
           data: dataSource,
 
           // Flutter always uses premultiplied alpha when decoding.
-          premultiplyAlpha: 'premultiply',
+          premultiplyAlpha: 'premultiply'.toJS,
           // "default" gives the browser the liberty to convert to display-appropriate
           // color space, typically SRGB, which is what we want.
-          colorSpaceConversion: 'default',
+          colorSpaceConversion: 'default'.toJS,
 
           // Flutter doesn't give the developer a way to customize this, so if this
           // is an animated image we should prefer the animated track.
-          preferAnimation: true,
+          preferAnimation: true.toJS,
         ),
       );
 
@@ -121,6 +121,8 @@ abstract class BrowserImageDecoder implements ui.Codec {
 
       // Flutter doesn't have an API for progressive loading of images, so we
       // wait until the image is fully decoded.
+      // package:js bindings don't work with getters that return a Promise, which
+      // is why js_util is used instead.
       await promiseToFuture<void>(getJsProperty(webDecoder, 'completed'));
       frameCount = webDecoder.tracks.selectedTrack!.frameCount.toInt();
 
@@ -149,11 +151,7 @@ abstract class BrowserImageDecoder implements ui.Codec {
 
       return webDecoder;
     } catch (error) {
-      // TODO(srujzs): Replace this with `error.isJSAny` when we have that API
-      // in `dart:js_interop`.
-      // https://github.com/dart-lang/sdk/issues/56905
-      // ignore: invalid_runtime_check_with_js_interop_types
-      if (error is JSAny && error.isA<DomException>()) {
+      if (domInstanceOfString(error, 'DOMException')) {
         if ((error as DomException).name == DomException.notSupported) {
           throw ImageCodecException(
             "Image file format ($contentType) is not supported by this browser's ImageDecoder API.\n"
@@ -174,7 +172,7 @@ abstract class BrowserImageDecoder implements ui.Codec {
     _debugCheckNotDisposed();
     final ImageDecoder webDecoder = await _getOrCreateWebDecoder();
     final DecodeResult result = await promiseToFuture<DecodeResult>(
-      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)),
+      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex.toJS)),
     );
     final VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;
@@ -246,7 +244,7 @@ class ResizingCodec implements ui.Codec {
   );
 
   @override
-  int get repetitionCount => delegate.repetitionCount;
+  int get repetitionCount => delegate.frameCount;
 }
 
 BitmapSize? scaledImageSize(int width, int height, int? targetWidth, int? targetHeight) {

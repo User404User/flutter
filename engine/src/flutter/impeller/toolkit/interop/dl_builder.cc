@@ -66,21 +66,24 @@ void DisplayListBuilder::RestoreToCount(uint32_t count) {
   builder_.RestoreToCount(count);
 }
 
-void DisplayListBuilder::ClipRect(const Rect& rect, flutter::DlClipOp op) {
+void DisplayListBuilder::ClipRect(const Rect& rect,
+                                  flutter::DlCanvas::ClipOp op) {
   builder_.ClipRect(rect, op);
 }
 
-void DisplayListBuilder::ClipOval(const Rect& rect, flutter::DlClipOp op) {
+void DisplayListBuilder::ClipOval(const Rect& rect,
+                                  flutter::DlCanvas::ClipOp op) {
   builder_.ClipOval(rect, op);
 }
 
 void DisplayListBuilder::ClipRoundedRect(const Rect& rect,
                                          const RoundingRadii& radii,
-                                         flutter::DlClipOp op) {
+                                         flutter::DlCanvas::ClipOp op) {
   builder_.ClipRoundRect(RoundRect::MakeRectRadii(rect, radii), op);
 }
 
-void DisplayListBuilder::ClipPath(const Path& path, flutter::DlClipOp op) {
+void DisplayListBuilder::ClipPath(const Path& path,
+                                  flutter::DlCanvas::ClipOp op) {
   builder_.ClipPath(flutter::DlPath(path.GetPath()), op);
 }
 
@@ -179,19 +182,6 @@ void DisplayListBuilder::DrawParagraph(const Paragraph& paragraph,
     return;
   }
   handle->Paint(&builder_, point.x, point.y);
-}
-
-void DisplayListBuilder::DrawShadow(const Path& path,
-                                    const flutter::DlColor& color,
-                                    float elevation,
-                                    bool occluder_is_transparent,
-                                    float device_pixel_ratio) {
-  builder_.DrawShadow(flutter::DlPath(path.GetPath()),  // path
-                      color,                            // shadow color
-                      elevation,                        // elevation
-                      occluder_is_transparent,          // occluder transparency
-                      device_pixel_ratio                // dpr
-  );
 }
 
 }  // namespace impeller::interop

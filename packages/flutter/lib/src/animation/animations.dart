@@ -379,7 +379,15 @@ class ReverseAnimation extends Animation<double>
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   /// Creates a curved animation.
   CurvedAnimation({required this.parent, required this.curve, this.reverseCurve}) {
-    assert(debugMaybeDispatchCreated('animation', 'CurvedAnimation', this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/animation.dart',
+        className: '$CurvedAnimation',
+        object: this,
+      );
+    }
     _updateCurveDirection(parent.status);
     parent.addStatusListener(_updateCurveDirection);
   }
@@ -426,7 +434,11 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 
   /// Cleans up any listeners added by this CurvedAnimation.
   void dispose() {
-    assert(debugMaybeDispatchDisposed(this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     isDisposed = true;
     parent.removeStatusListener(_updateCurveDirection);
   }
@@ -505,7 +517,15 @@ class TrainHoppingAnimation extends Animation<double>
     this._nextTrain, {
     this.onSwitchedTrain,
   }) {
-    assert(debugMaybeDispatchCreated('animation', 'TrainHoppingAnimation', this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/animation.dart',
+        className: '$TrainHoppingAnimation',
+        object: this,
+      );
+    }
     if (_nextTrain != null) {
       if (_currentTrain!.value == _nextTrain!.value) {
         _currentTrain = _nextTrain;
@@ -590,7 +610,11 @@ class TrainHoppingAnimation extends Animation<double>
   /// After this is called, this object is no longer usable.
   @override
   void dispose() {
-    assert(debugMaybeDispatchDisposed(this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     assert(_currentTrain != null);
     _currentTrain!.removeStatusListener(_statusChangeHandler);
     _currentTrain!.removeListener(_valueChangeHandler);

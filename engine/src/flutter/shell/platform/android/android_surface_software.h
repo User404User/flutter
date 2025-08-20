@@ -43,9 +43,7 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
   bool OnScreenSurfaceResize(const SkISize& size) override;
 
   // |AndroidSurface|
-  bool SetNativeWindow(
-      fml::RefPtr<AndroidNativeWindow> window,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) override;
+  bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
   // |GPUSurfaceSoftwareDelegate|
   sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;

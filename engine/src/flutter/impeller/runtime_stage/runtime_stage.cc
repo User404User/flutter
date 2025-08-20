@@ -54,7 +54,6 @@ std::unique_ptr<RuntimeStage> RuntimeStage::RuntimeStageIfPresent(
     return nullptr;
   }
 
-  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   return std::unique_ptr<RuntimeStage>(
       new RuntimeStage(runtime_stage, payload));
 }

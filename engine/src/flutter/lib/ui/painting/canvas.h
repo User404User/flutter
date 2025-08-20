@@ -12,7 +12,6 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/rrect.h"
-#include "flutter/lib/ui/painting/rsuperellipse.h"
 #include "flutter/lib/ui/painting/vertices.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
@@ -59,10 +58,9 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                 double top,
                 double right,
                 double bottom,
-                DlClipOp clipOp,
+                DlCanvas::ClipOp clipOp,
                 bool doAntiAlias = true);
   void clipRRect(const RRect& rrect, bool doAntiAlias = true);
-  void clipRSuperellipse(const RSuperellipse* rse, bool doAntiAlias = true);
   void clipPath(const CanvasPath* path, bool doAntiAlias = true);
   void getDestinationClipBounds(Dart_Handle rect_handle);
   void getLocalClipBounds(Dart_Handle rect_handle);
@@ -93,10 +91,6 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                   const RRect& inner,
                   Dart_Handle paint_objects,
                   Dart_Handle paint_data);
-
-  void drawRSuperellipse(const RSuperellipse* rse,
-                         Dart_Handle paint_objects,
-                         Dart_Handle paint_data);
 
   void drawOval(double left,
                 double top,
@@ -167,7 +161,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
 
   void drawPoints(Dart_Handle paint_objects,
                   Dart_Handle paint_data,
-                  DlPointMode point_mode,
+                  DlCanvas::PointMode point_mode,
                   const tonic::Float32List& points);
 
   void drawVertices(const Vertices* vertices,

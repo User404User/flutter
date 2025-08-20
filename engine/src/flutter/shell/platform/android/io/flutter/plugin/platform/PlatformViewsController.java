@@ -74,7 +74,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private FlutterView flutterView;
 
   // The texture registry maintaining the textures into which the embedded views will be rendered.
-  @VisibleForTesting @Nullable TextureRegistry textureRegistry;
+  @Nullable private TextureRegistry textureRegistry;
 
   @Nullable private TextInputPlugin textInputPlugin;
 
@@ -928,6 +928,14 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   /**
    * Invoked when the {@link io.flutter.embedding.engine.FlutterEngine} that owns this {@link
+   * PlatformViewsController} attaches to JNI.
+   */
+  public void onAttachedToJNI() {
+    // Currently no action needs to be taken after JNI attachment.
+  }
+
+  /**
+   * Invoked when the {@link io.flutter.embedding.engine.FlutterEngine} that owns this {@link
    * PlatformViewsController} detaches from JNI.
    */
   public void onDetachedFromJNI() {
@@ -977,12 +985,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private static PlatformViewRenderTarget makePlatformViewRenderTarget(
       TextureRegistry textureRegistry) {
     if (enableSurfaceProducerRenderTarget && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-      TextureRegistry.SurfaceLifecycle lifecycle =
-          Build.VERSION.SDK_INT <= API_LEVELS.API_34
-              ? TextureRegistry.SurfaceLifecycle.resetInBackground
-              : TextureRegistry.SurfaceLifecycle.manual;
-      final TextureRegistry.SurfaceProducer textureEntry =
-          textureRegistry.createSurfaceProducer(lifecycle);
+      final TextureRegistry.SurfaceProducer textureEntry = textureRegistry.createSurfaceProducer();
       Log.i(TAG, "PlatformView is using SurfaceProducer backend");
       return new SurfaceProducerPlatformViewRenderTarget(textureEntry);
     }

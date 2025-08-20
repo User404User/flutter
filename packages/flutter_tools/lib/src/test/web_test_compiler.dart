@@ -118,10 +118,29 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
     required WebRendererMode webRenderer,
   }) async {
-    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+    LanguageVersion languageVersion = LanguageVersion(2, 8);
+    late final String platformDillName;
+
+    // TODO(zanderso): to support autodetect this would need to partition the source code into
+    // a sound and unsound set and perform separate compilations
+    final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
+    switch (buildInfo.nullSafetyMode) {
+      case NullSafetyMode.unsound || NullSafetyMode.autodetect:
+        platformDillName = 'ddc_outline.dill';
+        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
+      case NullSafetyMode.sound:
+        languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+        platformDillName = 'ddc_outline_sound.dill';
+        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+          extraFrontEndOptions.add('--sound-null-safety');
+        }
+    }
+
     final String platformDillPath = _fileSystem.path.join(
       _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
-      'ddc_outline.dill',
+      platformDillName,
     );
 
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
@@ -136,7 +155,7 @@ class WebTestCompiler {
     final String cachedKernelPath = getDefaultCachedKernelPath(
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       dartDefines: buildInfo.dartDefines,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      extraFrontEndOptions: extraFrontEndOptions,
       fileSystem: _fileSystem,
       config: _config,
     );
@@ -151,7 +170,7 @@ class WebTestCompiler {
       fileSystemScheme: 'org-dartlang-app',
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      extraFrontEndOptions: extraFrontEndOptions,
       platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
       dartDefines: dartDefines,
       librariesSpec:

@@ -267,15 +267,12 @@ bool RenderPass::BindDynamicResource(ShaderStage stage,
   return BindBuffer(stage, slot, std::move(resouce));
 }
 
-bool RenderPass::BindDynamicResource(
-    ShaderStage stage,
-    DescriptorType type,
-    const SampledImageSlot& slot,
-    std::unique_ptr<ShaderMetadata> metadata,
-    std::shared_ptr<const Texture> texture,
-    raw_ptr<const Sampler>
-        sampler  // NOLINT(performance-unnecessary-value-param)
-) {
+bool RenderPass::BindDynamicResource(ShaderStage stage,
+                                     DescriptorType type,
+                                     const SampledImageSlot& slot,
+                                     std::unique_ptr<ShaderMetadata> metadata,
+                                     std::shared_ptr<const Texture> texture,
+                                     raw_ptr<const Sampler> sampler) {
   if (!sampler) {
     return false;
   }
@@ -306,7 +303,6 @@ bool RenderPass::BindTexture(ShaderStage stage,
   TextureAndSampler data = TextureAndSampler{
       .stage = stage,
       .texture = std::move(resource),
-      // NOLINTNEXTLINE(performance-move-const-arg)
       .sampler = sampler,
   };
 

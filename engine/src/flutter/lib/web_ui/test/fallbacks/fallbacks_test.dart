@@ -17,7 +17,7 @@ void main() {
 }
 
 @JS()
-external bool get crossOriginIsolated;
+external JSBoolean get crossOriginIsolated;
 
 Future<void> testMain() async {
   setUpUnitTests(setUpTestViewDimensions: false);
@@ -27,7 +27,7 @@ Future<void> testMain() async {
       expect(isWasm, isTrue);
       expect(isSkwasm, isTrue);
       final bool shouldBeMultiThreaded =
-          crossOriginIsolated && !configuration.forceSingleThreadedSkwasm;
+          crossOriginIsolated.toDart && !configuration.forceSingleThreadedSkwasm;
       expect(isMultiThreaded, shouldBeMultiThreaded);
     } else {
       expect(isWasm, isFalse);

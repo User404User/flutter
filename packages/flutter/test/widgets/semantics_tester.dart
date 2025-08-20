@@ -56,7 +56,6 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
-    this.validationResult = SemanticsValidationResult.none,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        tags = tags?.toSet() ?? <SemanticsTag>{};
@@ -81,7 +80,6 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
-    this.validationResult = SemanticsValidationResult.none,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -122,7 +120,6 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
-    this.validationResult = SemanticsValidationResult.none,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
@@ -234,14 +231,6 @@ class TestSemantics {
   final int? scrollChildren;
 
   final TextSelection? textSelection;
-
-  /// The validation result for this node, if any.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsValidationResult], which is the enum listing possible values
-  ///    for this field.
-  final SemanticsValidationResult validationResult;
 
   static Matrix4 _applyRootChildScale(Matrix4? transform) {
     final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
@@ -401,12 +390,6 @@ class TestSemantics {
 
     if (role != node.role) {
       return fail('expected node id $id to have role $role but found role ${node.role}');
-    }
-
-    if (validationResult != node.validationResult) {
-      return fail(
-        'expected node id $id to have validationResult $validationResult but found validationResult ${node.validationResult}',
-      );
     }
 
     if (children.isEmpty) {
@@ -577,8 +560,6 @@ class SemanticsTester {
     String? label,
     String? value,
     String? hint,
-    String? increasedValue,
-    String? decreasedValue,
     TextDirection? textDirection,
     List<SemanticsAction>? actions,
     List<SemanticsFlag>? flags,
@@ -589,7 +570,6 @@ class SemanticsTester {
     int? currentValueLength,
     int? maxValueLength,
     SemanticsNode? ancestor,
-    SemanticsInputType? inputType,
   }) {
     bool checkNode(SemanticsNode node) {
       if (label != null && node.label != label) {
@@ -615,12 +595,6 @@ class SemanticsTester {
         return false;
       }
       if (hint != null && node.hint != hint) {
-        return false;
-      }
-      if (increasedValue != null && node.increasedValue != increasedValue) {
-        return false;
-      }
-      if (decreasedValue != null && node.decreasedValue != decreasedValue) {
         return false;
       }
       if (attributedHint != null &&
@@ -671,9 +645,6 @@ class SemanticsTester {
         return false;
       }
       if (maxValueLength != null && node.maxValueLength != maxValueLength) {
-        return false;
-      }
-      if (inputType != null && node.inputType != inputType) {
         return false;
       }
       return true;
@@ -945,8 +916,6 @@ class _IncludesNodeWith extends Matcher {
     this.label,
     this.value,
     this.hint,
-    this.increasedValue,
-    this.decreasedValue,
     this.textDirection,
     this.actions,
     this.flags,
@@ -956,21 +925,17 @@ class _IncludesNodeWith extends Matcher {
     this.scrollExtentMin,
     this.maxValueLength,
     this.currentValueLength,
-    this.inputType,
   }) : assert(
          label != null ||
              value != null ||
              actions != null ||
              flags != null ||
              tags != null ||
-             increasedValue != null ||
-             decreasedValue != null ||
              scrollPosition != null ||
              scrollExtentMax != null ||
              scrollExtentMin != null ||
              maxValueLength != null ||
-             currentValueLength != null ||
-             inputType != null,
+             currentValueLength != null,
        );
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
@@ -978,8 +943,6 @@ class _IncludesNodeWith extends Matcher {
   final String? label;
   final String? value;
   final String? hint;
-  final String? increasedValue;
-  final String? decreasedValue;
   final TextDirection? textDirection;
   final List<SemanticsAction>? actions;
   final List<SemanticsFlag>? flags;
@@ -989,7 +952,6 @@ class _IncludesNodeWith extends Matcher {
   final double? scrollExtentMin;
   final int? currentValueLength;
   final int? maxValueLength;
-  final SemanticsInputType? inputType;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -1001,8 +963,6 @@ class _IncludesNodeWith extends Matcher {
           label: label,
           value: value,
           hint: hint,
-          increasedValue: increasedValue,
-          decreasedValue: decreasedValue,
           textDirection: textDirection,
           actions: actions,
           flags: flags,
@@ -1012,7 +972,6 @@ class _IncludesNodeWith extends Matcher {
           scrollExtentMin: scrollExtentMin,
           currentValueLength: currentValueLength,
           maxValueLength: maxValueLength,
-          inputType: inputType,
         )
         .isNotEmpty;
   }
@@ -1041,14 +1000,11 @@ class _IncludesNodeWith extends Matcher {
       if (actions != null) 'actions "${actions!.join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
       if (tags != null) 'tags "${tags!.join(', ')}"',
-      if (increasedValue != null) 'increasedValue "$increasedValue"',
-      if (decreasedValue != null) 'decreasedValue "$decreasedValue"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',
       if (scrollExtentMax != null) 'scrollExtentMax "$scrollExtentMax"',
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
       if (currentValueLength != null) 'currentValueLength "$currentValueLength"',
       if (maxValueLength != null) 'maxValueLength "$maxValueLength"',
-      if (inputType != null) 'inputType $inputType',
     ];
     return strings.join(', ');
   }
@@ -1065,8 +1021,6 @@ Matcher includesNodeWith({
   AttributedString? attributedValue,
   String? hint,
   AttributedString? attributedHint,
-  String? increasedValue,
-  String? decreasedValue,
   TextDirection? textDirection,
   List<SemanticsAction>? actions,
   List<SemanticsFlag>? flags,
@@ -1076,7 +1030,6 @@ Matcher includesNodeWith({
   double? scrollExtentMin,
   int? maxValueLength,
   int? currentValueLength,
-  SemanticsInputType? inputType,
 }) {
   return _IncludesNodeWith(
     label: label,
@@ -1086,8 +1039,6 @@ Matcher includesNodeWith({
     hint: hint,
     attributedHint: attributedHint,
     textDirection: textDirection,
-    increasedValue: increasedValue,
-    decreasedValue: decreasedValue,
     actions: actions,
     flags: flags,
     tags: tags,
@@ -1096,6 +1047,5 @@ Matcher includesNodeWith({
     scrollExtentMin: scrollExtentMin,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
-    inputType: inputType,
   );
 }

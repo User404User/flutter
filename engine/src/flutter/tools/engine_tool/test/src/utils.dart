@@ -73,18 +73,18 @@ class TestEnvironment {
       ),
       processRunner: ProcessRunner(
         processManager: FakeProcessManager(
-          onStart: (FakeCommandLogEntry entry) {
-            final FakeProcess processResult = _getCannedResult(entry.command, cannedProcesses);
+          onStart: (List<String> command) {
+            final FakeProcess processResult = _getCannedResult(command, cannedProcesses);
             processResult.exitCode.then((int exitCode) {
-              processHistory.add(ExecutedProcess(entry.command, processResult, exitCode));
+              processHistory.add(ExecutedProcess(command, processResult, exitCode));
             });
             return processResult;
           },
-          onRun: (FakeCommandLogEntry entry) {
-            final io.ProcessResult result = _getCannedProcessResult(entry.command, cannedProcesses);
+          onRun: (List<String> command) {
+            final io.ProcessResult result = _getCannedProcessResult(command, cannedProcesses);
             processHistory.add(
               ExecutedProcess(
-                entry.command,
+                command,
                 FakeProcess(
                   exitCode: result.exitCode,
                   stdout: result.stdout as String,

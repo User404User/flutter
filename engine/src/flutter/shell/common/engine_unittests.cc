@@ -62,7 +62,7 @@ class MockDelegate : public Engine::Delegate {
  public:
   MOCK_METHOD(void,
               OnEngineUpdateSemantics,
-              (int64_t, SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
+              (SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
               (override));
   MOCK_METHOD(void,
               OnEngineHandlePlatformMessage,
@@ -90,10 +90,6 @@ class MockDelegate : public Engine::Delegate {
               GetScaledFontSize,
               (double font_size, int configuration_id),
               (const, override));
-  MOCK_METHOD(void,
-              RequestViewFocusChange,
-              (const ViewFocusChangeRequest&),
-              (override));
 };
 
 class MockResponse : public PlatformMessageResponse {
@@ -113,7 +109,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
               (override));
   MOCK_METHOD(void,
               UpdateSemantics,
-              (int64_t, SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
+              (SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
               (override));
   MOCK_METHOD(void,
               HandlePlatformMessage,
@@ -141,10 +137,6 @@ class MockRuntimeDelegate : public RuntimeDelegate {
               GetScaledFontSize,
               (double font_size, int configuration_id),
               (const, override));
-  MOCK_METHOD(void,
-              RequestViewFocusChange,
-              (const ViewFocusChangeRequest&),
-              (override));
 };
 
 class MockRuntimeController : public RuntimeController {

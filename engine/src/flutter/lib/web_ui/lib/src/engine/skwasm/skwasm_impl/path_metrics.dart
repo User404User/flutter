@@ -24,9 +24,7 @@ class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter
     : super(contourMeasureIterCreate(path.handle, forceClosed, 1.0), _registry);
 
   static final SkwasmFinalizationRegistry<RawContourMeasureIter> _registry =
-      SkwasmFinalizationRegistry<RawContourMeasureIter>(
-        (ContourMeasureIterHandle handle) => contourMeasureIterDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawContourMeasureIter>(contourMeasureIterDispose);
 
   SkwasmPathMetric? _current;
   int _nextIndex = 0;
@@ -61,9 +59,7 @@ class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure> implements
   SkwasmPathMetric(ContourMeasureHandle handle, this.contourIndex) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawContourMeasure> _registry =
-      SkwasmFinalizationRegistry<RawContourMeasure>(
-        (ContourMeasureHandle handle) => contourMeasureDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawContourMeasure>(contourMeasureDispose);
 
   @override
   final int contourIndex;

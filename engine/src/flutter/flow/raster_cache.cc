@@ -40,8 +40,7 @@ void RasterCacheResult::draw(DlCanvas& canvas,
                              bool preserve_rtree) const {
   DlAutoCanvasRestore auto_restore(&canvas, true);
 
-  auto matrix =
-      RasterCacheUtil::GetIntegralTransCTM(ToSkMatrix(canvas.GetMatrix()));
+  auto matrix = RasterCacheUtil::GetIntegralTransCTM(canvas.GetTransform());
   SkRect bounds =
       RasterCacheUtil::GetRoundedOutDeviceBounds(logical_rect_, matrix);
   FML_DCHECK(std::abs(bounds.width() - image_->dimensions().width()) <= 1 &&
@@ -49,7 +48,7 @@ void RasterCacheResult::draw(DlCanvas& canvas,
   canvas.TransformReset();
   flow_.Step();
   if (!preserve_rtree || !rtree_) {
-    canvas.DrawImage(image_, DlPoint(bounds.fLeft, bounds.fTop),
+    canvas.DrawImage(image_, SkPoint{bounds.fLeft, bounds.fTop},
                      DlImageSampling::kNearestNeighbor, paint);
   } else {
     // On some platforms RTree from overlay layers is used for unobstructed
@@ -62,9 +61,9 @@ void RasterCacheResult::draw(DlCanvas& canvas,
     SkRect rtree_bounds = RasterCacheUtil::GetRoundedOutDeviceBounds(
         ToSkRect(rtree_->bounds()), matrix);
     for (auto rect : rects) {
-      DlRect device_rect = ToDlRect(RasterCacheUtil::GetRoundedOutDeviceBounds(
-          SkRect::Make(ToSkIRect(rect)), matrix));
-      device_rect = device_rect.Shift(-rtree_bounds.fLeft, -rtree_bounds.fTop);
+      SkRect device_rect = RasterCacheUtil::GetRoundedOutDeviceBounds(
+          SkRect::Make(ToSkIRect(rect)), matrix);
+      device_rect.offset(-rtree_bounds.fLeft, -rtree_bounds.fTop);
       canvas.DrawImageRect(image_, device_rect, device_rect,
                            DlImageSampling::kNearestNeighbor, paint);
     }
@@ -81,7 +80,7 @@ std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
     const RasterCache::Context& context,
     sk_sp<const DlRTree> rtree,
     const std::function<void(DlCanvas*)>& draw_function,
-    const std::function<void(DlCanvas*, const DlRect& rect)>& draw_checkerboard)
+    const std::function<void(DlCanvas*, const SkRect& rect)>& draw_checkerboard)
     const {
   auto matrix = RasterCacheUtil::GetIntegralTransCTM(context.matrix);
   SkRect dest_rect =
@@ -104,11 +103,11 @@ std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
   canvas.Clear(DlColor::kTransparent());
 
   canvas.Translate(-dest_rect.left(), -dest_rect.top());
-  canvas.Transform(ToDlMatrix(matrix));
+  canvas.Transform(matrix);
   draw_function(&canvas);
 
   if (checkerboard_images_) {
-    draw_checkerboard(&canvas, ToDlRect(context.logical_rect));
+    draw_checkerboard(&canvas, context.logical_rect);
   }
 
   auto image = DlImage::Make(surface->makeImageSnapshot());
@@ -124,7 +123,7 @@ bool RasterCache::UpdateCacheEntry(
   RasterCacheKey key = RasterCacheKey(id, raster_cache_context.matrix);
   Entry& entry = cache_[key];
   if (!entry.image) {
-    void (*func)(DlCanvas*, const DlRect& rect) = DrawCheckerboard;
+    void (*func)(DlCanvas*, const SkRect& rect) = DrawCheckerboard;
     entry.image = Rasterize(raster_cache_context, std::move(rtree),
                             render_function, func);
     if (entry.image != nullptr) {
@@ -178,7 +177,7 @@ bool RasterCache::Draw(const RasterCacheKeyID& id,
                        DlCanvas& canvas,
                        const DlPaint* paint,
                        bool preserve_rtree) const {
-  auto it = cache_.find(RasterCacheKey(id, ToSkMatrix(canvas.GetMatrix())));
+  auto it = cache_.find(RasterCacheKey(id, canvas.GetTransform()));
   if (it == cache_.end()) {
     return false;
   }

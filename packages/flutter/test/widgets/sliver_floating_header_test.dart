@@ -178,14 +178,14 @@ void main() {
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
-              const SliverFloatingHeader(
+              SliverFloatingHeader(
                 animationStyle: AnimationStyle(
                   curve: Curves.linear,
                   reverseCurve: Curves.linear,
-                  duration: Duration(seconds: 1),
-                  reverseDuration: Duration(seconds: 1),
+                  duration: const Duration(seconds: 1),
+                  reverseDuration: const Duration(seconds: 1),
                 ),
-                child: SizedBox(height: 200, child: Text('header')),
+                child: const SizedBox(height: 200, child: Text('header')),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate((BuildContext context, int index) {

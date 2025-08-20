@@ -15,7 +15,6 @@ void main() {
     final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
-    codec.dispose();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
     expect(codecHeight, 2);
@@ -26,7 +25,6 @@ void main() {
     final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetHeight: 1);
     final FrameInfo frame = await codec.getNextFrame();
-    codec.dispose();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
     expect(codecHeight, 1);
@@ -37,7 +35,6 @@ void main() {
     final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetWidth: 1);
     final FrameInfo frame = await codec.getNextFrame();
-    codec.dispose();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
     expect(codecHeight, 1);
@@ -48,7 +45,6 @@ void main() {
     final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10);
     final FrameInfo frame = await codec.getNextFrame();
-    codec.dispose();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
     expect(codecHeight, 10);
@@ -59,7 +55,6 @@ void main() {
     final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10, allowUpscaling: false);
     final FrameInfo frame = await codec.getNextFrame();
-    codec.dispose();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
     expect(codecHeight, 2);
@@ -70,7 +65,6 @@ void main() {
     final Uint8List bytes = await readFile('2x2.png');
     final Codec codec = await instantiateImageCodec(bytes, targetWidth: 10, targetHeight: 1);
     final FrameInfo frame = await codec.getNextFrame();
-    codec.dispose();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
     expect(codecHeight, 1);
@@ -86,7 +80,6 @@ void main() {
       allowUpscaling: false,
     );
     final FrameInfo frame = await codec.getNextFrame();
-    codec.dispose();
     final int codecHeight = frame.image.height;
     final int codecWidth = frame.image.width;
     expect(codecHeight, 1);

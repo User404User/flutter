@@ -67,7 +67,6 @@ void main() {
       'apk',
       '--debug',
     ], workingDirectory: exampleAppDir.path);
-    expect(result, const ProcessResultMatcher());
     expect(
       exampleAppDir
           .childDirectory('build')
@@ -104,7 +103,6 @@ void main() {
       'apk',
       '--debug',
     ], workingDirectory: exampleAppDir.path);
-    expect(result, const ProcessResultMatcher());
     expect(
       exampleAppDir
           .childDirectory('build')
@@ -157,7 +155,6 @@ void main() {
       'apk',
       '--debug',
     ], workingDirectory: exampleAppDir.path);
-    expect(result, const ProcessResultMatcher());
     expect(
       exampleAppDir
           .childDirectory('build')

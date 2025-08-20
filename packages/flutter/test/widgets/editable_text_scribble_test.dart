@@ -173,7 +173,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(selectionCause, SelectionChangedCause.stylusHandwriting);
+      expect(selectionCause, SelectionChangedCause.scribble);
 
       await tester.testTextInput.finishScribbleInteraction();
     },
@@ -210,10 +210,10 @@ void main() {
       );
 
       expect(focusNode.hasFocus, true);
-      expect(selectionCause, SelectionChangedCause.stylusHandwriting);
+      expect(selectionCause, SelectionChangedCause.scribble);
 
       // On web, we should rely on the browser's implementation of Scribble, so the selection changed cause
-      // will never be SelectionChangedCause.stylusHandwriting.
+      // will never be SelectionChangedCause.scribble.
     },
     skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),

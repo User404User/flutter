@@ -9,7 +9,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
-import 'package:ui/ui_web/src/ui_web/navigation/url_strategy.dart';
 
 import '../common/matchers.dart';
 import '../common/test_initialization.dart';
@@ -508,7 +507,7 @@ class _SampleUrlStrategy implements ui_web.UrlStrategy {
   Object? getState() => _state;
 
   @override
-  ui.VoidCallback addPopStateListener(PopStateListener listener) {
+  ui.VoidCallback addPopStateListener(DartDomEventListener listener) {
     wasUsed = true;
     return () {};
   }

@@ -2203,7 +2203,7 @@ TEST_F(KeyboardTest, TextInputSubmit) {
 
   tester.InjectPlatformMessage(
       "flutter/textinput", "TextInput.setClient",
-      R"|([108, {"inputAction": "TextInputAction.none", "viewId": 0}])|");
+      R"|([108, {"inputAction": "TextInputAction.none"}])|");
 
   // Press Enter
   tester.InjectKeyboardChanges(std::vector<KeyboardChange>{

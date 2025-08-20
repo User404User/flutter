@@ -91,7 +91,7 @@ class SafariPointerEventWorkaround {
   void workAroundMissingPointerEvents() {
     // We only need to attach the listener once.
     if (_listener == null) {
-      _listener = createDomEventListener((DomEvent _) {});
+      _listener = createDomEventListener((_) {});
       domDocument.addEventListener('touchstart', _listener);
     }
   }
@@ -322,9 +322,9 @@ class ClickDebouncer {
     assert(event.type == 'pointerdown', 'Click debouncing must begin with a pointerdown');
 
     final DomEventTarget? target = event.target;
-    if (target.isA<DomElement>() && (target! as DomElement).hasAttribute('flt-tappable')) {
+    if (target is DomElement && target.hasAttribute('flt-tappable')) {
       _state = (
-        target: target as DomElement,
+        target: target,
         // The 200ms duration was chosen empirically by testing tapping, mouse
         // clicking, trackpad tapping and clicking, as well as the following
         // screen readers: TalkBack on Android, VoiceOver on macOS, Narrator/
@@ -471,7 +471,7 @@ class Listener {
       target.addEventListener(event, jsHandler);
     } else {
       final Map<String, Object> eventOptions = <String, Object>{'passive': passive};
-      target.addEventListener(event, jsHandler, eventOptions.toJSAnyDeep);
+      target.addEventListenerWithOptions(event, jsHandler, eventOptions);
     }
 
     final Listener listener = Listener._(event: event, target: target, handler: jsHandler);
@@ -528,9 +528,9 @@ abstract class _BaseAdapter {
   /// instead, because the browser doesn't fire the latter two for DOM elements
   /// when the pointer is outside the window.
   void addEventListener(DomEventTarget target, String eventName, DartDomEventListener handler) {
-    void loggedHandler(DomEvent event) {
+    JSVoid loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
-        if (event.isA<DomPointerEvent>()) {
+        if (domInstanceOfString(event, 'PointerEvent')) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
           final ui.Offset offset = computeEventOffsetToTarget(event, _view);
           print(
@@ -723,14 +723,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   }
 
   void _handleWheelEvent(DomEvent event) {
-    // Wheel events should switch semantics to pointer event mode, because wheel
-    // events should always be handled by the framework.
-    // See: https://github.com/flutter/flutter/issues/159358
-    if (!EngineSemantics.instance.receiveGlobalEvent(event)) {
-      return;
-    }
-
-    assert(event.isA<DomWheelEvent>());
+    assert(domInstanceOfString(event, 'WheelEvent'));
     if (_debugLogPointerEvents) {
       print(event.type);
     }

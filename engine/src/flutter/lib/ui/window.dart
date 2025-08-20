@@ -397,12 +397,10 @@ class FlutterView {
   /// This function disposes the given update, which means the semantics update
   /// cannot be used further.
   void updateSemantics(SemanticsUpdate update) =>
-      _updateSemantics(viewId, update as _NativeSemanticsUpdate);
+      _updateSemantics(update as _NativeSemanticsUpdate);
 
-  @Native<Void Function(Int64, Pointer<Void>)>(
-    symbol: 'PlatformConfigurationNativeApi::UpdateSemantics',
-  )
-  external static void _updateSemantics(int viewId, _NativeSemanticsUpdate update);
+  @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::UpdateSemantics')
+  external static void _updateSemantics(_NativeSemanticsUpdate update);
 
   @override
   String toString() => 'FlutterView(id: $viewId)';

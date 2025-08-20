@@ -15,7 +15,7 @@ const int maxLineWidth = 84;
 class CommandHelp {
   CommandHelp({
     required Logger logger,
-    required Terminal terminal,
+    required AnsiTerminal terminal,
     required Platform platform,
     required OutputPreferences outputPreferences,
   }) : _logger = logger,
@@ -25,7 +25,7 @@ class CommandHelp {
 
   final Logger _logger;
 
-  final Terminal _terminal;
+  final AnsiTerminal _terminal;
 
   final Platform _platform;
 
@@ -45,6 +45,11 @@ class CommandHelp {
     'L',
     'Dump layer tree to the console.',
     'debugDumpLayerTree',
+  );
+
+  late final CommandHelpOption M = _makeOption(
+    'M',
+    'Write SkSL shaders to a unique file in the project directory.',
   );
 
   late final CommandHelpOption P = _makeOption(

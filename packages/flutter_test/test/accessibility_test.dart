@@ -874,6 +874,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData.light(),
         home: Scaffold(
           backgroundColor: Colors.white,
           body: ElevatedButton(

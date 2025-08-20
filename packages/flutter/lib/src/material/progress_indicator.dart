@@ -343,8 +343,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     this.stopIndicatorRadius,
     this.trackGap,
     @Deprecated(
-      'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
-      'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
+      'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
       'This feature was deprecated after v3.26.0-0.1.pre.',
     )
     this.year2023,
@@ -421,8 +420,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
-    'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
-    'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
+    'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
     'This feature was deprecated after v3.27.0-0.1.pre.',
   )
   final bool? year2023;
@@ -606,7 +604,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
             ..strokeCap = strokeCap ?? StrokeCap.round
             ..style = PaintingStyle.stroke;
       // If hasGap is true, draw the background arc with a gap.
-      if (hasGap && value != null && value! > _epsilon) {
+      if (hasGap && value! > _epsilon) {
         final double arcRadius = arcActualSize.shortestSide / 2;
         final double strokeRadius = strokeWidth / arcRadius;
         final double gapRadius = trackGap! / arcRadius;
@@ -721,8 +719,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.constraints,
     this.trackGap,
     @Deprecated(
-      'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
-      'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
+      'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
       'This feature was deprecated after v3.27.0-0.1.pre.',
     )
     this.year2023,
@@ -752,8 +749,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.constraints,
     this.trackGap,
     @Deprecated(
-      'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
-      'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
+      'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
       'This feature was deprecated after v3.27.0-0.2.pre.',
     )
     this.year2023,
@@ -836,8 +832,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
-    'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
-    'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
+    'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
     'This feature was deprecated after v3.27.0-0.2.pre.',
   )
   final bool? year2023;

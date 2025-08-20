@@ -16,8 +16,8 @@ TEST(MutatorsStack, Initialization) {
 
 TEST(MutatorsStack, CopyConstructor) {
   MutatorsStack stack;
-  auto rrect = DlRoundRect();
-  auto rect = DlRect();
+  auto rrect = SkRRect::MakeEmpty();
+  auto rect = SkRect::MakeEmpty();
   stack.PushClipRect(rect);
   stack.PushClipRRect(rrect);
   MutatorsStack copy = MutatorsStack(stack);
@@ -26,8 +26,8 @@ TEST(MutatorsStack, CopyConstructor) {
 
 TEST(MutatorsStack, CopyAndUpdateTheCopy) {
   MutatorsStack stack;
-  auto rrect = DlRoundRect();
-  auto rect = DlRect();
+  auto rrect = SkRRect::MakeEmpty();
+  auto rect = SkRect::MakeEmpty();
   stack.PushClipRect(rect);
   stack.PushClipRRect(rrect);
   MutatorsStack copy = MutatorsStack(stack);
@@ -46,7 +46,7 @@ TEST(MutatorsStack, CopyAndUpdateTheCopy) {
 
 TEST(MutatorsStack, PushClipRect) {
   MutatorsStack stack;
-  auto rect = DlRect();
+  auto rect = SkRect::MakeEmpty();
   stack.PushClipRect(rect);
   auto iter = stack.Bottom();
   ASSERT_TRUE(iter->get()->GetType() == MutatorType::kClipRect);
@@ -55,25 +55,16 @@ TEST(MutatorsStack, PushClipRect) {
 
 TEST(MutatorsStack, PushClipRRect) {
   MutatorsStack stack;
-  auto rrect = DlRoundRect();
+  auto rrect = SkRRect::MakeEmpty();
   stack.PushClipRRect(rrect);
   auto iter = stack.Bottom();
   ASSERT_TRUE(iter->get()->GetType() == MutatorType::kClipRRect);
   ASSERT_TRUE(iter->get()->GetRRect() == rrect);
 }
 
-TEST(MutatorsStack, PushClipRSE) {
-  MutatorsStack stack;
-  auto rse = DlRoundSuperellipse();
-  stack.PushClipRSE(rse);
-  auto iter = stack.Bottom();
-  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kClipRSE);
-  ASSERT_TRUE(iter->get()->GetRSE() == rse);
-}
-
 TEST(MutatorsStack, PushClipPath) {
   MutatorsStack stack;
-  DlPath path;
+  SkPath path;
   stack.PushClipPath(path);
   auto iter = stack.Bottom();
   ASSERT_TRUE(iter->get()->GetType() == flutter::MutatorType::kClipPath);
@@ -82,7 +73,8 @@ TEST(MutatorsStack, PushClipPath) {
 
 TEST(MutatorsStack, PushTransform) {
   MutatorsStack stack;
-  DlMatrix matrix;
+  SkMatrix matrix;
+  matrix.setIdentity();
   stack.PushTransform(matrix);
   auto iter = stack.Bottom();
   ASSERT_TRUE(iter->get()->GetType() == MutatorType::kTransform);
@@ -91,7 +83,7 @@ TEST(MutatorsStack, PushTransform) {
 
 TEST(MutatorsStack, PushOpacity) {
   MutatorsStack stack;
-  uint8_t alpha = 240;
+  int alpha = 240;
   stack.PushOpacity(alpha);
   auto iter = stack.Bottom();
   ASSERT_TRUE(iter->get()->GetType() == MutatorType::kOpacity);
@@ -103,7 +95,7 @@ TEST(MutatorsStack, PushBackdropFilter) {
   const int num_of_mutators = 10;
   for (int i = 0; i < num_of_mutators; i++) {
     auto filter = DlImageFilter::MakeBlur(i, 5, DlTileMode::kClamp);
-    stack.PushBackdropFilter(filter, DlRect::MakeXYWH(i, i, i, i));
+    stack.PushBackdropFilter(filter, SkRect::MakeXYWH(i, i, i, i));
   }
 
   auto iter = stack.Begin();
@@ -112,10 +104,10 @@ TEST(MutatorsStack, PushBackdropFilter) {
     ASSERT_EQ(iter->get()->GetType(), MutatorType::kBackdropFilter);
     ASSERT_EQ(iter->get()->GetFilterMutation().GetFilter().asBlur()->sigma_x(),
               i);
-    ASSERT_EQ(iter->get()->GetFilterMutation().GetFilterRect().GetX(), i);
-    ASSERT_EQ(iter->get()->GetFilterMutation().GetFilterRect().GetY(), i);
-    ASSERT_EQ(iter->get()->GetFilterMutation().GetFilterRect().GetWidth(), i);
-    ASSERT_EQ(iter->get()->GetFilterMutation().GetFilterRect().GetHeight(), i);
+    ASSERT_EQ(iter->get()->GetFilterMutation().GetFilterRect().x(), i);
+    ASSERT_EQ(iter->get()->GetFilterMutation().GetFilterRect().x(), i);
+    ASSERT_EQ(iter->get()->GetFilterMutation().GetFilterRect().width(), i);
+    ASSERT_EQ(iter->get()->GetFilterMutation().GetFilterRect().height(), i);
     ++iter;
     ++i;
   }
@@ -124,7 +116,8 @@ TEST(MutatorsStack, PushBackdropFilter) {
 
 TEST(MutatorsStack, Pop) {
   MutatorsStack stack;
-  DlMatrix matrix;
+  SkMatrix matrix;
+  matrix.setIdentity();
   stack.PushTransform(matrix);
   stack.Pop();
   auto iter = stack.Bottom();
@@ -133,11 +126,12 @@ TEST(MutatorsStack, Pop) {
 
 TEST(MutatorsStack, Traversal) {
   MutatorsStack stack;
-  DlMatrix matrix;
+  SkMatrix matrix;
+  matrix.setIdentity();
   stack.PushTransform(matrix);
-  auto rect = DlRect();
+  auto rect = SkRect::MakeEmpty();
   stack.PushClipRect(rect);
-  auto rrect = DlRoundRect();
+  auto rrect = SkRRect::MakeEmpty();
   stack.PushClipRRect(rrect);
   auto iter = stack.Bottom();
   int index = 0;
@@ -165,165 +159,153 @@ TEST(MutatorsStack, Traversal) {
 
 TEST(MutatorsStack, Equality) {
   MutatorsStack stack;
-  DlMatrix matrix = DlMatrix::MakeScale({1, 1, 1});
+  SkMatrix matrix = SkMatrix::Scale(1, 1);
   stack.PushTransform(matrix);
-  DlRect rect = DlRect();
+  SkRect rect = SkRect::MakeEmpty();
   stack.PushClipRect(rect);
-  DlRoundRect rrect = DlRoundRect();
+  SkRRect rrect = SkRRect::MakeEmpty();
   stack.PushClipRRect(rrect);
-  DlPath path;
+  SkPath path;
   stack.PushClipPath(path);
-  uint8_t alpha = 240;
+  int alpha = 240;
   stack.PushOpacity(alpha);
   auto filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
-  stack.PushBackdropFilter(filter, DlRect());
+  stack.PushBackdropFilter(filter, SkRect::MakeEmpty());
 
   MutatorsStack stack_other;
-  DlMatrix matrix_other = DlMatrix::MakeScale({1, 1, 1});
+  SkMatrix matrix_other = SkMatrix::Scale(1, 1);
   stack_other.PushTransform(matrix_other);
-  DlRect rect_other = DlRect();
+  SkRect rect_other = SkRect::MakeEmpty();
   stack_other.PushClipRect(rect_other);
-  DlRoundRect rrect_other = DlRoundRect();
+  SkRRect rrect_other = SkRRect::MakeEmpty();
   stack_other.PushClipRRect(rrect_other);
-  DlPath other_path;
+  SkPath other_path;
   stack_other.PushClipPath(other_path);
-  uint8_t other_alpha = 240;
+  int other_alpha = 240;
   stack_other.PushOpacity(other_alpha);
   auto other_filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
-  stack_other.PushBackdropFilter(other_filter, DlRect());
+  stack_other.PushBackdropFilter(other_filter, SkRect::MakeEmpty());
 
   ASSERT_TRUE(stack == stack_other);
 }
 
 TEST(Mutator, Initialization) {
-  DlRect rect = DlRect();
+  SkRect rect = SkRect::MakeEmpty();
   Mutator mutator = Mutator(rect);
   ASSERT_TRUE(mutator.GetType() == MutatorType::kClipRect);
   ASSERT_TRUE(mutator.GetRect() == rect);
 
-  DlRoundRect rrect = DlRoundRect();
+  SkRRect rrect = SkRRect::MakeEmpty();
   Mutator mutator2 = Mutator(rrect);
   ASSERT_TRUE(mutator2.GetType() == MutatorType::kClipRRect);
   ASSERT_TRUE(mutator2.GetRRect() == rrect);
 
-  DlRoundSuperellipse rse = DlRoundSuperellipse();
-  Mutator mutator2se = Mutator(rse);
-  ASSERT_TRUE(mutator2se.GetType() == MutatorType::kClipRSE);
-  ASSERT_TRUE(mutator2se.GetRSE() == rse);
-
-  DlPath path;
+  SkPath path;
   Mutator mutator3 = Mutator(path);
   ASSERT_TRUE(mutator3.GetType() == MutatorType::kClipPath);
   ASSERT_TRUE(mutator3.GetPath() == path);
 
-  DlMatrix matrix;
+  SkMatrix matrix;
+  matrix.setIdentity();
   Mutator mutator4 = Mutator(matrix);
   ASSERT_TRUE(mutator4.GetType() == MutatorType::kTransform);
   ASSERT_TRUE(mutator4.GetMatrix() == matrix);
 
-  uint8_t alpha = 240;
+  int alpha = 240;
   Mutator mutator5 = Mutator(alpha);
   ASSERT_TRUE(mutator5.GetType() == MutatorType::kOpacity);
 
   auto filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
-  Mutator mutator6 = Mutator(filter, DlRect());
+  Mutator mutator6 = Mutator(filter, SkRect::MakeEmpty());
   ASSERT_TRUE(mutator6.GetType() == MutatorType::kBackdropFilter);
   ASSERT_TRUE(mutator6.GetFilterMutation().GetFilter() == *filter);
 }
 
 TEST(Mutator, CopyConstructor) {
-  DlRect rect = DlRect();
+  SkRect rect = SkRect::MakeEmpty();
   Mutator mutator = Mutator(rect);
   Mutator copy = Mutator(mutator);
   ASSERT_TRUE(mutator == copy);
 
-  DlRoundRect rrect = DlRoundRect();
+  SkRRect rrect = SkRRect::MakeEmpty();
   Mutator mutator2 = Mutator(rrect);
   Mutator copy2 = Mutator(mutator2);
   ASSERT_TRUE(mutator2 == copy2);
 
-  DlRoundSuperellipse rse = DlRoundSuperellipse();
-  Mutator mutator2se = Mutator(rse);
-  Mutator copy2se = Mutator(mutator2se);
-  ASSERT_TRUE(mutator2se == copy2se);
-
-  DlPath path;
+  SkPath path;
   Mutator mutator3 = Mutator(path);
   Mutator copy3 = Mutator(mutator3);
   ASSERT_TRUE(mutator3 == copy3);
 
-  DlMatrix matrix;
+  SkMatrix matrix;
+  matrix.setIdentity();
   Mutator mutator4 = Mutator(matrix);
   Mutator copy4 = Mutator(mutator4);
   ASSERT_TRUE(mutator4 == copy4);
 
-  uint8_t alpha = 240;
+  int alpha = 240;
   Mutator mutator5 = Mutator(alpha);
   Mutator copy5 = Mutator(mutator5);
   ASSERT_TRUE(mutator5 == copy5);
 
   auto filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
-  Mutator mutator6 = Mutator(filter, DlRect());
+  Mutator mutator6 = Mutator(filter, SkRect::MakeEmpty());
   Mutator copy6 = Mutator(mutator6);
   ASSERT_TRUE(mutator6 == copy6);
 }
 
 TEST(Mutator, Equality) {
-  DlMatrix matrix;
+  SkMatrix matrix;
+  matrix.setIdentity();
   Mutator mutator = Mutator(matrix);
   Mutator other_mutator = Mutator(matrix);
   ASSERT_TRUE(mutator == other_mutator);
 
-  DlRect rect = DlRect();
+  SkRect rect = SkRect::MakeEmpty();
   Mutator mutator2 = Mutator(rect);
   Mutator other_mutator2 = Mutator(rect);
   ASSERT_TRUE(mutator2 == other_mutator2);
 
-  DlRoundRect rrect = DlRoundRect();
+  SkRRect rrect = SkRRect::MakeEmpty();
   Mutator mutator3 = Mutator(rrect);
   Mutator other_mutator3 = Mutator(rrect);
   ASSERT_TRUE(mutator3 == other_mutator3);
 
-  DlRoundSuperellipse rse = DlRoundSuperellipse();
-  Mutator mutator3se = Mutator(rse);
-  Mutator other_mutator3se = Mutator(rse);
-  ASSERT_TRUE(mutator3se == other_mutator3se);
-
-  DlPath path;
+  SkPath path;
   flutter::Mutator mutator4 = flutter::Mutator(path);
   flutter::Mutator other_mutator4 = flutter::Mutator(path);
   ASSERT_TRUE(mutator4 == other_mutator4);
   ASSERT_FALSE(mutator2 == mutator);
-
-  uint8_t alpha = 240;
+  int alpha = 240;
   Mutator mutator5 = Mutator(alpha);
   Mutator other_mutator5 = Mutator(alpha);
   ASSERT_TRUE(mutator5 == other_mutator5);
 
   auto filter1 = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
   auto filter2 = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
-  Mutator mutator6 = Mutator(filter1, DlRect());
-  Mutator other_mutator6 = Mutator(filter2, DlRect());
+  Mutator mutator6 = Mutator(filter1, SkRect::MakeEmpty());
+  Mutator other_mutator6 = Mutator(filter2, SkRect::MakeEmpty());
   ASSERT_TRUE(mutator6 == other_mutator6);
 }
 
 TEST(Mutator, UnEquality) {
-  DlRect rect = DlRect();
+  SkRect rect = SkRect::MakeEmpty();
   Mutator mutator = Mutator(rect);
-  DlMatrix matrix;
+  SkMatrix matrix;
+  matrix.setIdentity();
   Mutator not_equal_mutator = Mutator(matrix);
   ASSERT_TRUE(not_equal_mutator != mutator);
 
-  uint8_t alpha = 240;
-  uint8_t alpha2 = 241;
+  int alpha = 240;
+  int alpha2 = 241;
   Mutator mutator2 = Mutator(alpha);
   Mutator other_mutator2 = Mutator(alpha2);
   ASSERT_TRUE(mutator2 != other_mutator2);
 
   auto filter = DlImageFilter::MakeBlur(5, 5, DlTileMode::kClamp);
   auto filter2 = DlImageFilter::MakeBlur(10, 10, DlTileMode::kClamp);
-  Mutator mutator3 = Mutator(filter, DlRect());
-  Mutator other_mutator3 = Mutator(filter2, DlRect());
+  Mutator mutator3 = Mutator(filter, SkRect::MakeEmpty());
+  Mutator other_mutator3 = Mutator(filter2, SkRect::MakeEmpty());
   ASSERT_TRUE(mutator3 != other_mutator3);
 }
 

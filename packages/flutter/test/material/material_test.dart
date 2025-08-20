@@ -9,7 +9,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/multi_view_testing.dart';
@@ -194,12 +193,16 @@ void main() {
     expect(getModel(tester).shadowColor, ThemeData().shadowColor);
 
     // Default M3 shadow color
-    await tester.pumpWidget(Theme(data: ThemeData(), child: buildWithShadow(null)));
+    await tester.pumpWidget(
+      Theme(data: ThemeData(useMaterial3: true), child: buildWithShadow(null)),
+    );
     await tester.pumpAndSettle();
     expect(getModel(tester).shadowColor, ThemeData().colorScheme.shadow);
 
     // Drop shadow can be turned off with a transparent color.
-    await tester.pumpWidget(Theme(data: ThemeData(), child: buildWithShadow(Colors.transparent)));
+    await tester.pumpWidget(
+      Theme(data: ThemeData(useMaterial3: true), child: buildWithShadow(Colors.transparent)),
+    );
     await tester.pumpAndSettle();
     expect(getModel(tester).shadowColor, Colors.transparent);
   });
@@ -281,30 +284,6 @@ void main() {
     expect(pressed, isTrue);
   });
 
-  testWidgets('Material uses the dark SystemUIOverlayStyle when the background is light', (
-    WidgetTester tester,
-  ) async {
-    final ThemeData lightTheme = ThemeData();
-    await tester.pumpWidget(
-      MaterialApp(theme: lightTheme, home: const Scaffold(body: Center(child: Text('test')))),
-    );
-
-    expect(lightTheme.colorScheme.brightness, Brightness.light);
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
-  });
-
-  testWidgets('Material uses the light SystemUIOverlayStyle when the background is dark', (
-    WidgetTester tester,
-  ) async {
-    final ThemeData darkTheme = ThemeData.dark();
-    await tester.pumpWidget(
-      MaterialApp(theme: darkTheme, home: const Scaffold(body: Center(child: Text('test')))),
-    );
-
-    expect(darkTheme.colorScheme.brightness, Brightness.dark);
-    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
-  });
-
   group('Surface Tint Overlay', () {
     testWidgets(
       'applyElevationOverlayColor does not effect anything with useMaterial3 set to true',
@@ -313,6 +292,7 @@ void main() {
         await tester.pumpWidget(
           Theme(
             data: ThemeData(
+              useMaterial3: true,
               applyElevationOverlayColor: true,
               colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
             ),
@@ -332,7 +312,10 @@ void main() {
 
       // With no surfaceTintColor specified, it should not apply an overlay
       await tester.pumpWidget(
-        Theme(data: ThemeData(), child: buildMaterial(color: baseColor, elevation: 12.0)),
+        Theme(
+          data: ThemeData(useMaterial3: true),
+          child: buildMaterial(color: baseColor, elevation: 12.0),
+        ),
       );
       await tester.pumpAndSettle();
       final RenderPhysicalShape noTintModel = getModel(tester);
@@ -341,7 +324,7 @@ void main() {
       // With transparent surfaceTintColor, it should not apply an overlay
       await tester.pumpWidget(
         Theme(
-          data: ThemeData(),
+          data: ThemeData(useMaterial3: true),
           child: buildMaterial(
             color: baseColor,
             surfaceTintColor: Colors.transparent,
@@ -357,7 +340,7 @@ void main() {
       // on the elevation.
       await tester.pumpWidget(
         Theme(
-          data: ThemeData(),
+          data: ThemeData(useMaterial3: true),
           child: buildMaterial(
             color: baseColor,
             surfaceTintColor: surfaceTintColor,
@@ -933,6 +916,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: true),
           home: Scaffold(
             body: RepaintBoundary(
               key: painterKey,
@@ -1005,6 +989,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: true),
           home: Scaffold(
             body: RepaintBoundary(
               key: painterKey,

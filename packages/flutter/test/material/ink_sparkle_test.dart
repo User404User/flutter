@@ -199,6 +199,7 @@ Future<void> _runM3Test(
 
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         body: Center(
           child: RepaintBoundary(

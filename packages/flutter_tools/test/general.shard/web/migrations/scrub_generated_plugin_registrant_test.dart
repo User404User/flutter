@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -14,7 +16,6 @@ import 'package:flutter_tools/src/features.dart';
 import '../../../src/context.dart'; // legacy
 import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
-import '../../../src/package_config.dart';
 import '../../../src/test_build_system.dart';
 import '../../../src/test_flutter_command_runner.dart'; // legacy
 
@@ -40,16 +41,20 @@ void main() {
     late File registrant;
 
     // Environment overrides
+    late Artifacts artifacts;
     late FileSystem fileSystem;
     late ProcessManager processManager;
     late BuildSystem buildSystem;
+    late ProcessUtils processUtils;
     late BufferLogger logger;
 
     setUp(() {
       // Prepare environment overrides
       fileSystem = MemoryFileSystem.test();
+      artifacts = Artifacts.test(fileSystem: fileSystem);
       processManager = FakeProcessManager.any();
       logger = BufferLogger.test();
+      processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
       buildSystem = TestBuildSystem.all(BuildResult(success: true));
       // Write some initial state into our testing filesystem
@@ -67,11 +72,13 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
+            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: BufferLogger.test(),
             osUtils: FakeOperatingSystemUtils(),
+            processUtils: processUtils,
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -97,11 +104,13 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
+            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: logger,
             osUtils: FakeOperatingSystemUtils(),
+            processUtils: processUtils,
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -126,10 +135,12 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
+            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: logger,
+            processUtils: processUtils,
             osUtils: FakeOperatingSystemUtils(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
@@ -157,10 +168,12 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
+            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: logger,
+            processUtils: processUtils,
             osUtils: FakeOperatingSystemUtils(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
@@ -187,10 +200,12 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
+            artifacts: artifacts,
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
             logger: logger,
+            processUtils: processUtils,
             osUtils: FakeOperatingSystemUtils(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
@@ -285,9 +300,4 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
   fileSystem.file(fileSystem.path.join('lib', 'main.dart')).writeAsStringSync('void main() { }');
-  writePackageConfigFile(
-    directory: fileSystem.currentDirectory,
-    mainLibName: 'foo',
-    packages: <String, String>{'bar': 'bar'},
-  );
 }

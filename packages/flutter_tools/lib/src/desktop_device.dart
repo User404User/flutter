@@ -285,6 +285,12 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.endlessTraceBuffer) {
       addFlag('endless-trace-buffer=true');
     }
+    if (debuggingOptions.dumpSkpOnShaderCompilation) {
+      addFlag('dump-skp-on-shader-compilation=true');
+    }
+    if (debuggingOptions.cacheSkSL) {
+      addFlag('cache-sksl=true');
+    }
     if (debuggingOptions.purgePersistentCache) {
       addFlag('purge-persistent-cache=true');
     }
@@ -311,7 +317,7 @@ abstract class DesktopDevice extends Device {
       if (debuggingOptions.disableServiceAuthCodes) {
         addFlag('disable-service-auth-codes=true');
       }
-      final String dartVmFlags = debuggingOptions.dartFlags;
+      final String dartVmFlags = computeDartVmFlags(debuggingOptions);
       if (dartVmFlags.isNotEmpty) {
         addFlag('dart-flags=$dartVmFlags');
       }

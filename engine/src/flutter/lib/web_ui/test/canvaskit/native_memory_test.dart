@@ -252,7 +252,10 @@ class TestSkDeletableMock {
   JsConstructor get constructor => TestJsConstructor(name: 'TestSkDeletable');
 }
 
-extension type TestSkDeletable._primary(JSObject _) implements SkDeletable {
+@JS()
+@anonymous
+@staticInterop
+class TestSkDeletable implements SkDeletable {
   factory TestSkDeletable() {
     final TestSkDeletableMock mock = TestSkDeletableMock();
     return TestSkDeletable._(
@@ -275,7 +278,10 @@ extension type TestSkDeletable._primary(JSObject _) implements SkDeletable {
   });
 }
 
-extension type TestJsConstructor._(JSObject _) implements JsConstructor {
+@JS()
+@anonymous
+@staticInterop
+class TestJsConstructor implements JsConstructor {
   external factory TestJsConstructor({String name});
 }
 
@@ -317,7 +323,7 @@ class _MockNativeMemoryFinalizationRegistry implements NativeMemoryFinalizationR
   final List<_MockPair> registeredPairs = <_MockPair>[];
 
   @override
-  void register(Object owner, UniqueRef<JSObject> ref) {
+  void register(Object owner, UniqueRef<Object> ref) {
     registeredPairs.add(_MockPair(owner, ref));
   }
 }
@@ -326,5 +332,5 @@ class _MockPair {
   _MockPair(this.owner, this.ref);
 
   Object owner;
-  UniqueRef<JSObject> ref;
+  UniqueRef<Object> ref;
 }

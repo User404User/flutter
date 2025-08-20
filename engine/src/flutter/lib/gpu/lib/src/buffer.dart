@@ -244,6 +244,9 @@ base class HostBuffer {
       StorageMode.hostVisible,
       length,
     );
+    if (buffer == null) {
+      throw Exception('Failed to allocate DeviceBuffer of length $length');
+    }
     return buffer;
   }
 

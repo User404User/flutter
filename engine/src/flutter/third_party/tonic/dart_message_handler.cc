@@ -39,9 +39,7 @@ void DartMessageHandler::OnMessage(DartState* dart_state) {
   auto weak_dart_state = dart_state->GetWeakPtr();
   task_dispatcher_([weak_dart_state]() {
     if (auto dart_state = weak_dart_state.lock()) {
-      if (!dart_state->IsShuttingDown()) {
-        dart_state->message_handler().OnHandleMessage(dart_state.get());
-      }
+      dart_state->message_handler().OnHandleMessage(dart_state.get());
     }
   });
 }

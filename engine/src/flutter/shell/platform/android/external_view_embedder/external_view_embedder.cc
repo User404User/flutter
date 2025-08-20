@@ -19,8 +19,7 @@ AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
       android_context_(android_context),
       jni_facade_(std::move(jni_facade)),
       surface_factory_(std::move(surface_factory)),
-      surface_pool_(
-          std::make_unique<SurfacePool>(/*use_new_surface_methods=*/false)),
+      surface_pool_(std::make_unique<SurfacePool>()),
       task_runners_(task_runners) {}
 
 // |ExternalViewEmbedder|

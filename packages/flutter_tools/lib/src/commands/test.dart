@@ -71,6 +71,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }) {
     requiresPubspecYaml();
     usesPubOption();
+    addNullSafetyModeOptions(hide: !verboseHelp);
     usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
@@ -273,19 +274,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'timeout',
         help:
-            'The default timeout for individual tests, specified either in '
-            'seconds (e.g. "60s"), as a multiplier of the default test timeout '
-            '(e.g. "2x"), or as the string "none" to disable test timeouts '
-            'entirely. This value does not apply to the default test suite '
-            'loading timeout.',
-      )
-      ..addFlag(
-        'ignore-timeouts',
-        help:
-            'Ignore all timeouts. Useful when testing a big application '
-            'that requires a longer time to compile (e.g. running integration '
-            'tests for a Flutter app).',
-        negatable: false,
+            'The default test timeout, specified either '
+            'in seconds (e.g. "60s"), '
+            'as a multiplier of the default timeout (e.g. "2x"), '
+            'or as the string "none" to disable the timeout entirely.',
       )
       ..addFlag(
         FlutterOptions.kWebWasmFlag,
@@ -465,6 +457,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,
+      nullAssertions: boolArg(FlutterOptions.kNullAssertions),
       usingCISystem: usingCISystem,
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
@@ -599,6 +592,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
+    if (webRenderer.isDeprecated) {
+      globals.logger.printWarning(webRenderer.deprecationWarning);
+    }
+
     Device? integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
@@ -656,7 +653,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
-        ignoreTimeouts: boolArg('ignore-timeouts'),
         failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
@@ -685,7 +681,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
-        ignoreTimeouts: boolArg('ignore-timeouts'),
         failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
@@ -727,15 +722,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterProject flutterProject,
     PackageConfig packageConfig,
   ) {
-    final Set<String> packagesToInclude = <String>{};
-    if (packagesRegExps.isEmpty) {
-      void addProject(FlutterProject project) {
-        packagesToInclude.add(project.manifest.appName);
-        project.workspaceProjects.forEach(addProject);
-      }
-
-      addProject(flutterProject);
-    }
+    final String projectName = flutterProject.manifest.appName;
+    final Set<String> packagesToInclude = <String>{if (packagesRegExps.isEmpty) projectName};
     try {
       for (final String regExpStr in packagesRegExps) {
         final RegExp regExp = RegExp(regExpStr);

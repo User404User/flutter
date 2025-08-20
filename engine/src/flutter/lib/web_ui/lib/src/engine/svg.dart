@@ -6,18 +6,20 @@ import 'dart:js_interop';
 
 import 'dom.dart';
 
-extension type SVGElement(JSObject _) implements JSObject, DomElement {}
+@JS()
+@staticInterop
+class SVGElement extends DomElement {}
 
 SVGElement createSVGElement(String tag) =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', tag) as SVGElement;
 
-extension type SVGGraphicsElement(JSObject _) implements JSObject, SVGElement {}
+@JS()
+@staticInterop
+class SVGGraphicsElement extends SVGElement {}
 
-extension type SVGSVGElement(JSObject _) implements JSObject, SVGGraphicsElement {
-  external SVGNumber createSVGNumber();
-  external SVGAnimatedLength? get height;
-  external SVGAnimatedLength? get width;
-}
+@JS()
+@staticInterop
+class SVGSVGElement extends SVGGraphicsElement {}
 
 SVGSVGElement createSVGSVGElement() {
   final SVGElement el = createSVGElement('svg');
@@ -25,24 +27,42 @@ SVGSVGElement createSVGSVGElement() {
   return el as SVGSVGElement;
 }
 
-extension type SVGClipPathElement(JSObject _) implements JSObject, SVGGraphicsElement {}
+extension SVGSVGElementExtension on SVGSVGElement {
+  external SVGNumber createSVGNumber();
+  external SVGAnimatedLength? get height;
+  external SVGAnimatedLength? get width;
+}
+
+@JS()
+@staticInterop
+class SVGClipPathElement extends SVGGraphicsElement {}
 
 SVGClipPathElement createSVGClipPathElement() =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', 'clipPath') as SVGClipPathElement;
 
-extension type SVGDefsElement(JSObject _) implements JSObject, SVGGraphicsElement {}
+@JS()
+@staticInterop
+class SVGDefsElement extends SVGGraphicsElement {}
 
 SVGDefsElement createSVGDefsElement() =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', 'defs') as SVGDefsElement;
 
-extension type SVGGeometryElement(JSObject _) implements JSObject, SVGGraphicsElement {}
+@JS()
+@staticInterop
+class SVGGeometryElement extends SVGGraphicsElement {}
 
-extension type SVGPathElement(JSObject _) implements JSObject, SVGGeometryElement {}
+@JS()
+@staticInterop
+class SVGPathElement extends SVGGeometryElement {}
 
 SVGPathElement createSVGPathElement() =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', 'path') as SVGPathElement;
 
-extension type SVGFilterElement(JSObject _) implements JSObject, SVGElement {
+@JS()
+@staticInterop
+class SVGFilterElement extends SVGElement {}
+
+extension SVGFilterElementExtension on SVGFilterElement {
   external SVGAnimatedEnumeration? get filterUnits;
   external SVGAnimatedLength? get height;
   external SVGAnimatedLength? get width;
@@ -53,22 +73,46 @@ extension type SVGFilterElement(JSObject _) implements JSObject, SVGElement {
 SVGFilterElement createSVGFilterElement() =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', 'filter') as SVGFilterElement;
 
-extension type SVGAnimatedLength(JSObject _) implements JSObject {
+@JS()
+@staticInterop
+class SVGAnimatedLength {}
+
+extension SVGAnimatedLengthExtension on SVGAnimatedLength {
   external SVGLength? get baseVal;
 }
 
-extension type SVGLength(JSObject _) implements JSObject {
-  external set valueAsString(String? value);
-  external void newValueSpecifiedUnits(int unitType, num valueInSpecifiedUnits);
+@JS()
+@staticInterop
+class SVGLength {}
+
+extension SVGLengthExtension on SVGLength {
+  @JS('valueAsString')
+  external set _valueAsString(JSString? value);
+  set valueAsString(String? value) => _valueAsString = value?.toJS;
+
+  @JS('newValueSpecifiedUnits')
+  external JSVoid _newValueSpecifiedUnits(JSNumber unitType, JSNumber valueInSpecifiedUnits);
+  void newValueSpecifiedUnits(int unitType, num valueInSpecifiedUnits) =>
+      _newValueSpecifiedUnits(unitType.toJS, valueInSpecifiedUnits.toJS);
 }
 
 const int svgLengthTypeNumber = 1;
 
-extension type SVGAnimatedEnumeration(JSObject _) implements JSObject {
-  external set baseVal(int? value);
+@JS()
+@staticInterop
+class SVGAnimatedEnumeration {}
+
+extension SVGAnimatedEnumerationExtenson on SVGAnimatedEnumeration {
+  @JS('baseVal')
+  external set _baseVal(JSNumber? value);
+  set baseVal(int? value) => _baseVal = value?.toJS;
 }
 
-extension type SVGFEColorMatrixElement(JSObject _) implements JSObject, SVGElement {
+@JS()
+@staticInterop
+class SVGFEColorMatrixElement extends SVGElement {}
+
+extension SVGFEColorMatrixElementExtension on SVGFEColorMatrixElement {
   external SVGAnimatedEnumeration? get type;
   external SVGAnimatedString? get result;
   external SVGAnimatedNumberList? get values;
@@ -78,14 +122,22 @@ SVGFEColorMatrixElement createSVGFEColorMatrixElement() =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', 'feColorMatrix')
         as SVGFEColorMatrixElement;
 
-extension type SVGFEFloodElement(JSObject _) implements JSObject, SVGElement {
+@JS()
+@staticInterop
+class SVGFEFloodElement extends SVGElement {}
+
+extension SVGFEFloodElementExtension on SVGFEFloodElement {
   external SVGAnimatedString? get result;
 }
 
 SVGFEFloodElement createSVGFEFloodElement() =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', 'feFlood') as SVGFEFloodElement;
 
-extension type SVGFEBlendElement(JSObject _) implements JSObject, SVGElement {
+@JS()
+@staticInterop
+class SVGFEBlendElement extends SVGElement {}
+
+extension SVGFEBlendElementExtension on SVGFEBlendElement {
   external SVGAnimatedString? get in1;
   external SVGAnimatedString? get in2;
   external SVGAnimatedEnumeration? get mode;
@@ -94,7 +146,11 @@ extension type SVGFEBlendElement(JSObject _) implements JSObject, SVGElement {
 SVGFEBlendElement createSVGFEBlendElement() =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', 'feBlend') as SVGFEBlendElement;
 
-extension type SVGFEImageElement(JSObject _) implements JSObject, SVGElement {
+@JS()
+@staticInterop
+class SVGFEImageElement extends SVGElement {}
+
+extension SVGFEImageElementExtension on SVGFEImageElement {
   external SVGAnimatedLength? get height;
   external SVGAnimatedLength? get width;
   external SVGAnimatedString? get result;
@@ -106,7 +162,15 @@ extension type SVGFEImageElement(JSObject _) implements JSObject, SVGElement {
 SVGFEImageElement createSVGFEImageElement() =>
     domDocument.createElementNS('http://www.w3.org/2000/svg', 'feImage') as SVGFEImageElement;
 
-extension type SVGFECompositeElement(JSObject _) implements JSObject, SVGElement {
+@JS()
+@staticInterop
+class SVGFECompositeElement extends SVGElement {}
+
+SVGFECompositeElement createSVGFECompositeElement() =>
+    domDocument.createElementNS('http://www.w3.org/2000/svg', 'feComposite')
+        as SVGFECompositeElement;
+
+extension SVGFEBlendCompositeExtension on SVGFECompositeElement {
   external SVGAnimatedString? get in1;
   external SVGAnimatedString? get in2;
   external SVGAnimatedNumber? get k1;
@@ -117,26 +181,48 @@ extension type SVGFECompositeElement(JSObject _) implements JSObject, SVGElement
   external SVGAnimatedString? get result;
 }
 
-SVGFECompositeElement createSVGFECompositeElement() =>
-    domDocument.createElementNS('http://www.w3.org/2000/svg', 'feComposite')
-        as SVGFECompositeElement;
+@JS()
+@staticInterop
+class SVGAnimatedString {}
 
-extension type SVGAnimatedString(JSObject _) implements JSObject {
-  external set baseVal(String? value);
+extension SVGAnimatedStringExtension on SVGAnimatedString {
+  @JS('baseVal')
+  external set _baseVal(JSString? value);
+  set baseVal(String? value) => _baseVal = value?.toJS;
 }
 
-extension type SVGAnimatedNumber(JSObject _) implements JSObject {
-  external set baseVal(num? value);
+@JS()
+@staticInterop
+class SVGAnimatedNumber {}
+
+extension SVGAnimatedNumberExtension on SVGAnimatedNumber {
+  @JS('baseVal')
+  external set _baseVal(JSNumber? value);
+  set baseVal(num? value) => _baseVal = value?.toJS;
 }
 
-extension type SVGAnimatedNumberList(JSObject _) implements JSObject {
+@JS()
+@staticInterop
+class SVGAnimatedNumberList {}
+
+extension SVGAnimatedNumberListExtension on SVGAnimatedNumberList {
   external SVGNumberList? get baseVal;
 }
 
-extension type SVGNumberList(JSObject _) implements JSObject {
+@JS()
+@staticInterop
+class SVGNumberList {}
+
+extension SVGNumberListExtension on SVGNumberList {
   external SVGNumber appendItem(SVGNumber newItem);
 }
 
-extension type SVGNumber(JSObject _) implements JSObject {
-  external set value(num? v);
+@JS()
+@staticInterop
+class SVGNumber {}
+
+extension SVGNumberExtension on SVGNumber {
+  @JS('value')
+  external set _value(JSNumber? value);
+  set value(num? v) => _value = v?.toJS;
 }

@@ -154,6 +154,7 @@ void main() {
   testWidgets('Material3 - locale parameter overrides ambient locale', (WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         locale: const Locale('en', 'US'),
         supportedLocales: const <Locale>[Locale('en', 'US'), Locale('fr', 'CA')],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -234,6 +235,7 @@ void main() {
   ) async {
     Widget buildFrame() {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         locale: const Locale('en', 'US'),
         home: Material(
           child: Builder(
@@ -316,6 +318,7 @@ void main() {
   ) async {
     Widget buildFrame() {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         locale: const Locale('en', 'US'),
         supportedLocales: const <Locale>[Locale('en', 'US'), Locale('fr', 'CA')],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,

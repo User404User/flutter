@@ -22,17 +22,6 @@ bool rrectIsValid(ui.RRect rrect) {
   return true;
 }
 
-bool rsuperellipseIsValid(ui.RSuperellipse rsuperellipse) {
-  assert(
-    !(rsuperellipse.left.isNaN ||
-        rsuperellipse.right.isNaN ||
-        rsuperellipse.top.isNaN ||
-        rsuperellipse.bottom.isNaN),
-    'RSuperellipse argument contained a NaN value.',
-  );
-  return true;
-}
-
 bool offsetIsValid(ui.Offset offset) {
   assert(!offset.dx.isNaN && !offset.dy.isNaN, 'Offset argument contained a NaN value.');
   return true;

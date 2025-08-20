@@ -14,10 +14,9 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -28,6 +27,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -46,8 +46,6 @@ import '../src/fake_process_manager.dart';
 import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
-import '../src/package_config.dart';
-import '../src/test_build_system.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Stdout'}),
@@ -77,11 +75,6 @@ const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
   ...kAttachIsolateExpectations,
 ];
 
-const List<String> kDdcLibraryBundleFlags = <String>[
-  '--dartdevc-module-format=ddc',
-  '--dartdevc-canary',
-];
-
 void main() {
   late FakeDebugConnection debugConnection;
   late FakeChromeDevice chromeDevice;
@@ -96,6 +89,7 @@ void main() {
   late FakeVmServiceHost fakeVmServiceHost;
   late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
+  late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;
 
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
@@ -105,6 +99,7 @@ void main() {
   }
 
   setUp(() {
+    testUsage = TestUsage();
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
     debugConnection = FakeDebugConnection();
@@ -121,10 +116,7 @@ void main() {
           .._devFS = webDevFS
           ..device = mockDevice
           ..generator = residentCompiler;
-    fileSystem.file('pubspec.yaml').writeAsStringSync('''
-name: my_app
-''');
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -154,9 +146,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
       );
@@ -186,9 +176,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
       );
@@ -210,9 +198,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
       );
@@ -224,9 +210,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
       );
@@ -366,9 +350,7 @@ name: my_app
         stayResident: false,
         fileSystem: fileSystem,
         logger: logger,
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -397,99 +379,13 @@ name: my_app
         stayResident: false,
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
       );
 
       expect(await residentWebRunner.run(), 0);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
-    },
-  );
-
-  testUsingContext(
-    'Detach keeps device running',
-    () async {
-      final BufferLogger logger = BufferLogger.test();
-      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
-      setupMocks();
-      fileSystem.directory('web').deleteSync(recursive: true);
-      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
-        flutterDevice,
-        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        fileSystem: fileSystem,
-        logger: logger,
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        analytics: globals.analytics,
-        systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
-      );
-
-      mockDevice.dds = DartDevelopmentService(logger: logger);
-
-      expect(mockDevice.isRunning, false);
-      final Completer<DebugConnectionInfo> connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
-      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-      await connectionInfoCompleter.future;
-      expect(mockDevice.isRunning, true);
-      await residentWebRunner.detach();
-      expect(residentWebRunner.stopAppDuringCleanup, false);
-      await residentWebRunner.exit();
-      await residentWebRunner.cleanupAtFinish();
-      expect(mockDevice.isRunning, true);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
-    },
-  );
-
-  testUsingContext(
-    'Quit stops device',
-    () async {
-      final BufferLogger logger = BufferLogger.test();
-      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
-      setupMocks();
-      fileSystem.directory('web').deleteSync(recursive: true);
-      final ResidentWebRunner residentWebRunner = ResidentWebRunner(
-        flutterDevice,
-        flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        fileSystem: fileSystem,
-        logger: logger,
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        analytics: globals.analytics,
-        systemClock: globals.systemClock,
-        devtoolsHandler: createNoOpHandler,
-      );
-
-      mockDevice.dds = DartDevelopmentService(logger: logger);
-
-      expect(mockDevice.isRunning, false);
-      final Completer<DebugConnectionInfo> connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
-      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-      await connectionInfoCompleter.future;
-      expect(mockDevice.isRunning, true);
-      expect(residentWebRunner.stopAppDuringCleanup, true);
-      await residentWebRunner.cleanupAtFinish();
-      expect(mockDevice.isRunning, false);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -699,9 +595,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -732,29 +626,13 @@ name: my_app
         flutterDevice,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachExpectations,
           const FakeVmServiceRequest(
-            method: kReloadSourcesServiceName,
-            args: <String, Object>{'isolateId': ''},
-            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
-          ),
-          const FakeVmServiceRequest(
-            method: 'ext.flutter.reassemble',
-            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
+            method: kHotRestartServiceName,
+            jsonResponse: <String, Object>{'type': 'Success'},
           ),
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -792,37 +670,54 @@ name: my_app
 
       final OperationResult result = await residentWebRunner.restart();
 
-      expect(logger.statusText, contains('Reloaded application in'));
+      expect(logger.statusText, contains('Restarted application in'));
       expect(result.code, 0);
       expect(webDevFS.mainUri.toString(), contains('entrypoint.dart'));
 
+      // ensure that analytics are sent.
+      expect(testUsage.events, <TestUsageEvent>[
+        TestUsageEvent(
+          'hot',
+          'restart',
+          parameters: CustomDimensions.fromMap(<String, String>{
+            'cd27': 'web-javascript',
+            'cd28': '',
+            'cd29': 'false',
+            'cd30': 'true',
+            'cd13': '0',
+            'cd48': 'false',
+          }),
+        ),
+      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
           Event.hotRunnerInfo(
-            label: 'reload',
+            label: 'restart',
             targetPlatform: 'web-javascript',
             sdkName: '',
             emulator: false,
-            fullRestart: false,
+            fullRestart: true,
             overallTimeInMs: 0,
-            syncedBytes: 0,
-            invalidatedSourcesCount: 0,
-            transferTimeInMs: 0,
-            compileTimeInMs: 0,
-            findInvalidatedTimeInMs: 0,
-            scannedSourcesCount: 0,
-            reassembleTimeInMs: 0,
-            reloadVMTimeInMs: 0,
           ),
         ),
       );
+      expect(testUsage.timings, const <TestTimingEvent>[
+        TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
+      ]);
       expect(
         fakeAnalytics.sentEvents,
-        contains(Event.timing(workflow: 'hot', variableName: 'reload', elapsedMilliseconds: 0)),
+        contains(
+          Event.timing(
+            workflow: 'hot',
+            variableName: 'web-incremental-restart',
+            elapsedMilliseconds: 0,
+          ),
+        ),
       );
     },
     overrides: <Type, Generator>{
+      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -832,31 +727,20 @@ name: my_app
   );
 
   testUsingContext(
-    'Hot reload reject reports correct analytics',
+    'Can hot restart after attaching',
     () async {
       final BufferLogger logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachExpectations,
           const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{'streamId': 'Isolate'},
+            method: kHotRestartServiceName,
+            jsonResponse: <String, Object>{'type': 'Success'},
           ),
         ],
       );
@@ -884,30 +768,63 @@ name: my_app
       final Completer<DebugConnectionInfo> connectionInfoCompleter =
           Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-      final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
+      await connectionInfoCompleter.future;
+      final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
-      expect(debugConnectionInfo, isNotNull);
+      // Ensure that generated entrypoint is generated correctly.
+      expect(webDevFS.mainUri, isNotNull);
+      final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
+      expect(entrypointContents, contains('// Flutter web bootstrap script'));
+      expect(entrypointContents, contains("import 'dart:ui_web' as ui_web;"));
+      expect(entrypointContents, contains('await ui_web.bootstrapEngine('));
 
-      webDevFS.report = UpdateFSReport(hotReloadRejected: true);
-      final OperationResult result = await residentWebRunner.restart();
+      expect(logger.statusText, contains('Restarted application in'));
+      expect(result.code, 0);
 
-      expect(result.code, 1);
-      expect(webDevFS.mainUri.toString(), contains('entrypoint.dart'));
-
+      // ensure that analytics are sent.
+      expect(testUsage.events, <TestUsageEvent>[
+        TestUsageEvent(
+          'hot',
+          'restart',
+          parameters: CustomDimensions.fromMap(<String, String>{
+            'cd27': 'web-javascript',
+            'cd28': '',
+            'cd29': 'false',
+            'cd30': 'true',
+            'cd13': '0',
+            'cd48': 'false',
+          }),
+        ),
+      ]);
       expect(
         fakeAnalytics.sentEvents,
         contains(
           Event.hotRunnerInfo(
-            label: 'reload-reject',
+            label: 'restart',
             targetPlatform: 'web-javascript',
             sdkName: '',
             emulator: false,
-            fullRestart: false,
+            fullRestart: true,
+            overallTimeInMs: 0,
+          ),
+        ),
+      );
+      expect(testUsage.timings, const <TestTimingEvent>[
+        TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
+      ]);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.timing(
+            workflow: 'hot',
+            variableName: 'web-incremental-restart',
+            elapsedMilliseconds: 0,
           ),
         ),
       );
     },
     overrides: <Type, Generator>{
+      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -915,202 +832,6 @@ name: my_app
       Pub: FakePubWithPrimedDeps.new,
     },
   );
-
-  // Regression test for https://github.com/flutter/flutter/issues/167887.
-  testUsingContext(
-    'WASM builds report analysis without crashing',
-    () async {
-      final BufferLogger logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(
-        flutterDevice,
-        logger: logger,
-        systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-          webUseWasm: true,
-        ),
-      );
-      fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          ...kAttachExpectations,
-          const FakeVmServiceRequest(
-            method: kReloadSourcesServiceName,
-            args: <String, Object>{'isolateId': ''},
-            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
-          ),
-          const FakeVmServiceRequest(
-            method: 'ext.flutter.reassemble',
-            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
-          ),
-          const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{'streamId': 'Isolate'},
-          ),
-        ],
-      );
-      setupMocks();
-      final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
-      final FakeProcess process = FakeProcess();
-      final Chromium chrome = Chromium(
-        1,
-        chromeConnection,
-        chromiumLauncher: chromiumLauncher,
-        process: process,
-        logger: logger,
-      );
-      chromiumLauncher.setInstance(chrome);
-
-      flutterDevice.device = GoogleChromeDevice(
-        fileSystem: fileSystem,
-        chromiumLauncher: chromiumLauncher,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.any(),
-      );
-      webDevFS.report = UpdateFSReport(success: true);
-
-      final Completer<DebugConnectionInfo> connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
-      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-      final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
-
-      expect(debugConnectionInfo, isNotNull);
-
-      final OperationResult result = await residentWebRunner.restart();
-      expect(logger.statusText, contains('Reloaded application in'));
-      expect(result.code, 0);
-    },
-    overrides: <Type, Generator>{
-      Analytics: () => fakeAnalytics,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
-    },
-  );
-
-  // Hot restart is available with and without the DDC library bundle format.
-  // Test one extra config where `fullRestart` is false without the DDC library
-  // bundle format - we should do a hot restart in this case because hot reload
-  // is not available.
-  for (final (List<String> flags, bool fullRestart) in <(List<String>, bool)>[
-    (kDdcLibraryBundleFlags, true),
-    (<String>[], true),
-    (<String>[], false),
-  ]) {
-    testUsingContext(
-      'Can hot restart after attaching with flags: $flags fullRestart: $fullRestart',
-      () async {
-        final BufferLogger logger = BufferLogger.test();
-        final ResidentRunner residentWebRunner = setUpResidentRunner(
-          flutterDevice,
-          logger: logger,
-          systemClock: SystemClock.fixed(DateTime(2001)),
-          debuggingOptions: DebuggingOptions.enabled(
-            BuildInfo(
-              BuildMode.debug,
-              null,
-              trackWidgetCreation: true,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-              extraFrontEndOptions: flags,
-            ),
-          ),
-        );
-        fakeVmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            ...kAttachExpectations,
-            const FakeVmServiceRequest(
-              method: kHotRestartServiceName,
-              jsonResponse: <String, Object>{'type': 'Success'},
-            ),
-          ],
-        );
-        setupMocks();
-        final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
-        final FakeProcess process = FakeProcess();
-        final Chromium chrome = Chromium(
-          1,
-          chromeConnection,
-          chromiumLauncher: chromiumLauncher,
-          process: process,
-          logger: logger,
-        );
-        chromiumLauncher.setInstance(chrome);
-
-        flutterDevice.device = GoogleChromeDevice(
-          fileSystem: fileSystem,
-          chromiumLauncher: chromiumLauncher,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-        );
-        webDevFS.report = UpdateFSReport(success: true);
-
-        final Completer<DebugConnectionInfo> connectionInfoCompleter =
-            Completer<DebugConnectionInfo>();
-        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
-        await connectionInfoCompleter.future;
-        final OperationResult result = await residentWebRunner.restart(fullRestart: fullRestart);
-
-        // Ensure that generated entrypoint is generated correctly.
-        expect(webDevFS.mainUri, isNotNull);
-        final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
-        expect(entrypointContents, contains('// Flutter web bootstrap script'));
-        expect(entrypointContents, contains("import 'dart:ui_web' as ui_web;"));
-        expect(entrypointContents, contains('await ui_web.bootstrapEngine('));
-
-        expect(logger.statusText, contains('Restarted application in'));
-        expect(result.code, 0);
-
-        expect(
-          fakeAnalytics.sentEvents,
-          contains(
-            Event.hotRunnerInfo(
-              label: 'restart',
-              targetPlatform: 'web-javascript',
-              sdkName: '',
-              emulator: false,
-              fullRestart: true,
-              overallTimeInMs: 0,
-              syncedBytes: 0,
-              invalidatedSourcesCount: 0,
-              transferTimeInMs: 0,
-              compileTimeInMs: 0,
-              findInvalidatedTimeInMs: 0,
-              scannedSourcesCount: 0,
-            ),
-          ),
-        );
-        expect(
-          fakeAnalytics.sentEvents,
-          contains(
-            Event.timing(
-              workflow: 'hot',
-              variableName: 'web-incremental-restart',
-              elapsedMilliseconds: 0,
-            ),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
-      },
-    );
-  }
 
   testUsingContext(
     'Can hot restart after attaching with web-server device',
@@ -1136,9 +857,12 @@ name: my_app
       expect(result.code, 0);
 
       // web-server device does not send restart analytics
+      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
+      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
+      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -1174,9 +898,12 @@ name: my_app
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
 
       expect(await residentWebRunner.run(), 1);
+      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
+      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
+      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -1242,9 +969,12 @@ name: my_app
 
       expect(result.code, 1);
       expect(result.message, contains('Failed to recompile application.'));
+      expect(testUsage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
+      expect(testUsage.timings, isEmpty);
     },
     overrides: <Type, Generator>{
+      Usage: () => testUsage,
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -1317,47 +1047,14 @@ name: my_app
   );
 
   testUsingContext(
-    'printHelp without details shows only hot restart help message',
+    'printHelp without details shows hot restart help message',
     () async {
       final BufferLogger logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       residentWebRunner.printHelp(details: false);
 
-      expect(logger.statusText, contains('Hot restart'));
-      expect(logger.statusText.contains('Hot reload'), false);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
-
-  testUsingContext(
-    'printHelp without details shows hot restart and hot reload help message '
-    'if using DDC library bundle format',
-    () async {
-      final BufferLogger logger = BufferLogger.test();
-      final ResidentRunner residentWebRunner = setUpResidentRunner(
-        flutterDevice,
-        logger: logger,
-        debuggingOptions: DebuggingOptions.enabled(
-          const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: true,
-            treeShakeIcons: false,
-            packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
-          ),
-        ),
-      );
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      residentWebRunner.printHelp(details: false);
-
-      expect(logger.statusText, contains('Hot restart'));
-      expect(logger.statusText, contains('Hot reload'));
+      expect(logger.statusText, contains('To hot restart changes'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1490,9 +1187,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         fileSystem: fileSystem,
         logger: logger,
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -1538,9 +1233,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         fileSystem: fileSystem,
         logger: logger,
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -1583,9 +1276,7 @@ name: my_app
         stayResident: false,
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
+        usage: globals.flutterUsage,
         analytics: globals.analytics,
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
@@ -1604,19 +1295,29 @@ name: my_app
 }''');
       globals.fs.file('l10n.yaml').createSync();
       globals.fs.file('pubspec.yaml').writeAsStringSync('''
-name: my_app
 flutter:
   generate: true
 ''');
-      writePackageConfigFile(
-        directory: globals.fs.currentDirectory,
-        mainLibName: 'my_app',
-        packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
-      );
+      globals.fs.directory('.dart_tool').childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "../../../path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
       expect(await residentWebRunner.run(), 0);
       final File generatedLocalizationsFile = globals.fs
-          .directory('lib')
-          .childDirectory('l10n')
+          .directory('.dart_tool')
+          .childDirectory('flutter_gen')
+          .childDirectory('gen_l10n')
           .childFile('app_localizations.dart');
       expect(generatedLocalizationsFile.existsSync(), isTrue);
       // Completing this future ensures that the daemon can exit correctly.
@@ -1636,12 +1337,23 @@ flutter:
     'Does not generate dart_plugin_registrant.dart',
     () async {
       // Create necessary files for [DartPluginRegistrantTarget]
-      writePackageConfigFile(
-        directory: globals.fs.currentDirectory,
-        mainLibName: 'my_app',
-        packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
-      );
-
+      final File packageConfig = globals.fs
+          .directory('.dart_tool')
+          .childFile('package_config.json');
+      packageConfig.createSync(recursive: true);
+      packageConfig.writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "../../../path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
       // Start with a dart_plugin_registrant.dart file.
       globals.fs
           .directory('.dart_tool')
@@ -1857,13 +1569,11 @@ ResidentRunner setUpResidentRunner(
     flutterDevice,
     flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
+    usage: globals.flutterUsage,
     analytics: globals.analytics,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
-    terminal: Terminal.test(),
-    platform: FakePlatform(),
-    outputPreferences: OutputPreferences.test(),
     devtoolsHandler: createNoOpHandler,
   );
 }
@@ -1879,16 +1589,11 @@ class FakeDevice extends Fake implements Device {
 
   int count = 0;
 
-  bool isRunning = false;
-
   @override
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
 
   @override
   late DartDevelopmentService dds;
-
-  @override
-  bool get supportsHotRestart => true;
 
   @override
   Future<LaunchResult> startApp(
@@ -1901,7 +1606,6 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String? userIdentifier,
   }) async {
-    isRunning = true;
     return LaunchResult.succeeded();
   }
 
@@ -1911,7 +1615,6 @@ class FakeDevice extends Fake implements Device {
       throw StateError('stopApp called more than once.');
     }
     count += 1;
-    isRunning = false;
     return true;
   }
 }
@@ -1963,7 +1666,6 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
-    bool recompileRestart = false,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
   }
@@ -2017,12 +1719,12 @@ class FakeWebDevFS extends Fake implements WebDevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
+    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
-    bool resetCompiler = false,
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
@@ -2079,11 +1781,6 @@ class FakeChromeTab extends Fake implements ChromeTab {
 class FakeWipConnection extends Fake implements WipConnection {
   @override
   final WipDebugger debugger = FakeWipDebugger();
-
-  @override
-  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
-    return WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}});
-  }
 }
 
 /// A test implementation of the [ChromiumLauncher] that launches a fixed instance.
@@ -2177,6 +1874,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
+    GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,

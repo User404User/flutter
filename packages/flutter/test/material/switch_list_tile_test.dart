@@ -196,7 +196,7 @@ void main() {
       MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(8.0)),
         child: Theme(
-          data: ThemeData(),
+          data: ThemeData(useMaterial3: true),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: StatefulBuilder(
@@ -507,7 +507,7 @@ void main() {
 
     Widget buildFrame({Color? activeColor, Color? thumbColor}) {
       return MaterialApp(
-        theme: ThemeData(
+        theme: ThemeData.light().copyWith(
           switchTheme: SwitchThemeData(
             thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.selected) ? thumbColor : null;
@@ -844,6 +844,7 @@ void main() {
 
     Widget buildSwitchListTile({required bool enabled, required bool selected}) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -989,6 +990,7 @@ void main() {
 
     Widget buildSwitchListTile() {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -1154,6 +1156,7 @@ void main() {
       Icon? inactiveIcon,
     }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: wrap(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -1277,6 +1280,7 @@ void main() {
   ) async {
     Widget buildSwitchListTile(MaterialTapTargetSize materialTapTargetSize) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -1349,7 +1353,7 @@ void main() {
   ) async {
     Widget buildSwitchListTile(bool applyCupertinoTheme, TargetPlatform platform) {
       return MaterialApp(
-        theme: ThemeData(platform: platform),
+        theme: ThemeData(useMaterial3: true, platform: platform),
         home: Material(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -1422,6 +1426,7 @@ void main() {
   ) async {
     Widget buildSwitchListTile(MaterialTapTargetSize materialTapTargetSize) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {

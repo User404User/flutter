@@ -44,11 +44,6 @@ class AllocatorMTL final : public Allocator {
   // |Allocator|
   Bytes DebugGetHeapUsage() const override;
 
-  // visible for testing.
-  void DebugSetSupportsUMA(bool value);
-
-  AllocatorMTL(id<MTLDevice> device, std::string label);
-
  private:
   friend class ContextMTL;
 
@@ -64,6 +59,8 @@ class AllocatorMTL final : public Allocator {
 #endif  // IMPELLER_DEBUG
 
   ISize max_texture_supported_;
+
+  AllocatorMTL(id<MTLDevice> device, std::string label);
 
   // |Allocator|
   bool IsValid() const;

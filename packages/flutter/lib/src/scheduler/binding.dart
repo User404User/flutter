@@ -212,7 +212,15 @@ typedef _PerformanceModeCleanupCallback = VoidCallback;
 /// The component that makes the request is responsible for disposing the handle.
 class PerformanceModeRequestHandle {
   PerformanceModeRequestHandle._(_PerformanceModeCleanupCallback this._cleanup) {
-    assert(debugMaybeDispatchCreated('scheduler', 'PerformanceModeRequestHandle', this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/scheduler.dart',
+        className: '$PerformanceModeRequestHandle',
+        object: this,
+      );
+    }
   }
 
   _PerformanceModeCleanupCallback? _cleanup;
@@ -223,7 +231,11 @@ class PerformanceModeRequestHandle {
   /// This method must only be called once per object.
   void dispose() {
     assert(_cleanup != null);
-    assert(debugMaybeDispatchDisposed(this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _cleanup!();
     _cleanup = null;
   }
@@ -577,15 +589,13 @@ mixin SchedulerBinding on BindingBase {
 
   /// Schedules the given transient frame callback.
   ///
-  /// Adds the given callback to the list of frame callbacks, and ensures that a
-  /// frame is scheduled if the `scheduleNewFrame` argument is true.
-  ///
-  /// The `scheduleNewFrame` argument dictates whether [scheduleFrame] should be
-  /// called to ensure a new frame. Defaults to true.
+  /// Adds the given callback to the list of frame callbacks and ensures that a
+  /// frame is scheduled.
   ///
   /// If this is called during the frame's animation phase (when transient frame
-  /// callbacks are still being invoked), `callback` will be called in the next
-  /// frame, not in the current frame.
+  /// callbacks are still being invoked), a new frame will be scheduled, and
+  /// `callback` will be called in the newly scheduled frame, not in the current
+  /// frame.
   ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///
@@ -607,14 +617,8 @@ mixin SchedulerBinding on BindingBase {
   ///  * [WidgetsBinding.drawFrame], which explains the phases of each frame
   ///    for those apps that use Flutter widgets (and where transient frame
   ///    callbacks fit into those phases).
-  int scheduleFrameCallback(
-    FrameCallback callback, {
-    bool rescheduling = false,
-    bool scheduleNewFrame = true,
-  }) {
-    if (scheduleNewFrame) {
-      scheduleFrame();
-    }
+  int scheduleFrameCallback(FrameCallback callback, {bool rescheduling = false}) {
+    scheduleFrame();
     _nextFrameCallbackId += 1;
     _transientCallbacks[_nextFrameCallbackId] = _FrameCallbackEntry(
       callback,

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
+
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -19,8 +20,8 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../features.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../version.dart';
 
 /// The [Pub] instance.
@@ -112,6 +113,7 @@ abstract class Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
+    required Usage usage,
   }) = _DefaultPub;
 
   /// Create a [Pub] instance with a mocked [stdio].
@@ -122,6 +124,7 @@ abstract class Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
+    required Usage usage,
     required Stdio stdio,
   }) = _DefaultPub.test;
 
@@ -158,9 +161,7 @@ abstract class Pub {
   /// While it is guaranteed that, if successful, that the result are a valid
   /// JSON object, the exact contents returned are _not_ validated, and are left
   /// as a responsibility of the caller.
-  ///
-  /// If `null` is returned, it should be assumed deps could not be determined.
-  Future<Map<String, Object?>?> deps(FlutterProject project);
+  Future<Map<String, Object?>> deps(FlutterProject project);
 
   /// Runs pub in 'batch' mode.
   ///
@@ -210,10 +211,12 @@ class _DefaultPub implements Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
+    required Usage usage,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
+       _usage = usage,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _stdio = null;
@@ -225,11 +228,13 @@ class _DefaultPub implements Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
+    required Usage usage,
     required Stdio stdio,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
+       _usage = usage,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _stdio = stdio;
@@ -239,6 +244,7 @@ class _DefaultPub implements Pub {
   final ProcessUtils _processUtils;
   final Platform _platform;
   final BotDetector _botDetector;
+  final Usage _usage;
   final ProcessManager _processManager;
   final Stdio? _stdio;
 
@@ -356,22 +362,13 @@ class _DefaultPub implements Pub {
   }
 
   @override
-  Future<Map<String, Object?>?> deps(FlutterProject project) async {
+  Future<Map<String, Object?>> deps(FlutterProject project) async {
     final List<String> pubCommand = <String>[..._pubCommand, 'deps', '--json'];
-    final RunResult runResult;
 
-    // Don't treat this command as terminal if it fails.
-    // See https://github.com/flutter/flutter/issues/166648
-    try {
-      runResult = await _processUtils.run(
-        pubCommand,
-        workingDirectory: project.directory.path,
-        throwOnError: true,
-      );
-    } on io.ProcessException catch (e) {
-      _logger.printWarning('${pubCommand.join(' ')} ${e.message}');
-      return null;
-    }
+    final RunResult runResult = await _processUtils.run(
+      pubCommand,
+      workingDirectory: project.directory.path,
+    );
 
     Never fail([String? reason]) {
       final String stdout = runResult.stdout;
@@ -383,6 +380,11 @@ class _DefaultPub implements Pub {
         '${pubCommand.join(' ')} ${reason != null ? 'had unexpected output: $reason' : 'failed'}'
         '${stderr.isNotEmpty ? '\n$stderr' : ''}',
       );
+    }
+
+    // Guard against dart pub deps crashing.
+    if (runResult.exitCode != 0) {
+      fail();
     }
 
     // Guard against dart pub deps having explicitly invalid output.
@@ -499,6 +501,8 @@ class _DefaultPub implements Pub {
     }
 
     final int code = exitCode;
+    final String result = code == 0 ? 'success' : 'failure';
+    PubResultEvent(context: context.toAnalyticsString(), result: result, usage: _usage).send();
 
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');
@@ -576,6 +580,12 @@ class _DefaultPub implements Pub {
       mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
       environment: pubEnvironment,
     );
+
+    String result = 'success';
+    if (code != 0) {
+      result = 'failure';
+    }
+    PubResultEvent(context: context.toAnalyticsString(), result: result, usage: _usage).send();
 
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');
@@ -767,24 +777,24 @@ class _DefaultPub implements Pub {
         .childFile('package_config_subset')
         .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
 
-    // If we aren't generating localizations, short-circuit.
+    // TODO(matanlurey): Remove this once flutter_gen is removed.
+    //
+    // This is actually incorrect logic; the presence of a `generate: true`
+    // does *NOT* mean that we need to add `flutter_gen` to the package config,
+    // and never did, but the name of the manifest field was labeled and
+    // described incorrectly.
+    //
+    // Tracking removal: https://github.com/flutter/flutter/issues/102983.
     if (!project.manifest.generateLocalizations) {
       return;
     }
 
-    // Workaround for https://github.com/flutter/flutter/issues/164864.
-    // If this flag is set, synthetic packages cannot be used, so we short-circut.
-    if (featureFlags.isExplicitPackageDependenciesEnabled) {
-      return;
-    }
-
+    // TODO(matanlurey): Remove this once flutter_gen is removed.
+    //
+    // See https://github.com/dart-lang/pub/issues/4471.
     if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
-      throwToolExit(
-        '`generate: true` is not supported within workspaces unless flutter config '
-        '--explicit-package-dependencies is set.',
-      );
+      throwToolExit('`generate: true` is not supported within workspaces.');
     }
-
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;
     }

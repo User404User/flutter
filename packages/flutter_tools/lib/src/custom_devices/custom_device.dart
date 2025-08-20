@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -22,7 +21,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -280,6 +278,7 @@ class CustomDeviceAppSession {
     bool traceStartup,
     String? route,
   ) {
+    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     return <String>[
       if (traceStartup) 'trace-startup=true',
       if (route != null) 'route=$route',
@@ -292,6 +291,8 @@ class CustomDeviceAppSession {
       if (debuggingOptions.traceSystrace) 'trace-systrace=true',
       if (debuggingOptions.traceToFile != null) 'trace-to-file=${debuggingOptions.traceToFile}',
       if (debuggingOptions.endlessTraceBuffer) 'endless-trace-buffer=true',
+      if (debuggingOptions.dumpSkpOnShaderCompilation) 'dump-skp-on-shader-compilation=true',
+      if (debuggingOptions.cacheSkSL) 'cache-sksl=true',
       if (debuggingOptions.purgePersistentCache) 'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
@@ -302,7 +303,7 @@ class CustomDeviceAppSession {
         ],
         if (debuggingOptions.startPaused) 'start-paused=true',
         if (debuggingOptions.disableServiceAuthCodes) 'disable-service-auth-codes=true',
-        if (debuggingOptions.dartFlags.isNotEmpty) 'dart-flags=${debuggingOptions.dartFlags}',
+        if (dartVmFlags.isNotEmpty) 'dart-flags=$dartVmFlags',
         if (debuggingOptions.useTestFonts) 'use-test-fonts=true',
         if (debuggingOptions.verboseSystemLogs) 'verbose-logging=true',
       ],
@@ -343,7 +344,6 @@ class CustomDeviceAppSession {
     Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     String? userIdentifier,
-    Map<String, String> additionalReplacementValues = const <String, String>{},
   }) async {
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     final String? packageName = _appPackage.name;
@@ -355,7 +355,7 @@ class CustomDeviceAppSession {
           'remotePath': '/tmp/',
           'appName': packageName,
           'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route),
-        }, additionalReplacementValues: additionalReplacementValues);
+        });
 
     final Process process = await _processUtils.start(interpolated);
     assert(_process == null);
@@ -703,16 +703,6 @@ class CustomDevice extends Device {
     String? userIdentifier,
     BundleBuilder? bundleBuilder,
   }) async {
-    final TargetPlatform platform = await targetPlatform;
-    final Artifacts artifacts = globals.artifacts!;
-
-    final Map<String, String> additionalReplacementValues = <String, String>{
-      'buildMode': debuggingOptions.buildInfo.modeName,
-      'icuDataPath': artifacts.getArtifactPath(Artifact.icuData, platform: platform),
-      'engineRevision':
-          artifacts.usesLocalArtifacts ? 'local' : globals.flutterVersion.engineRevision,
-    };
-
     if (!prebuiltApplication) {
       final String assetBundleDir = getAssetBuildDirectory();
 
@@ -720,7 +710,7 @@ class CustomDevice extends Device {
 
       // this just builds the asset bundle, it's the same as `flutter build bundle`
       await bundleBuilder.build(
-        platform: platform,
+        platform: await targetPlatform,
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
         depfilePath: defaultDepfilePath,
@@ -733,11 +723,7 @@ class CustomDevice extends Device {
         if (packageName == null) {
           throwToolExit('Could not start app, name for $package is unknown.');
         }
-        await _tryPostBuild(
-          appName: packageName,
-          localPath: assetBundleDir,
-          additionalReplacementValues: additionalReplacementValues,
-        );
+        await _tryPostBuild(appName: packageName, localPath: assetBundleDir);
       }
     }
 
@@ -753,7 +739,6 @@ class CustomDevice extends Device {
       platformArgs: platformArgs,
       prebuiltApplication: prebuiltApplication,
       userIdentifier: userIdentifier,
-      additionalReplacementValues: additionalReplacementValues,
     );
   }
 

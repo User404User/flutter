@@ -48,7 +48,6 @@ std::unique_ptr<TestVulkanSurface> TestVulkanSurface::Create(
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
-  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   auto result = std::unique_ptr<TestVulkanSurface>(
       new TestVulkanSurface(std::move(image_result.value())));
   result->surface_ = SkSurfaces::WrapBackendTexture(

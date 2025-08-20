@@ -14,11 +14,11 @@ import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:package_config/package_config.dart' show Package;
 
 import '../../../../src/common.dart';
 import '../../../../src/context.dart';
 import '../../../../src/fakes.dart';
-import '../../../../src/package_config.dart';
 import '../../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -74,7 +74,7 @@ void main() {
   });
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
-    writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+    await createPackageConfig(iosEnvironment);
 
     iosEnvironment.defines.remove(kIosArchs);
 
@@ -91,10 +91,10 @@ void main() {
     'NativeAssets throws error if missing sdk root',
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
     () async {
-      writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+      await createPackageConfig(iosEnvironment);
 
       final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <String>['foo'],
+        packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.projectDir.uri)],
       );
 
       iosEnvironment.defines.remove(kSdkRoot);
@@ -117,7 +117,7 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: isNativeAssetsEnabled),
       },
       () async {
-        writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+        await createPackageConfig(iosEnvironment);
 
         final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
         await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
@@ -187,7 +187,7 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     },
     () async {
-      writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+      await createPackageConfig(iosEnvironment);
 
       final List<CodeAsset> codeAssets = <CodeAsset>[
         CodeAsset(
@@ -200,7 +200,7 @@ void main() {
         ),
       ];
       final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
-        packagesWithNativeAssetsResult: <String>['foo'],
+        packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.buildDir.uri)],
         buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
           codeAssets: codeAssets,
           dependencies: <Uri>[Uri.file('src/foo.c')],
@@ -253,7 +253,7 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       },
       () async {
-        writePackageConfigFile(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+        await createPackageConfig(androidEnvironment);
         await fileSystem.file('libfoo.so').create();
 
         final List<CodeAsset> codeAssets = <CodeAsset>[
@@ -268,7 +268,9 @@ void main() {
             ),
         ];
         final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <String>['foo'],
+          packagesWithNativeAssetsResult: <Package>[
+            Package('foo', androidEnvironment.buildDir.uri),
+          ],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
             codeAssets: codeAssets,
             dependencies: <Uri>[Uri.file('src/foo.c')],
@@ -279,4 +281,12 @@ void main() {
       },
     );
   }
+}
+
+Future<void> createPackageConfig(Environment iosEnvironment) async {
+  final File packageConfig = iosEnvironment.projectDir
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json');
+  await packageConfig.parent.create();
+  await packageConfig.create();
 }

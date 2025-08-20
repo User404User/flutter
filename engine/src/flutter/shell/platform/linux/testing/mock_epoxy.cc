@@ -60,12 +60,6 @@ MockEpoxy::MockEpoxy() {
   mock = this;
 }
 
-MockEpoxy::~MockEpoxy() {
-  if (mock == this) {
-    mock = nullptr;
-  }
-}
-
 static bool check_display(EGLDisplay dpy) {
   if (dpy == nullptr) {
     mock_error = EGL_BAD_DISPLAY;

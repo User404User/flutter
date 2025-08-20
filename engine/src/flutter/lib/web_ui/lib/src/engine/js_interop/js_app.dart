@@ -2,13 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@JS()
+library js_app;
+
 import 'dart:js_interop';
 import 'package:ui/src/engine.dart';
 
 /// The JS bindings for the configuration object passed to [FlutterApp.addView].
-extension type JsFlutterViewOptions._(JSObject _) implements JSObject {
-  factory JsFlutterViewOptions() => JSObject() as JsFlutterViewOptions;
+@JS()
+@anonymous
+@staticInterop
+class JsFlutterViewOptions {
+  external factory JsFlutterViewOptions();
+}
 
+/// The attributes of the [JsFlutterViewOptions] object.
+extension JsFlutterViewOptionsExtension on JsFlutterViewOptions {
   @JS('hostElement')
   external DomElement? get _hostElement;
   DomElement get hostElement {
@@ -16,21 +25,32 @@ extension type JsFlutterViewOptions._(JSObject _) implements JSObject {
     return _hostElement!;
   }
 
-  external JsViewConstraints? get viewConstraints;
+  @JS('viewConstraints')
+  external JsViewConstraints? get _viewConstraints;
+  JsViewConstraints? get viewConstraints {
+    return _viewConstraints;
+  }
+
   external JSAny? get initialData;
 }
 
 /// The JS bindings for a [ViewConstraints] object.
-///
-/// Attributes are expressed in *logical* pixels.
-extension type JsViewConstraints._(JSObject _) implements JSObject {
+@JS()
+@anonymous
+@staticInterop
+class JsViewConstraints {
   external factory JsViewConstraints({
     double? minWidth,
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
   });
+}
 
+/// The attributes of a [JsViewConstraints] object.
+///
+/// These attributes are expressed in *logical* pixels.
+extension JsViewConstraintsExtension on JsViewConstraints {
   external double? get maxHeight;
   external double? get maxWidth;
   external double? get minHeight;
@@ -38,11 +58,17 @@ extension type JsViewConstraints._(JSObject _) implements JSObject {
 }
 
 /// The public JS API of a running Flutter Web App.
-extension type FlutterApp._primary(JSObject _) implements JSObject {
+@JS()
+@anonymous
+@staticInterop
+abstract class FlutterApp {
   factory FlutterApp({
     required AddFlutterViewFn addView,
     required RemoveFlutterViewFn removeView,
-  }) => FlutterApp._(addView: addView.toJS, removeView: ((int id) => removeView(id)).toJS);
+  }) => FlutterApp._(
+    addView: addView.toJS,
+    removeView: ((JSNumber id) => removeView(id.toDartInt)).toJS,
+  );
   external factory FlutterApp._({required JSFunction addView, required JSFunction removeView});
 }
 

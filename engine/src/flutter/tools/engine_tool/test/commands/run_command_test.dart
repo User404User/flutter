@@ -153,21 +153,21 @@ void main() {
       // Be very permissive on process execution, and check usage below instead.
       final permissiveProcessManager = FakeProcessManager(
         canRun: (_, {workingDirectory}) => true,
-        onRun: (FakeCommandLogEntry entry) {
-          commandsRun.add(entry.command);
+        onRun: (command) {
+          commandsRun.add(command);
           return io.ProcessResult(81, 0, '', '');
         },
-        onStart: (FakeCommandLogEntry entry) {
-          commandsRun.add(entry.command);
-          for (final intercept in interceptCommands) {
-            if (entry.command.first.endsWith(intercept.$1)) {
-              final result = intercept.$2(entry.command);
+        onStart: (command) {
+          commandsRun.add(command);
+          for (final entry in interceptCommands) {
+            if (command.first.endsWith(entry.$1)) {
+              final result = entry.$2(command);
               if (result != null) {
                 return result;
               }
             }
           }
-          switch (entry.command) {
+          switch (command) {
             case ['flutter', 'devices', '--machine', ..._]:
               return FakeProcess(stdout: jsonEncode(attachedDevices));
             default:

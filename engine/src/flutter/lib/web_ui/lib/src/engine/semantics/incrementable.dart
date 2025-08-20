@@ -36,7 +36,7 @@ class SemanticIncrementable extends SemanticRole {
 
     _element.addEventListener(
       'change',
-      createDomEventListener((DomEvent _) {
+      createDomEventListener((_) {
         if (_element.disabled!) {
           return;
         }
@@ -102,11 +102,6 @@ class SemanticIncrementable extends SemanticRole {
   /// This field is used to determine whether the HTML DOM of the semantics
   /// tree should be updated.
   bool _pendingResync = false;
-
-  @override
-  void updateValidationResult() {
-    SemanticRole.updateAriaInvalid(_element, semanticsObject.validationResult);
-  }
 
   @override
   void update() {

@@ -125,8 +125,4 @@ void ImageFilter::initShader(ReusableFragmentShader* shader) {
   filter_ = shader->as_image_filter();
 }
 
-bool ImageFilter::equals(ImageFilter* a, ImageFilter* b) {
-  return a->filter_ == b->filter_;
-}
-
 }  // namespace flutter

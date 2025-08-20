@@ -4,27 +4,30 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include "flutter/shell/platform/android/android_shell_holder.h"
+
 #include <pthread.h>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <memory>
 #include <optional>
 
+#include <sstream>
 #include <string>
 #include <utility>
 
-#include "common/settings.h"
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/native_library.h"
+#include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_display.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
-#include "flutter/shell/platform/android/android_rendering_selector.h"
-#include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
@@ -81,11 +84,8 @@ static PlatformData GetDefaultPlatformData() {
 
 AndroidShellHolder::AndroidShellHolder(
     const flutter::Settings& settings,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    AndroidRenderingAPI android_rendering_api)
-    : settings_(settings),
-      jni_facade_(jni_facade),
-      android_rendering_api_(android_rendering_api) {
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+    : settings_(settings), jni_facade_(jni_facade) {
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
 
@@ -112,15 +112,15 @@ AndroidShellHolder::AndroidShellHolder(
   thread_host_ = std::make_shared<ThreadHost>(host_config);
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
-  AndroidRenderingAPI rendering_api = android_rendering_api_;
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [&jni_facade, &weak_platform_view, rendering_api](Shell& shell) {
+      [&jni_facade, &weak_platform_view](Shell& shell) {
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
             shell,                   // delegate
             shell.GetTaskRunners(),  // task runners
             jni_facade,              // JNI interop
-            rendering_api            // rendering API
+            shell.GetSettings()
+                .enable_software_rendering  // use software rendering
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
@@ -187,15 +187,13 @@ AndroidShellHolder::AndroidShellHolder(
     const std::shared_ptr<ThreadHost>& thread_host,
     std::unique_ptr<Shell> shell,
     std::unique_ptr<APKAssetProvider> apk_asset_provider,
-    const fml::WeakPtr<PlatformViewAndroid>& platform_view,
-    AndroidRenderingAPI rendering_api)
+    const fml::WeakPtr<PlatformViewAndroid>& platform_view)
     : settings_(settings),
       jni_facade_(jni_facade),
       platform_view_(platform_view),
       thread_host_(thread_host),
       shell_(std::move(shell)),
-      apk_asset_provider_(std::move(apk_asset_provider)),
-      android_rendering_api_(rendering_api) {
+      apk_asset_provider_(std::move(apk_asset_provider)) {
   FML_DCHECK(jni_facade);
   FML_DCHECK(shell_);
   FML_DCHECK(shell_->IsSetup());
@@ -222,8 +220,7 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
     const std::string& entrypoint,
     const std::string& libraryUrl,
     const std::string& initial_route,
-    const std::vector<std::string>& entrypoint_args,
-    int64_t engine_id) const {
+    const std::vector<std::string>& entrypoint_args) const {
   FML_DCHECK(shell_ && shell_->IsSetup())
       << "A new Shell can only be spawned "
          "if the current Shell is properly constructed";
@@ -264,13 +261,14 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
     return std::make_unique<Rasterizer>(shell);
   };
 
+  // TODO(xster): could be worth tracing this to investigate whether
+  // the IsolateConfiguration could be cached somewhere.
   auto config = BuildRunConfiguration(entrypoint, libraryUrl, entrypoint_args);
   if (!config) {
     // If the RunConfiguration was null, the kernel blob wasn't readable.
     // Fail the whole thing.
     return nullptr;
   }
-  config->SetEngineId(engine_id);
 
   std::unique_ptr<flutter::Shell> shell =
       shell_->Spawn(std::move(config.value()), initial_route,
@@ -278,16 +276,14 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
 
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
       GetSettings(), jni_facade, thread_host_, std::move(shell),
-      apk_asset_provider_->Clone(), weak_platform_view,
-      android_context->RenderingApi()));
+      apk_asset_provider_->Clone(), weak_platform_view));
 }
 
 void AndroidShellHolder::Launch(
     std::unique_ptr<APKAssetProvider> apk_asset_provider,
     const std::string& entrypoint,
     const std::string& libraryUrl,
-    const std::vector<std::string>& entrypoint_args,
-    int64_t engine_id) {
+    const std::vector<std::string>& entrypoint_args) {
   if (!IsValid()) {
     return;
   }
@@ -297,7 +293,6 @@ void AndroidShellHolder::Launch(
   if (!config) {
     return;
   }
-  config->SetEngineId(engine_id);
   UpdateDisplayMetrics();
   shell_->RunEngine(std::move(config.value()));
 }
@@ -361,10 +356,6 @@ void AndroidShellHolder::UpdateDisplayMetrics() {
   std::vector<std::unique_ptr<Display>> displays;
   displays.push_back(std::make_unique<AndroidDisplay>(jni_facade_));
   shell_->OnDisplayUpdates(std::move(displays));
-}
-
-bool AndroidShellHolder::IsSurfaceControlEnabled() {
-  return GetPlatformView()->IsSurfaceControlEnabled();
 }
 
 }  // namespace flutter

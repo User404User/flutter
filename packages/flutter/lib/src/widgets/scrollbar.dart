@@ -517,7 +517,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
 
-    if (!_needPaint(oldMetrics) && !_needPaint(metrics)) {
+    bool needPaint(ScrollMetrics? metrics) =>
+        metrics != null && metrics.maxScrollExtent > metrics.minScrollExtent;
+    if (!needPaint(oldMetrics) && !needPaint(metrics)) {
       return;
     }
     notifyListeners();
@@ -533,11 +535,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   Paint get _paintThumb {
     return Paint()..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
-  }
-
-  bool _needPaint(ScrollMetrics? metrics) {
-    return metrics != null &&
-        metrics.maxScrollExtent - metrics.minScrollExtent > precisionErrorTolerance;
   }
 
   Paint _paintTrack({bool isBorder = false}) {
@@ -632,7 +629,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (_lastAxisDirection == null || !_needPaint(_lastMetrics)) {
+    if (_lastAxisDirection == null ||
+        _lastMetrics == null ||
+        _lastMetrics!.maxScrollExtent <= _lastMetrics!.minScrollExtent) {
       return;
     }
     // Skip painting if there's not enough space.

@@ -8,7 +8,6 @@ import 'package:native_assets_cli/code_assets_builder.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
 import '../macos/native_assets_host.dart';
-import '../native_assets.dart';
 
 // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
 const int targetIOSVersion = 12;
@@ -29,41 +28,40 @@ Architecture getNativeIOSArchitecture(DarwinArch darwinArch) {
   };
 }
 
-Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
-  List<FlutterCodeAsset> nativeAssets,
-) {
+Map<KernelAssetPath, List<CodeAsset>> fatAssetTargetLocationsIOS(List<CodeAsset> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  final Map<KernelAssetPath, List<FlutterCodeAsset>> result =
-      <KernelAssetPath, List<FlutterCodeAsset>>{};
+  final Map<KernelAssetPath, List<CodeAsset>> result = <KernelAssetPath, List<CodeAsset>>{};
   final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  for (final FlutterCodeAsset asset in nativeAssets) {
+  for (final CodeAsset asset in nativeAssets) {
     // Use same target path for all assets with the same id.
-    final String assetId = asset.codeAsset.id;
     final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
-    idToPath[assetId] = path;
-    result[path] ??= <FlutterCodeAsset>[];
+        idToPath[asset.id] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
+    idToPath[asset.id] = path;
+    result[path] ??= <CodeAsset>[];
     result[path]!.add(asset);
   }
   return result;
 }
 
-Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
+Map<CodeAsset, KernelAsset> assetTargetLocationsIOS(List<CodeAsset> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
   final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  final Map<FlutterCodeAsset, KernelAsset> result = <FlutterCodeAsset, KernelAsset>{};
-  for (final FlutterCodeAsset asset in nativeAssets) {
-    final String assetId = asset.codeAsset.id;
+  final Map<CodeAsset, KernelAsset> result = <CodeAsset, KernelAsset>{};
+  for (final CodeAsset asset in nativeAssets) {
     final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
-    idToPath[assetId] = path;
-    result[asset] = KernelAsset(id: assetId, target: asset.target, path: path);
+        idToPath[asset.id] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
+    idToPath[asset.id] = path;
+    result[asset] = KernelAsset(
+      id: asset.id,
+      target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+      path: path,
+    );
   }
   return result;
 }
 
-KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenNames) {
-  final LinkMode linkMode = asset.codeAsset.linkMode;
+KernelAsset _targetLocationIOS(CodeAsset asset, Set<String> alreadyTakenNames) {
+  final LinkMode linkMode = asset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
     case DynamicLoadingSystem _:
@@ -73,12 +71,16 @@ KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenN
     case LookupInProcess _:
       kernelAssetPath = KernelAssetInProcess();
     case DynamicLoadingBundled _:
-      final String fileName = asset.codeAsset.file!.pathSegments.last;
+      final String fileName = asset.file!.pathSegments.last;
       kernelAssetPath = KernelAssetAbsolutePath(frameworkUri(fileName, alreadyTakenNames));
     default:
       throw Exception('Unsupported asset link mode $linkMode in asset $asset');
   }
-  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
+  return KernelAsset(
+    id: asset.id,
+    target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+    path: kernelAssetPath,
+  );
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -95,7 +97,7 @@ KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenN
 /// in xcode_backend.dart.
 Future<void> copyNativeCodeAssetsIOS(
   Uri buildUri,
-  Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
+  Map<KernelAssetPath, List<CodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
@@ -104,12 +106,11 @@ Future<void> copyNativeCodeAssetsIOS(
   final Map<String, String> oldToNewInstallNames = <String, String>{};
   final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
 
-  for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
+  for (final MapEntry<KernelAssetPath, List<CodeAsset>> assetMapping
       in assetTargetLocations.entries) {
     final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
     final List<File> sources = <File>[
-      for (final FlutterCodeAsset source in assetMapping.value)
-        fileSystem.file(source.codeAsset.file),
+      for (final CodeAsset source in assetMapping.value) fileSystem.file(source.file),
     ];
     final Uri targetUri = buildUri.resolveUri(target);
     final File dylibFile = fileSystem.file(targetUri);

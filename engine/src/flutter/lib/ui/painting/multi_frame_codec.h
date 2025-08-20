@@ -60,16 +60,16 @@ class MultiFrameCodec : public Codec {
     std::optional<SkIRect> restoreBGColorRect_;
 
     std::pair<sk_sp<DlImage>, std::string> GetNextFrameImage(
-        const fml::WeakPtr<GrDirectContext>& resourceContext,
+        fml::WeakPtr<GrDirectContext> resourceContext,
         const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
         const std::shared_ptr<impeller::Context>& impeller_context,
-        const fml::RefPtr<flutter::SkiaUnrefQueue>& unref_queue);
+        fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue);
 
     void GetNextFrameAndInvokeCallback(
         std::unique_ptr<tonic::DartPersistentValue> callback,
         const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
-        const fml::WeakPtr<GrDirectContext>& resourceContext,
-        const fml::RefPtr<flutter::SkiaUnrefQueue>& unref_queue,
+        fml::WeakPtr<GrDirectContext> resourceContext,
+        fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
         const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
         size_t trace_id,
         const std::shared_ptr<impeller::Context>& impeller_context);

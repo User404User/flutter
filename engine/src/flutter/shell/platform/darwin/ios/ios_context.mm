@@ -8,7 +8,9 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/darwin/ios/ios_context_metal_impeller.h"
+#include "flutter/shell/platform/darwin/ios/ios_context_metal_skia.h"
 #include "flutter/shell/platform/darwin/ios/ios_context_noop.h"
+#include "flutter/shell/platform/darwin/ios/ios_context_software.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -21,24 +23,30 @@ IOSContext::~IOSContext() = default;
 std::unique_ptr<IOSContext> IOSContext::Create(
     IOSRenderingAPI api,
     IOSRenderingBackend backend,
-    const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
-    const Settings& settings) {
+    const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
   switch (api) {
     case IOSRenderingAPI::kSoftware:
-      FML_LOG(IMPORTANT)
-          << "Software rendering is incompatible with Impeller.\n"
-             "Software rendering may have been automatically selected when running on a "
-             "simulator "
-             "in an environment that does not support Metal. Enabling GPU passthrough in your "
-             "environment may fix this.";
-      return std::make_unique<IOSContextNoop>();
+      if (backend == IOSRenderingBackend::kImpeller) {
+        FML_LOG(IMPORTANT)
+            << "Software rendering is incompatible with Impeller.\n"
+               "Software rendering may have been automatically selected when running on a "
+               "simulator "
+               "in an environment that does not support Metal. Enabling GPU passthrough in your "
+               "environment may fix this.";
+        return std::make_unique<IOSContextNoop>();
+      }
+      return std::make_unique<IOSContextSoftware>();
     case IOSRenderingAPI::kMetal:
       switch (backend) {
         case IOSRenderingBackend::kSkia:
+#if !SLIMPELLER
+          return std::make_unique<IOSContextMetalSkia>();
+#else   //  !SLIMPELLER
           FML_LOG(FATAL) << "Impeller opt-out unavailable.";
           return nullptr;
+#endif  //  !SLIMPELLER
         case IOSRenderingBackend::kImpeller:
-          return std::make_unique<IOSContextMetalImpeller>(settings, is_gpu_disabled_sync_switch);
+          return std::make_unique<IOSContextMetalImpeller>(is_gpu_disabled_sync_switch);
       }
     default:
       break;

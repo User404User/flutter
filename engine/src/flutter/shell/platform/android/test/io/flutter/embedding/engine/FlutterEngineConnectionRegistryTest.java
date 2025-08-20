@@ -21,7 +21,6 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformViewsController;
-import io.flutter.plugin.platform.PlatformViewsController2;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,8 +37,6 @@ public class FlutterEngineConnectionRegistryTest {
     FlutterEngine flutterEngine = mock(FlutterEngine.class);
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
     when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
-    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
-    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
 
     FlutterLoader flutterLoader = mock(FlutterLoader.class);
 
@@ -78,8 +75,6 @@ public class FlutterEngineConnectionRegistryTest {
     FlutterEngine flutterEngine = mock(FlutterEngine.class);
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
     when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
-    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
-    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
 
     FlutterLoader flutterLoader = mock(FlutterLoader.class);
 
@@ -129,8 +124,6 @@ public class FlutterEngineConnectionRegistryTest {
     FlutterEngine flutterEngine = mock(FlutterEngine.class);
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
     when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
-    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
-    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
 
     FlutterLoader flutterLoader = mock(FlutterLoader.class);
 

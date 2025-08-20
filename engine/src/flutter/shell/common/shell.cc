@@ -43,8 +43,6 @@
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/tonic/common/log.h"
 
-#include "third_party/updater/library/include/updater.h"
-
 namespace flutter {
 
 constexpr char kSkiaChannel[] = "flutter/skia";
@@ -436,14 +434,6 @@ Shell::Shell(DartVMRef vm,
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
       weak_factory_gpu_(nullptr),
       weak_factory_(this) {
-  // FIXME: This is probably the wrong place to hook into.
-#if SHOREBIRD_PLATFORM_SUPPORTED
-  if (!vm_) {
-    shorebird_report_launch_failure();
-  } else {
-    shorebird_report_launch_success();
-  }
-#endif
   FML_CHECK(!settings.enable_software_rendering || !settings.enable_impeller)
       << "Software rendering is incompatible with Impeller.";
   if (!settings.enable_impeller && settings.warn_on_impeller_opt_out) {
@@ -642,12 +632,6 @@ void Shell::NotifyLowMemoryWarning() const {
       });
   // The IO Manager uses resource cache limits of 0, so it is not necessary
   // to purge them.
-}
-
-void Shell::FlushMicrotaskQueue() const {
-  if (engine_) {
-    engine_->FlushMicrotaskQueue();
-  }
 }
 
 void Shell::RunEngine(RunConfiguration run_configuration) {
@@ -929,7 +913,6 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     // is the raster thread.
     raster_task();
   }
-  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 // |PlatformView::Delegate|
@@ -1106,8 +1089,8 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-
-  task_runners_.GetUITaskRunner()->PostTask(
+  fml::TaskRunner::RunNowAndFlushMessages(
+      task_runners_.GetUITaskRunner(),
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
@@ -1118,8 +1101,7 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
 }
 
 // |PlatformView::Delegate|
-void Shell::OnPlatformViewDispatchSemanticsAction(int64_t view_id,
-                                                  int32_t node_id,
+void Shell::OnPlatformViewDispatchSemanticsAction(int32_t node_id,
                                                   SemanticsAction action,
                                                   fml::MallocMapping args) {
   FML_DCHECK(is_set_up_);
@@ -1127,11 +1109,10 @@ void Shell::OnPlatformViewDispatchSemanticsAction(int64_t view_id,
 
   fml::TaskRunner::RunNowAndFlushMessages(
       task_runners_.GetUITaskRunner(),
-      fml::MakeCopyable([engine = engine_->GetWeakPtr(), view_id, node_id,
-                         action, args = std::move(args)]() mutable {
+      fml::MakeCopyable([engine = engine_->GetWeakPtr(), node_id, action,
+                         args = std::move(args)]() mutable {
         if (engine) {
-          engine->DispatchSemanticsAction(view_id, node_id, action,
-                                          std::move(args));
+          engine->DispatchSemanticsAction(node_id, action, std::move(args));
         }
       }));
 }
@@ -1328,8 +1309,7 @@ void Shell::OnAnimatorDrawLastLayerTrees(
 }
 
 // |Engine::Delegate|
-void Shell::OnEngineUpdateSemantics(int64_t view_id,
-                                    SemanticsNodeUpdates update,
+void Shell::OnEngineUpdateSemantics(SemanticsNodeUpdates update,
                                     CustomAccessibilityActionUpdates actions) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
@@ -1337,9 +1317,9 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
   task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
       task_runners_.GetPlatformTaskRunner(),
       [view = platform_view_->GetWeakPtr(), update = std::move(update),
-       actions = std::move(actions), view_id = view_id] {
+       actions = std::move(actions)] {
         if (view) {
-          view->UpdateSemantics(view_id, update, actions);
+          view->UpdateSemantics(update, actions);
         }
       });
 }
@@ -1562,18 +1542,6 @@ double Shell::GetScaledFontSize(double unscaled_font_size,
                                 int configuration_id) const {
   return platform_view_->GetScaledFontSize(unscaled_font_size,
                                            configuration_id);
-}
-
-void Shell::RequestViewFocusChange(const ViewFocusChangeRequest& request) {
-  FML_DCHECK(is_set_up_);
-
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetPlatformTaskRunner(),
-      [view = platform_view_->GetWeakPtr(), request] {
-        if (view) {
-          view->RequestViewFocusChange(request);
-        }
-      });
 }
 
 void Shell::ReportTimings() {
@@ -2111,35 +2079,20 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
        rasterizer = rasterizer_->GetWeakPtr(),  //
        view_id,                                 //
        callback = std::move(callback)           //
-  ]() mutable {
-        bool removed = false;
+  ] {
         if (engine) {
-          removed = engine->RemoveView(view_id);
+          bool removed = engine->RemoveView(view_id);
+          callback(removed);
         }
-        task_runners.GetRasterTaskRunner()->PostTask(
-            [rasterizer, view_id, callback = std::move(callback), removed]() {
-              if (rasterizer) {
-                rasterizer->CollectView(view_id);
-              }
-              // Only call the callback after it is known for certain that the
-              // raster thread will not try to use resources associated with
-              // the view.
-              callback(removed);
-            });
-      });
-}
-
-void Shell::OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) {
-  TRACE_EVENT0("flutter", "Shell:: OnPlatformViewSendViewFocusEvent");
-  FML_DCHECK(is_set_up_);
-  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-
-  task_runners_.GetUITaskRunner()->RunNowOrPostTask(
-      task_runners_.GetUITaskRunner(),
-      [engine = engine_->GetWeakPtr(), event = event] {
-        if (engine) {
-          engine->SendViewFocusEvent(event);
-        }
+        // Don't wait for the raster task here, which only cleans up memory and
+        // does not affect functionality. Make sure it is done after Dart
+        // removes the view to avoid receiving another rasterization request
+        // that adds back the view record.
+        task_runners.GetRasterTaskRunner()->PostTask([rasterizer, view_id]() {
+          if (rasterizer) {
+            rasterizer->CollectView(view_id);
+          }
+        });
       });
 }
 

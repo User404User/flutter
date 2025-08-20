@@ -481,6 +481,7 @@ void main() {
     testWidgets('Material3 - currentDate is highlighted', (WidgetTester tester) async {
       await tester.pumpWidget(
         calendarDatePicker(
+          useMaterial3: true,
           initialDate: DateTime(2016, DateTime.january, 15),
           currentDate: DateTime(2016, 1, 2),
         ),
@@ -518,6 +519,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         calendarDatePicker(
+          useMaterial3: true,
           firstDate: DateTime(2016, 1, 3),
           lastDate: DateTime(2016, 1, 31),
           currentDate: DateTime(2016, 1, 2), // not between first and last
@@ -961,7 +963,6 @@ void main() {
             label: '1, Friday, January 1, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -972,7 +973,6 @@ void main() {
             label: '2, Saturday, January 2, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -983,7 +983,6 @@ void main() {
             label: '3, Sunday, January 3, 2016, Today',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -994,7 +993,6 @@ void main() {
             label: '4, Monday, January 4, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1005,7 +1003,6 @@ void main() {
             label: '5, Tuesday, January 5, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1016,7 +1013,6 @@ void main() {
             label: '6, Wednesday, January 6, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1027,7 +1023,6 @@ void main() {
             label: '7, Thursday, January 7, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1038,7 +1033,6 @@ void main() {
             label: '8, Friday, January 8, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1049,7 +1043,6 @@ void main() {
             label: '9, Saturday, January 9, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1060,7 +1053,6 @@ void main() {
             label: '10, Sunday, January 10, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1071,7 +1063,6 @@ void main() {
             label: '11, Monday, January 11, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1082,7 +1073,6 @@ void main() {
             label: '12, Tuesday, January 12, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1093,7 +1083,6 @@ void main() {
             label: '13, Wednesday, January 13, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1104,7 +1093,6 @@ void main() {
             label: '14, Thursday, January 14, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1115,7 +1103,6 @@ void main() {
             label: '15, Friday, January 15, 2016',
             isButton: true,
             hasTapAction: true,
-            hasSelectedState: true,
             hasFocusAction: true,
             isSelected: true,
             isFocusable: true,
@@ -1126,7 +1113,6 @@ void main() {
           matchesSemantics(
             label: '16, Saturday, January 16, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1137,7 +1123,6 @@ void main() {
           matchesSemantics(
             label: '17, Sunday, January 17, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1148,7 +1133,6 @@ void main() {
           matchesSemantics(
             label: '18, Monday, January 18, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1159,7 +1143,6 @@ void main() {
           matchesSemantics(
             label: '19, Tuesday, January 19, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1170,7 +1153,6 @@ void main() {
           matchesSemantics(
             label: '20, Wednesday, January 20, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1181,7 +1163,6 @@ void main() {
           matchesSemantics(
             label: '21, Thursday, January 21, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1192,7 +1173,6 @@ void main() {
           matchesSemantics(
             label: '22, Friday, January 22, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1203,7 +1183,6 @@ void main() {
           matchesSemantics(
             label: '23, Saturday, January 23, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1214,7 +1193,6 @@ void main() {
           matchesSemantics(
             label: '24, Sunday, January 24, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1225,7 +1203,6 @@ void main() {
           matchesSemantics(
             label: '25, Monday, January 25, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1236,7 +1213,6 @@ void main() {
           matchesSemantics(
             label: '26, Tuesday, January 26, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1247,7 +1223,6 @@ void main() {
           matchesSemantics(
             label: '27, Wednesday, January 27, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1258,7 +1233,6 @@ void main() {
           matchesSemantics(
             label: '28, Thursday, January 28, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1269,7 +1243,6 @@ void main() {
           matchesSemantics(
             label: '29, Friday, January 29, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1280,7 +1253,6 @@ void main() {
           matchesSemantics(
             label: '30, Saturday, January 30, 2016',
             isButton: true,
-            hasSelectedState: true,
             hasTapAction: true,
             hasFocusAction: true,
             isFocusable: true,
@@ -1320,7 +1292,6 @@ void main() {
               hasTapAction: true,
               hasFocusAction: true,
               isSelected: year == 2016,
-              hasSelectedState: true,
               isFocusable: true,
               isButton: true,
             ),
@@ -1522,79 +1493,4 @@ void main() {
       expect(selectedYear, equals(DateTime(2018, DateTime.june)));
     });
   });
-
-  group('Calendar Delegate', () {
-    testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: true),
-          home: Material(
-            child: CalendarDatePicker(
-              initialDate: DateTime(2025, DateTime.february, 26),
-              firstDate: DateTime(2025, DateTime.february),
-              lastDate: DateTime(2025, DateTime.may),
-              onDateChanged: (DateTime value) {},
-            ),
-          ),
-        ),
-      );
-
-      final CalendarDatePicker calendarPicker = tester.widget(find.byType(CalendarDatePicker));
-      expect(calendarPicker.calendarDelegate, isA<GregorianCalendarDelegate>());
-
-      final Finder datePickerModeToggleButton = find.descendant(
-        of: find.byType(InkWell),
-        matching: find.text('February 2025'),
-      );
-      await tester.tap(datePickerModeToggleButton);
-      await tester.pumpAndSettle();
-
-      final YearPicker yearPicker = tester.widget(find.byType(YearPicker));
-      expect(yearPicker.calendarDelegate, isA<GregorianCalendarDelegate>());
-    });
-
-    testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: true),
-          home: Material(
-            child: CalendarDatePicker(
-              initialDate: DateTime(2025, DateTime.february, 26),
-              firstDate: DateTime(2025, DateTime.february),
-              lastDate: DateTime(2025, DateTime.may),
-              onDateChanged: (DateTime value) {},
-              calendarDelegate: const TestCalendarDelegate(),
-            ),
-          ),
-        ),
-      );
-
-      final CalendarDatePicker calendarPicker = tester.widget(find.byType(CalendarDatePicker));
-      expect(calendarPicker.calendarDelegate, isA<TestCalendarDelegate>());
-
-      final Finder datePickerModeToggleButton = find.descendant(
-        of: find.byType(InkWell),
-        matching: find.text('February 2025'),
-      );
-      await tester.tap(datePickerModeToggleButton);
-      await tester.pumpAndSettle();
-
-      final YearPicker yearPicker = tester.widget(find.byType(YearPicker));
-      expect(yearPicker.calendarDelegate, isA<TestCalendarDelegate>());
-    });
-  });
-}
-
-class TestCalendarDelegate extends GregorianCalendarDelegate {
-  const TestCalendarDelegate();
-
-  @override
-  int getDaysInMonth(int year, int month) {
-    return month.isEven ? 21 : 28;
-  }
-
-  @override
-  int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
-    return 1;
-  }
 }

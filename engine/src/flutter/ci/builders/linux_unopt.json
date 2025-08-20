@@ -16,6 +16,8 @@
                 "debug",
                 "--unoptimized",
                 "--prebuilt-dart-sdk",
+                "--asan",
+                "--lsan",
                 "--dart-debug",
                 "--rbe",
                 "--no-goma"
@@ -65,7 +67,7 @@
                         "--variant",
                         "ci/host_debug_unopt",
                         "--type",
-                        "dart,dart-host,engine,font-subset",
+                        "dart,dart-host,engine",
                         "--engine-capture-core-dump",
                         "--use-sanitizer-suppressions"
                     ]

@@ -158,15 +158,7 @@ class AndroidValidator extends DoctorValidator {
 
     _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {
-      messages.add(
-        const ValidationMessage.error(
-          'cmdline-tools component is missing.\n'
-          'Try installing or updating Android Studio.\n'
-          'Alternatively, download the tools from https://developer.android.com/studio#command-line-tools-only '
-          'and make sure to set the ANDROID_HOME environment variable.\n'
-          'See https://developer.android.com/studio/command-line for more details.',
-        ),
-      );
+      messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
       return ValidationResult(ValidationType.missing, messages);
     }
 

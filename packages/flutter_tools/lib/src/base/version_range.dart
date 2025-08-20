@@ -22,9 +22,4 @@ class VersionRange {
 
   @override
   int get hashCode => Object.hash(versionMin, versionMax);
-
-  @override
-  String toString() {
-    return 'VersionRange(versionMin: $versionMin, versionMax: $versionMax)';
-  }
 }

@@ -25,7 +25,6 @@ using DlPoint = flutter::DlPoint;
 using DlRect = flutter::DlRect;
 using DlIRect = flutter::DlIRect;
 using DlRoundRect = flutter::DlRoundRect;
-using DlRoundSuperellipse = flutter::DlRoundSuperellipse;
 using DlPath = flutter::DlPath;
 
 class DlDispatcherBase : public flutter::DlOpReceiver {
@@ -125,29 +124,18 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void transformReset() override;
 
   // |flutter::DlOpReceiver|
-  void clipRect(const DlRect& rect,
-                flutter::DlClipOp clip_op,
-                bool is_aa) override;
+  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipOval(const DlRect& bounds,
-                flutter::DlClipOp clip_op,
-                bool is_aa) override;
+  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void clipRoundRect(const DlRoundRect& rrect,
-                     flutter::DlClipOp clip_op,
+                     ClipOp clip_op,
                      bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
-                             flutter::DlClipOp clip_op,
-                             bool is_aa) override;
-
-  // |flutter::DlOpReceiver|
-  void clipPath(const DlPath& path,
-                flutter::DlClipOp clip_op,
-                bool is_aa) override;
+  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void drawColor(flutter::DlColor color, flutter::DlBlendMode mode) override;
@@ -181,9 +169,6 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                          const DlRoundRect& inner) override;
 
   // |flutter::DlOpReceiver|
-  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override;
-
-  // |flutter::DlOpReceiver|
   void drawPath(const DlPath& path) override;
 
   // |flutter::DlOpReceiver|
@@ -193,7 +178,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                bool use_center) override;
 
   // |flutter::DlOpReceiver|
-  void drawPoints(flutter::DlPointMode mode,
+  void drawPoints(PointMode mode,
                   uint32_t count,
                   const DlPoint points[]) override;
 
@@ -213,7 +198,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                      const DlRect& dst,
                      flutter::DlImageSampling sampling,
                      bool render_with_attributes,
-                     flutter::DlSrcRectConstraint constraint) override;
+                     SrcRectConstraint constraint) override;
 
   // |flutter::DlOpReceiver|
   void drawImageNine(const sk_sp<flutter::DlImage> image,

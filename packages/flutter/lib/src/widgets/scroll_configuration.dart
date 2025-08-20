@@ -18,7 +18,6 @@ import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
-import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'scrollbar.dart';
@@ -90,7 +89,6 @@ class ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
-    ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
@@ -101,7 +99,6 @@ class ScrollBehavior {
       pointerAxisModifiers: pointerAxisModifiers,
       physics: physics,
       platform: platform,
-      keyboardDismissBehavior: keyboardDismissBehavior,
     );
   }
 
@@ -112,11 +109,10 @@ class ScrollBehavior {
 
   /// The device kinds that the scrollable will accept drag gestures from.
   ///
-  /// By default only [PointerDeviceKind.touch], [PointerDeviceKind.stylus],
-  /// [PointerDeviceKind.invertedStylus], and [PointerDeviceKind.trackpad]
-  /// are configured to create drag gestures. Enabling this for
-  /// [PointerDeviceKind.mouse] will make it difficult or impossible to select
-  /// text in scrollable containers and is not recommended.
+  /// By default only [PointerDeviceKind.touch], [PointerDeviceKind.stylus], and
+  /// [PointerDeviceKind.invertedStylus] are configured to create drag gestures.
+  /// Enabling this for [PointerDeviceKind.mouse] will make it difficult or
+  /// impossible to select text in scrollable containers and is not recommended.
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.multitouchDragStrategy}
@@ -268,12 +264,6 @@ class ScrollBehavior {
   /// method returns false, the rebuilds might be optimized away.
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 
-  /// The default keyboard dismissal behavior for [ScrollView] widgets.
-  ///
-  /// Defaults to [ScrollViewKeyboardDismissBehavior.manual].
-  ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(BuildContext context) =>
-      ScrollViewKeyboardDismissBehavior.manual;
-
   @override
   String toString() => objectRuntimeType(this, 'ScrollBehavior');
 }
@@ -288,7 +278,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
-    this.keyboardDismissBehavior,
   }) : _dragDevices = dragDevices,
        _pointerAxisModifiers = pointerAxisModifiers;
 
@@ -297,7 +286,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final bool overscroll;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
-  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
   final Set<PointerDeviceKind>? _dragDevices;
   final MultitouchDragStrategy? multitouchDragStrategy;
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
@@ -339,7 +327,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
-    ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
@@ -349,7 +336,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       pointerAxisModifiers: pointerAxisModifiers ?? this.pointerAxisModifiers,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
-      keyboardDismissBehavior: keyboardDismissBehavior ?? this.keyboardDismissBehavior,
     );
   }
 
@@ -361,11 +347,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
     return physics ?? delegate.getScrollPhysics(context);
-  }
-
-  @override
-  ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(BuildContext context) {
-    return keyboardDismissBehavior ?? delegate.getKeyboardDismissBehavior(context);
   }
 
   @override

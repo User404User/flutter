@@ -651,61 +651,6 @@ void main() {
       final bool isCupertino =
           debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
           debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
-      final TestSemantics textField =
-          kIsWeb
-              ? TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 9,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isTextField,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocused,
-                    ],
-                    actions: <SemanticsAction>[
-                      if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                      if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                      SemanticsAction.tap,
-                      SemanticsAction.focus,
-                      SemanticsAction.setSelection,
-                      SemanticsAction.setText,
-                      SemanticsAction.paste,
-                    ],
-                    label: 'Search',
-                    textDirection: TextDirection.ltr,
-                    textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                  ),
-                ],
-              )
-              : TestSemantics(
-                id: 9,
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isTextField,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocused,
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                actions: <SemanticsAction>[
-                  if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                  if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                  SemanticsAction.tap,
-                  SemanticsAction.focus,
-                  SemanticsAction.setSelection,
-                  SemanticsAction.setText,
-                  SemanticsAction.paste,
-                ],
-                label: 'Search',
-                textDirection: TextDirection.ltr,
-                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-              );
-
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -743,7 +688,29 @@ void main() {
                                 tooltip: 'Back',
                                 textDirection: TextDirection.ltr,
                               ),
-                              textField,
+                              TestSemantics(
+                                id: 9,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.isTextField,
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocused,
+                                  SemanticsFlag.isHeader,
+                                  if (!isCupertino) SemanticsFlag.namesRoute,
+                                ],
+                                actions: <SemanticsAction>[
+                                  if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                                  if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                                  SemanticsAction.tap,
+                                  SemanticsAction.focus,
+                                  SemanticsAction.setSelection,
+                                  SemanticsAction.setText,
+                                  SemanticsAction.paste,
+                                ],
+                                label: 'Search',
+                                textDirection: TextDirection.ltr,
+                                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                              ),
                               TestSemantics(
                                 id: 10,
                                 label: 'Bottom',
@@ -851,60 +818,6 @@ void main() {
       final bool isCupertino =
           debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
           debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
-      final TestSemantics textField =
-          kIsWeb
-              ? TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 11,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isTextField,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocused,
-                    ],
-                    actions: <SemanticsAction>[
-                      if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                      if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                      SemanticsAction.tap,
-                      SemanticsAction.focus,
-                      SemanticsAction.setSelection,
-                      SemanticsAction.setText,
-                      SemanticsAction.paste,
-                    ],
-                    label: 'Search',
-                    textDirection: TextDirection.ltr,
-                    textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                  ),
-                ],
-              )
-              : TestSemantics(
-                id: 11,
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isTextField,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocused,
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                actions: <SemanticsAction>[
-                  if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                  if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                  SemanticsAction.tap,
-                  SemanticsAction.focus,
-                  SemanticsAction.setSelection,
-                  SemanticsAction.setText,
-                  SemanticsAction.paste,
-                ],
-                label: 'Search',
-                textDirection: TextDirection.ltr,
-                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-              );
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -939,7 +852,29 @@ void main() {
                             tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
-                          textField,
+                          TestSemantics(
+                            id: 11,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.isHeader,
+                              if (!isCupertino) SemanticsFlag.namesRoute,
+                            ],
+                            actions: <SemanticsAction>[
+                              if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                              if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                              SemanticsAction.tap,
+                              SemanticsAction.focus,
+                              SemanticsAction.setSelection,
+                              SemanticsAction.setText,
+                              SemanticsAction.paste,
+                            ],
+                            label: 'Search',
+                            textDirection: TextDirection.ltr,
+                            textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                          ),
                           TestSemantics(id: 14, label: 'Bottom', textDirection: TextDirection.ltr),
                         ],
                       ),

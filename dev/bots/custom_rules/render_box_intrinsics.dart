@@ -115,7 +115,7 @@ class _RenderBoxSubclassVisitor extends RecursiveAstVisitor<void> {
     if (isCallingSuperImplementation) {
       return;
     }
-    final Element? declaredInClassElement = node.staticElement?.declaration?.enclosingElement3;
+    final Element? declaredInClassElement = node.staticElement?.declaration?.enclosingElement;
     if (declaredInClassElement is InterfaceElement &&
         _implementsRenderBox(declaredInClassElement)) {
       violationNodes.add((node, correctMethodName));

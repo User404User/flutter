@@ -58,11 +58,6 @@
  */
 - (void)disposePlatformViews;
 
-/**
- * Removes all platform views.
- */
-- (void)reset;
-
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWCONTROLLER_H_

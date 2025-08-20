@@ -21,7 +21,7 @@ class SkwasmNativeShader extends SkwasmObjectWrapper<RawShader> implements Skwas
   SkwasmNativeShader(ShaderHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawShader> _registry =
-      SkwasmFinalizationRegistry<RawShader>((ShaderHandle handle) => shaderDispose(handle));
+      SkwasmFinalizationRegistry<RawShader>(shaderDispose);
 }
 
 class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
@@ -223,9 +223,7 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
   }
 
   static final SkwasmFinalizationRegistry<RawRuntimeEffect> _registry =
-      SkwasmFinalizationRegistry<RawRuntimeEffect>(
-        (RuntimeEffectHandle handle) => runtimeEffectDispose(handle),
-      );
+      SkwasmFinalizationRegistry<RawRuntimeEffect>(runtimeEffectDispose);
 
   final String name;
   final int floatUniformCount;
@@ -241,7 +239,7 @@ class SkwasmShaderData extends SkwasmObjectWrapper<RawSkData> {
   SkwasmShaderData(int size) : super(skDataCreate(size), _registry);
 
   static final SkwasmFinalizationRegistry<RawSkData> _registry =
-      SkwasmFinalizationRegistry<RawSkData>((SkDataHandle handle) => skDataDispose(handle));
+      SkwasmFinalizationRegistry<RawSkData>(skDataDispose);
 }
 
 // This class does not inherit from SkwasmNativeShader, as its handle might

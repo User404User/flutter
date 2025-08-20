@@ -11,7 +11,6 @@
 
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
@@ -23,7 +22,9 @@ namespace {
 constexpr char kTextPlainFormat[] = "text/plain";
 const UInt32 kKeyPressClickSoundId = 1306;
 
+#if not APPLICATION_EXTENSION_API_ONLY
 NSString* const kSearchURLPrefix = @"x-web-search://?";
+#endif
 
 }  // namespace
 
@@ -44,23 +45,21 @@ const char* const kOverlayStyleUpdateNotificationKey =
 using namespace flutter;
 
 static void SetStatusBarHiddenForSharedApplication(BOOL hidden) {
-  UIApplication* flutterApplication = FlutterSharedApplication.application;
-  if (flutterApplication) {
-    flutterApplication.statusBarHidden = hidden;
-  } else {
-    FML_LOG(WARNING) << "Application based status bar styling is not available in app extension.";
-  }
+#if not APPLICATION_EXTENSION_API_ONLY
+  [UIApplication sharedApplication].statusBarHidden = hidden;
+#else
+  FML_LOG(WARNING) << "Application based status bar styling is not available in app extension.";
+#endif
 }
 
 static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
-  UIApplication* flutterApplication = FlutterSharedApplication.application;
-  if (flutterApplication) {
-    // Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
-    // in favor of delegating to the view controller.
-    [flutterApplication setStatusBarStyle:style];
-  } else {
-    FML_LOG(WARNING) << "Application based status bar styling is not available in app extension.";
-  }
+#if not APPLICATION_EXTENSION_API_ONLY
+  // Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
+  // in favor of delegating to the view controller.
+  [[UIApplication sharedApplication] setStatusBarStyle:style];
+#else
+  FML_LOG(WARNING) << "Application based status bar styling is not available in app extension.";
+#endif
 }
 
 @interface FlutterPlatformPlugin ()
@@ -221,18 +220,18 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 }
 
 - (void)searchWeb:(NSString*)searchTerm {
-  UIApplication* flutterApplication = FlutterSharedApplication.application;
-  if (flutterApplication == nil) {
-    FML_LOG(WARNING) << "SearchWeb.invoke is not availabe in app extension.";
-    return;
-  }
-
+#if APPLICATION_EXTENSION_API_ONLY
+  FML_LOG(WARNING) << "SearchWeb.invoke is not availabe in app extension.";
+#else
   NSString* escapedText = [searchTerm
       stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet
                                                              URLHostAllowedCharacterSet]];
   NSString* searchURL = [NSString stringWithFormat:@"%@%@", kSearchURLPrefix, escapedText];
 
-  [flutterApplication openURL:[NSURL URLWithString:searchURL] options:@{} completionHandler:nil];
+  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:searchURL]
+                                     options:@{}
+                           completionHandler:nil];
+#endif
 }
 
 - (void)playSystemSound:(NSString*)soundType {
@@ -382,19 +381,17 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     [navigationController popViewControllerAnimated:isAnimated];
   } else {
     UIViewController* rootViewController = nil;
-    UIApplication* flutterApplication = FlutterSharedApplication.application;
-    if (flutterApplication) {
-      rootViewController = flutterApplication.keyWindow.rootViewController;
+#if APPLICATION_EXTENSION_API_ONLY
+    if (@available(iOS 15.0, *)) {
+      rootViewController =
+          [engineViewController flutterWindowSceneIfViewLoaded].keyWindow.rootViewController;
     } else {
-      if (@available(iOS 15.0, *)) {
-        rootViewController =
-            [engineViewController flutterWindowSceneIfViewLoaded].keyWindow.rootViewController;
-      } else {
-        FML_LOG(WARNING)
-            << "rootViewController is not available in application extension prior to iOS 15.0.";
-      }
+      FML_LOG(WARNING)
+          << "rootViewController is not available in application extension prior to iOS 15.0.";
     }
-
+#else
+    rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+#endif
     if (engineViewController != rootViewController) {
       [engineViewController dismissViewControllerAnimated:isAnimated completion:nil];
     }

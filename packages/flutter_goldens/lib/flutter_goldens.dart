@@ -320,17 +320,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
-    try {
-      return await skiaClient.imgtestAdd(golden.path, goldenFile);
-    } on SkiaException catch (e) {
-      // Convert SkiaException -> TestFailure so that this class implements the
-      // contract of GoldenFileComparator, and matchesGoldenFile() converts the
-      // TestFailure into a standard reported test error (with a better stack
-      // trace, for example).
-      //
-      // https://github.com/flutter/flutter/issues/162621
-      throw TestFailure('$e');
-    }
+    return skiaClient.imgtestAdd(golden.path, goldenFile);
   }
 
   /// Decides based on the current environment if goldens tests should be

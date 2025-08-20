@@ -122,16 +122,16 @@ void SurfaceTextureExternalTextureVKImpeller::ProcessFrame(
     VALIDATION_LOG << "Invalid external texture.";
     return;
   }
-  DlMatrix matrix = context.canvas->GetMatrix();
-  DlRect mapped_bounds = ToDlRect(bounds).TransformAndClipBounds(matrix);
+  SkMatrix matrix = context.canvas->GetTransform();
+  SkRect mapped_bounds = matrix.mapRect(bounds);
 
   const auto& surface_context =
       SurfaceContextVK::Cast(*context.aiks_context->GetContext());
   const auto& context_vk = ContextVK::Cast(*surface_context.GetParent());
 
   auto dst_texture = GetCachedTextureSource(
-      surface_context.GetParent(),                                        //
-      ISize::MakeWH(mapped_bounds.GetWidth(), mapped_bounds.GetHeight())  //
+      surface_context.GetParent(),                                  //
+      ISize::MakeWH(mapped_bounds.width(), mapped_bounds.height())  //
   );
   if (!dst_texture || !dst_texture->IsValid()) {
     VALIDATION_LOG << "Could not fetch trampoline texture target.";
@@ -226,8 +226,10 @@ void SurfaceTextureExternalTextureVKImpeller::DrawFrame(
     PaintContext& context,
     const SkRect& bounds,
     const DlImageSampling sampling) const {
-  context.canvas->DrawImageRect(dl_image_, ToDlRect(bounds), sampling,
-                                context.paint);
+  context.canvas->DrawImageRect(
+      dl_image_,
+      SkRect::MakeSize(SkSize::Make(dl_image_->width(), dl_image_->height())),
+      bounds, sampling, context.paint);
 }
 
 }  // namespace flutter

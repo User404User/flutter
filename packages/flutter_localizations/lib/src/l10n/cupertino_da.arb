@@ -27,7 +27,5 @@
   "menuDismissLabel": "Luk menu",
   "lookUpButtonLabel": "Slå op",
   "searchWebButtonLabel": "Søg på nettet",
-  "shareButtonLabel": "Del…",
-  "cancelButtonLabel": "Annuller",
-  "backButtonLabel": "Tilbage"
+  "shareButtonLabel": "Del…"
 }

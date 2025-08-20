@@ -458,7 +458,10 @@ void main() {
   });
 
   testWidgets('Material3 - AppBar drawer icon has default color', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData themeData = ThemeData.from(
+      colorScheme: const ColorScheme.light(),
+      useMaterial3: true,
+    );
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -510,7 +513,10 @@ void main() {
   });
 
   testWidgets('Material3 - AppBar endDrawer icon has default color', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData themeData = ThemeData.from(
+      colorScheme: const ColorScheme.light(),
+      useMaterial3: true,
+    );
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -553,7 +559,7 @@ void main() {
   testWidgets('Material3 - leading widget extends to edge and is square', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData(platform: TargetPlatform.android);
+    final ThemeData themeData = ThemeData(platform: TargetPlatform.android, useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -603,7 +609,7 @@ void main() {
   });
 
   testWidgets('Material3 - Action is 4dp from edge and 48dp min', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(platform: TargetPlatform.android);
+    final ThemeData theme = ThemeData(platform: TargetPlatform.android, useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -639,6 +645,7 @@ void main() {
   ) async {
     Widget buildAppBar([double? elevation]) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Scaffold(appBar: AppBar(title: const Text('Title'), elevation: elevation)),
       );
     }
@@ -693,6 +700,7 @@ void main() {
   ) async {
     Widget buildAppBar({double? scrolledUnderElevation}) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           appBar: AppBar(
             title: const Text('Title'),
@@ -998,7 +1006,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         // Test was designed against InkSplash so need to make sure that is used.
-        theme: ThemeData(splashFactory: InkSplash.splashFactory),
+        theme: ThemeData(useMaterial3: true, splashFactory: InkSplash.splashFactory),
         home: Center(
           child: AppBar(
             title: const Text('Abc'),
@@ -1259,168 +1267,11 @@ void main() {
 
     semantics.dispose();
   });
-  testWidgets('AppBar has default semantics order', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: AppBar(
-            leading: Semantics(sortKey: const OrdinalSortKey(0), child: const Text('Leading')),
-            title: Semantics(sortKey: const OrdinalSortKey(2), child: const Text('Title')),
-            flexibleSpace: Semantics(
-              sortKey: const OrdinalSortKey(1),
-              child: const Text('Flexible Space'),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 7,
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 8,
-                                  label: 'Leading',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 9,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isHeader,
-                                    SemanticsFlag.namesRoute,
-                                  ],
-                                  label: 'Title',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
-                            ),
-                            TestSemantics(
-                              id: 5,
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 6,
-                                  label: 'Flexible Space',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
-
-    semantics.dispose();
-  });
-  testWidgets('AppBar can customize sort keys for flexible space', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: AppBar(
-            leading: Semantics(sortKey: const OrdinalSortKey(0), child: const Text('Leading')),
-            title: Semantics(sortKey: const OrdinalSortKey(2), child: const Text('Title')),
-            flexibleSpace: Semantics(
-              sortKey: const OrdinalSortKey(1),
-              child: const Text('Flexible Space'),
-            ),
-            useDefaultSemanticsOrder: false,
-          ),
-        ),
-      ),
-    );
-
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 6,
-                              label: 'Leading',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              id: 5,
-                              label: 'Flexible Space',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              id: 7,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isHeader,
-                                SemanticsFlag.namesRoute,
-                              ],
-                              label: 'Title',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
-
-    semantics.dispose();
-  });
 
   testWidgets('Material3 - AppBar draws a light system bar for a dark background', (
     WidgetTester tester,
   ) async {
-    final ThemeData darkTheme = ThemeData.dark();
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(theme: darkTheme, home: Scaffold(appBar: AppBar(title: const Text('test')))),
     );
@@ -1439,7 +1290,7 @@ void main() {
   testWidgets('Material3 - AppBar draws a dark system bar for a light background', (
     WidgetTester tester,
   ) async {
-    final ThemeData lightTheme = ThemeData();
+    final ThemeData lightTheme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(theme: lightTheme, home: Scaffold(appBar: AppBar(title: const Text('test')))),
     );
@@ -1467,7 +1318,7 @@ void main() {
 
       // Using a light theme.
       {
-        await tester.pumpWidget(buildAppBar(ThemeData()));
+        await tester.pumpWidget(buildAppBar(ThemeData(useMaterial3: true)));
         final Material appBarMaterial = tester.widget<Material>(
           find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
         );
@@ -1489,7 +1340,7 @@ void main() {
 
       // Using a dark theme.
       {
-        await tester.pumpWidget(buildAppBar(ThemeData.dark()));
+        await tester.pumpWidget(buildAppBar(ThemeData.dark(useMaterial3: true)));
         final Material appBarMaterial = tester.widget<Material>(
           find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
         );
@@ -1515,7 +1366,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         key: GlobalKey(),
-        theme: ThemeData(appBarTheme: const AppBarTheme()),
+        theme: ThemeData.light().copyWith(useMaterial3: true, appBarTheme: const AppBarTheme()),
         home: Scaffold(appBar: AppBar(title: const Text('title'))),
       ),
     );
@@ -1865,7 +1716,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
           home: Scaffold(
             appBar: AppBar(
               iconTheme: const IconThemeData(color: iconColor),
@@ -1892,7 +1743,10 @@ void main() {
     testWidgets('Material3 - Action icons and IconButtons are colored by ActionIconTheme', (
       WidgetTester tester,
     ) async {
-      final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: true,
+      );
 
       const Color actionsIconColor = Color(0xff0000ff);
       final Key leadingIconKey = UniqueKey();
@@ -1927,7 +1781,10 @@ void main() {
     testWidgets('Material3 - The actionIconTheme property overrides iconTheme', (
       WidgetTester tester,
     ) async {
-      final ThemeData themeData = ThemeData.from(colorScheme: const ColorScheme.light());
+      final ThemeData themeData = ThemeData.from(
+        colorScheme: const ColorScheme.light(),
+        useMaterial3: true,
+      );
 
       const Color overallIconColor = Color(0xff00ff00);
       const Color actionsIconColor = Color(0xff0000ff);
@@ -1968,6 +1825,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red, iconSize: 32.0),
           ),
+          useMaterial3: true,
         );
 
         const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
@@ -2004,6 +1862,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red, iconSize: 32.0),
           ),
+          useMaterial3: true,
         );
 
         const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
@@ -2035,6 +1894,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red, iconSize: 32.0),
           ),
+          useMaterial3: true,
         );
 
         const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
@@ -2072,6 +1932,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red, iconSize: 32.0),
           ),
+          useMaterial3: true,
         );
 
         const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow, size: 30.0);
@@ -2103,6 +1964,7 @@ void main() {
           iconButtonTheme: IconButtonThemeData(
             style: IconButton.styleFrom(foregroundColor: Colors.red),
           ),
+          useMaterial3: true,
         );
 
         await tester.pumpWidget(
@@ -2133,6 +1995,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.dark().copyWith(onSurfaceVariant: Colors.red),
+        useMaterial3: true,
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -2160,6 +2023,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.dark().copyWith(onSurfaceVariant: Colors.red),
+        useMaterial3: true,
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -2187,6 +2051,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
+        useMaterial3: true,
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -2214,6 +2079,7 @@ void main() {
     ) async {
       final ThemeData themeData = ThemeData(
         colorScheme: const ColorScheme.light().copyWith(onSurfaceVariant: Colors.red),
+        useMaterial3: true,
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -2733,7 +2599,9 @@ void main() {
     Widget buildFrame({double? themeToolbarHeight, double? appBarToolbarHeight}) {
       final AppBar appBar = AppBar(toolbarHeight: appBarToolbarHeight);
       return MaterialApp(
-        theme: ThemeData(appBarTheme: AppBarTheme(toolbarHeight: themeToolbarHeight)),
+        theme: ThemeData.light().copyWith(
+          appBarTheme: AppBarTheme(toolbarHeight: themeToolbarHeight),
+        ),
         home: Builder(
           builder: (BuildContext context) {
             preferredHeight = AppBar.preferredHeightFor(context, appBar.preferredSize);
@@ -3395,7 +3263,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           key: GlobalKey(),
-          theme: ThemeData(useMaterial3: false, appBarTheme: const AppBarTheme()),
+          theme: ThemeData.light().copyWith(useMaterial3: false, appBarTheme: const AppBarTheme()),
           home: Scaffold(appBar: AppBar(title: const Text('title'))),
         ),
       );

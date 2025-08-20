@@ -13,7 +13,7 @@ class RadioListTileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: RadioListTileExample());
+    return MaterialApp(theme: ThemeData(useMaterial3: true), home: const RadioListTileExample());
   }
 }
 

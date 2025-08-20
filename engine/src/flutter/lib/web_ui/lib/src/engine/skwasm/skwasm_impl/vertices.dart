@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_unused_constructor_parameters
+
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -68,5 +70,5 @@ class SkwasmVertices extends SkwasmObjectWrapper<RawVertices> implements ui.Vert
   SkwasmVertices._(VerticesHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawVertices> _registry =
-      SkwasmFinalizationRegistry<RawVertices>((VerticesHandle handle) => verticesDispose(handle));
+      SkwasmFinalizationRegistry<RawVertices>(verticesDispose);
 }

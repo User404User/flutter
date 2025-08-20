@@ -37,8 +37,6 @@ void main() {
     expect(localizations.searchTextFieldPlaceholderLabel, isNotNull);
     expect(localizations.noSpellCheckReplacementsLabel, isNotNull);
     expect(localizations.clearButtonLabel, isNotNull);
-    expect(localizations.cancelButtonLabel, isNotNull);
-    expect(localizations.backButtonLabel, isNotNull);
   });
 
   testWidgets('CupertinoLocalizations.of throws', (WidgetTester tester) async {

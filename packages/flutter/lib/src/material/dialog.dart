@@ -10,7 +10,7 @@
 /// @docImport 'text_button.dart';
 library;
 
-import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
+import 'dart:ui' show clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 
@@ -67,7 +67,6 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.child,
-    this.semanticsRole = SemanticsRole.dialog,
   }) : assert(elevation == null || elevation >= 0.0),
        _fullscreen = false;
 
@@ -80,7 +79,6 @@ class Dialog extends StatelessWidget {
     this.insetAnimationDuration = Duration.zero,
     this.insetAnimationCurve = Curves.decelerate,
     this.child,
-    this.semanticsRole = SemanticsRole.dialog,
   }) : elevation = 0,
        shadowColor = null,
        surfaceTintColor = null,
@@ -231,11 +229,6 @@ class Dialog extends StatelessWidget {
   /// This value is used to determine if this is a fullscreen dialog.
   final bool _fullscreen;
 
-  /// The role this dialog represent in assist technologies.
-  ///
-  /// Defaults to [SemanticsRole.dialog].
-  final SemanticsRole semanticsRole;
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -275,20 +268,17 @@ class Dialog extends StatelessWidget {
       );
     }
 
-    return Semantics(
-      role: semanticsRole,
-      child: AnimatedPadding(
-        padding: effectivePadding,
-        duration: insetAnimationDuration,
-        curve: insetAnimationCurve,
-        child: MediaQuery.removeViewInsets(
-          removeLeft: true,
-          removeTop: true,
-          removeRight: true,
-          removeBottom: true,
-          context: context,
-          child: dialogChild,
-        ),
+    return AnimatedPadding(
+      padding: effectivePadding,
+      duration: insetAnimationDuration,
+      curve: insetAnimationCurve,
+      child: MediaQuery.removeViewInsets(
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        context: context,
+        child: dialogChild,
       ),
     );
   }
@@ -928,7 +918,6 @@ class AlertDialog extends StatelessWidget {
       clipBehavior: clipBehavior,
       shape: shape,
       alignment: alignment,
-      semanticsRole: SemanticsRole.alertDialog,
       child: dialogChild,
     );
   }
@@ -1395,12 +1384,6 @@ Widget _buildMaterialDialogTransitions(
 /// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
 /// to allow users to cycle through dialog widgets without leaving the dialog.
 ///
-/// {@template flutter.material.dialog.requestFocus}
-/// The `requestFocus` argument is used to specify whether the dialog should
-/// request focus when shown.
-/// {@endtemplate}
-/// {@macro flutter.widgets.navigator.Route.requestFocus}
-///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
@@ -1465,8 +1448,6 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
-  bool? requestFocus,
-  AnimationStyle? animationStyle,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1492,8 +1473,6 @@ Future<T?> showDialog<T>({
       themes: themes,
       anchorPoint: anchorPoint,
       traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-      requestFocus: requestFocus,
-      animationStyle: animationStyle,
     ),
   );
 }
@@ -1517,8 +1496,6 @@ Future<T?> showAdaptiveDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
-  bool? requestFocus,
-  AnimationStyle? animationStyle,
 }) {
   final ThemeData theme = Theme.of(context);
   switch (theme.platform) {
@@ -1537,8 +1514,6 @@ Future<T?> showAdaptiveDialog<T>({
         routeSettings: routeSettings,
         anchorPoint: anchorPoint,
         traversalEdgeBehavior: traversalEdgeBehavior,
-        requestFocus: requestFocus,
-        animationStyle: animationStyle,
       );
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -1550,7 +1525,6 @@ Future<T?> showAdaptiveDialog<T>({
         useRootNavigator: useRootNavigator,
         anchorPoint: anchorPoint,
         routeSettings: routeSettings,
-        requestFocus: requestFocus,
       );
   }
 }
@@ -1632,9 +1606,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
-    AnimationStyle? animationStyle,
-  }) : _animationStyle = animationStyle,
-       super(
+  }) : super(
          pageBuilder: (
            BuildContext buildContext,
            Animation<double> animation,
@@ -1648,21 +1620,16 @@ class DialogRoute<T> extends RawDialogRoute<T> {
            return dialog;
          },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: animationStyle?.duration ?? const Duration(milliseconds: 150),
+         transitionDuration: const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
        );
 
   CurvedAnimation? _curvedAnimation;
-  final AnimationStyle? _animationStyle;
 
   void _setAnimation(Animation<double> animation) {
     if (_curvedAnimation?.parent != animation) {
       _curvedAnimation?.dispose();
-      _curvedAnimation = CurvedAnimation(
-        parent: animation,
-        curve: _animationStyle?.curve ?? Curves.easeOut,
-        reverseCurve: _animationStyle?.reverseCurve ?? Curves.easeOut,
-      );
+      _curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeOut);
     }
   }
 

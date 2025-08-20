@@ -76,6 +76,7 @@ class CopyArtifactsStep implements PipelineStep {
     final String canvaskitSourceDirectory;
     final String canvaskitChromiumSourceDirectory;
     final String skwasmSourceDirectory;
+    final String skwasmStSourceDirectory;
     switch (source) {
       case LocalArtifactSource(:final mode):
         final buildDirectory = getBuildDirectoryForRuntimeMode(mode).path;
@@ -83,6 +84,7 @@ class CopyArtifactsStep implements PipelineStep {
         canvaskitSourceDirectory = pathlib.join(buildDirectory, 'canvaskit');
         canvaskitChromiumSourceDirectory = pathlib.join(buildDirectory, 'canvaskit_chromium');
         skwasmSourceDirectory = pathlib.join(buildDirectory, 'skwasm');
+        skwasmStSourceDirectory = pathlib.join(buildDirectory, 'skwasm_st');
 
       case GcsArtifactSource(:final realm):
         final artifactsDirectory = (await _downloadArtifacts(realm)).path;
@@ -94,6 +96,7 @@ class CopyArtifactsStep implements PipelineStep {
           'chromium',
         );
         skwasmSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
+        skwasmStSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
     }
 
     await environment.webTestsArtifactsDir.create(recursive: true);
@@ -101,20 +104,19 @@ class CopyArtifactsStep implements PipelineStep {
     await copyTestFonts();
     await copySkiaTestImages();
     await copyFlutterJsFiles(flutterJsSourceDirectory);
-    final copied = <String>[];
     if (artifactDeps.canvasKit) {
-      copied.add('CanvasKit');
+      print('Copying CanvasKit...');
       await copyWasmLibrary('canvaskit', canvaskitSourceDirectory, 'canvaskit');
     }
     if (artifactDeps.canvasKitChromium) {
-      copied.add('CanvasKit (Chromium)');
+      print('Copying CanvasKit (Chromium)...');
       await copyWasmLibrary('canvaskit', canvaskitChromiumSourceDirectory, 'canvaskit/chromium');
     }
     if (artifactDeps.skwasm) {
-      copied.add('Skwasm');
+      print('Copying Skwasm...');
       await copyWasmLibrary('skwasm', skwasmSourceDirectory, 'canvaskit');
+      await copyWasmLibrary('skwasm_st', skwasmStSourceDirectory, 'canvaskit');
     }
-    print('Copied artifacts: ${copied.join(', ')}');
   }
 
   Future<void> copyTestFonts() async {
@@ -128,6 +130,7 @@ class CopyArtifactsStep implements PipelineStep {
 
     final String fontsPath = pathlib.join(
       environment.flutterDirectory.path,
+      'third_party',
       'txt',
       'third_party',
       'fonts',

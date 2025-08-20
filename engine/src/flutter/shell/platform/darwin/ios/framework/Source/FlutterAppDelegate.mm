@@ -10,7 +10,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 
 FLUTTER_ASSERT_ARC
@@ -155,10 +154,6 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (BOOL)handleOpenURL:(NSURL*)url
                      options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
     relayToSystemIfUnhandled:(BOOL)throwBack {
-  UIApplication* flutterApplication = FlutterSharedApplication.application;
-  if (flutterApplication == nil) {
-    return NO;
-  }
   if (![self isFlutterDeepLinkingEnabled]) {
     return NO;
   }
@@ -169,9 +164,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                  completionHandler:^(BOOL success) {
                                    if (!success && throwBack) {
                                      // throw it back to iOS
-                                     [flutterApplication openURL:url
-                                                         options:@{}
-                                               completionHandler:nil];
+                                     [UIApplication.sharedApplication openURL:url];
                                    }
                                  }];
   } else {

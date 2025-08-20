@@ -899,10 +899,13 @@ class CkParagraph implements ui.Paragraph {
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
     assert(!_disposed, 'Paragraph has been disposed.');
-    final int characterPosition = switch (position.affinity) {
-      ui.TextAffinity.upstream => position.offset - 1,
-      ui.TextAffinity.downstream => position.offset,
-    };
+    final int characterPosition;
+    switch (position.affinity) {
+      case ui.TextAffinity.upstream:
+        characterPosition = position.offset - 1;
+      case ui.TextAffinity.downstream:
+        characterPosition = position.offset;
+    }
     final SkTextRange skRange = skiaObject.getWordBoundary(characterPosition.toDouble());
     return ui.TextRange(start: skRange.start.toInt(), end: skRange.end.toInt());
   }
@@ -1081,7 +1084,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
     _placeholderCount++;
     _placeholderScales.add(scale);
-    final _CkParagraphPlaceholder placeholderStyle = _toSkPlaceholderStyle(
+    final _CkParagraphPlaceholder placeholderStyle = toSkPlaceholderStyle(
       width * scale,
       height * scale,
       alignment,
@@ -1101,7 +1104,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     );
   }
 
-  static _CkParagraphPlaceholder _toSkPlaceholderStyle(
+  static _CkParagraphPlaceholder toSkPlaceholderStyle(
     double width,
     double height,
     ui.PlaceholderAlignment alignment,

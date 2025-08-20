@@ -138,10 +138,7 @@ abstract final class FlutterTestDriver {
     _stderr.stream.listen((String message) => _debugPrint(message, topic: '<=stderr='));
   }
 
-  /// Completes when process exits with the given exit code.
-  ///
-  /// If the process has never been started, complets with `null`.
-  Future<int?> get done async => _process?.exitCode;
+  Future<void> get done async => _process?.exitCode;
 
   Future<void> connectToVmService({bool pauseOnExceptions = false}) async {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
@@ -151,9 +148,7 @@ abstract final class FlutterTestDriver {
     final Completer<void> isolateStarted = Completer<void>();
     _vmService!.onIsolateEvent.listen((Event event) {
       if (event.kind == EventKind.kIsolateStart) {
-        if (!isolateStarted.isCompleted) {
-          isolateStarted.complete();
-        }
+        isolateStarted.complete();
       } else if (event.kind == EventKind.kIsolateExit && event.isolate?.id == _flutterIsolateId) {
         // Hot restarts cause all the isolates to exit, so we need to refresh
         // our idea of what the Flutter isolate ID is.

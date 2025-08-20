@@ -15,12 +15,7 @@ const DlRect ClipRRectLayer::clip_shape_bounds() const {
 }
 
 void ClipRRectLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
-  bool is_aa = clip_behavior() != Clip::kHardEdge;
-  if (clip_shape().IsRect()) {
-    mutator.clipRect(clip_shape().GetBounds(), is_aa);
-  } else {
-    mutator.clipRRect(clip_shape(), is_aa);
-  }
+  mutator.clipRRect(clip_shape(), clip_behavior() != Clip::kHardEdge);
 }
 
 }  // namespace flutter

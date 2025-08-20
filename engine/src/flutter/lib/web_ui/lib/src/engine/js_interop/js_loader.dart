@@ -6,11 +6,15 @@
 library js_loader;
 
 import 'dart:js_interop';
-import 'dart:js_interop_unsafe';
 
+import 'package:js/js_util.dart' as js_util;
 import 'package:ui/src/engine.dart';
 
-extension type FlutterJS._(JSObject _) implements JSObject {
+@JS()
+@staticInterop
+class FlutterJS {}
+
+extension FlutterJSExtension on FlutterJS {
   external FlutterLoader? get loader;
 }
 
@@ -19,9 +23,13 @@ extension type FlutterJS._(JSObject _) implements JSObject {
 @JS('_flutter')
 external FlutterJS? get flutter;
 
-extension type FlutterLoader._(JSObject _) implements JSObject {
+@JS()
+@staticInterop
+class FlutterLoader {}
+
+extension FlutterLoaderExtension on FlutterLoader {
   external void didCreateEngineInitializer(FlutterEngineInitializer initializer);
-  bool get isAutoStart => !has('didCreateEngineInitializer');
+  bool get isAutoStart => !js_util.hasProperty(this, 'didCreateEngineInitializer');
 }
 
 /// Typedef for the function that initializes the flutter engine.
@@ -41,7 +49,10 @@ typedef ImmediateRunAppFn = Future<FlutterApp> Function();
 ///
 /// As a convenience method, [autoStart] allows the user to immediately initialize
 /// and run a Flutter Web app, from JavaScript.
-extension type FlutterEngineInitializer._primary(JSObject _) implements JSObject {
+@JS()
+@anonymous
+@staticInterop
+abstract class FlutterEngineInitializer {
   factory FlutterEngineInitializer({
     required InitializeEngineFn initializeEngine,
     required ImmediateRunAppFn autoStart,
@@ -62,9 +73,13 @@ extension type FlutterEngineInitializer._primary(JSObject _) implements JSObject
 
 /// A class that exposes a function that runs the Flutter app,
 /// and returns a promise of a FlutterAppCleaner.
-extension type FlutterAppRunner._primary(JSObject _) implements JSObject {
-  factory FlutterAppRunner({required RunAppFn runApp}) =>
-      FlutterAppRunner._(runApp: (([RunAppFnParameters? args]) => runApp(args).toPromise).toJS);
+@JS()
+@anonymous
+@staticInterop
+abstract class FlutterAppRunner {
+  factory FlutterAppRunner({required RunAppFn runApp}) => FlutterAppRunner._(
+    runApp: (([RunAppFnParameters? args]) => (runApp(args) as Future<JSObject>).toPromise).toJS,
+  );
 
   /// Runs a flutter app
   external factory FlutterAppRunner._({
@@ -74,7 +89,10 @@ extension type FlutterAppRunner._primary(JSObject _) implements JSObject {
 
 /// The shape of the object that can be passed as parameter to the
 /// runApp function of the FlutterAppRunner object (from JS).
-extension type RunAppFnParameters._(JSObject _) implements JSObject {}
+@JS()
+@anonymous
+@staticInterop
+abstract class RunAppFnParameters {}
 
 /// Typedef for the function that runs the flutter app main entrypoint.
 typedef RunAppFn = Future<FlutterApp> Function([RunAppFnParameters?]);

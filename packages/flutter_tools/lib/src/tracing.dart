@@ -98,6 +98,7 @@ class Tracing {
         }
         // The exception is rethrown, so don't catch only Exceptions.
       } catch (exception) {
+        // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }

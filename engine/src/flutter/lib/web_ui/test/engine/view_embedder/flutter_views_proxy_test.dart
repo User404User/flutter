@@ -106,7 +106,12 @@ Future<void> doTests() async {
 }
 
 // The JS-interop definition of the `initialData` object passed to the views of this app.
-extension type InitialData._(JSObject _) implements JSObject {
+@JS()
+@staticInterop
+class InitialData {}
+
+/// The attributes of the [InitialData] object.
+extension InitialDataExtension on InitialData {
   external int get someInt;
   external String? get someString;
 

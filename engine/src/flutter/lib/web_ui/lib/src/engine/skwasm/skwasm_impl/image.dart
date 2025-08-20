@@ -39,7 +39,7 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
   }
 
   static final SkwasmFinalizationRegistry<RawImage> _registry =
-      SkwasmFinalizationRegistry<RawImage>((ImageHandle handle) => imageDispose(handle));
+      SkwasmFinalizationRegistry<RawImage>(imageDispose);
 
   @override
   void dispose() {
@@ -64,11 +64,11 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
             recorder.endRecording() as SkwasmPicture,
           ])).imageBitmaps.single;
       final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(
-        bitmap.width,
-        bitmap.height,
+        bitmap.width.toDartInt,
+        bitmap.height.toDartInt,
       );
-      final DomImageBitmapRenderingContext context =
-          offscreenCanvas.getContext('bitmaprenderer')! as DomImageBitmapRenderingContext;
+      final DomCanvasRenderingContextBitmapRenderer context =
+          offscreenCanvas.getContext('bitmaprenderer')! as DomCanvasRenderingContextBitmapRenderer;
       context.transferFromImageBitmap(bitmap);
       final DomBlob blob = await offscreenCanvas.convertToBlob();
       final JSArrayBuffer arrayBuffer = (await blob.arrayBuffer().toDart)! as JSArrayBuffer;

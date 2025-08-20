@@ -68,9 +68,7 @@ class SemanticsUpdateBuilder
       const tonic::Int32List& customAccessibilityActions,
       int headingLevel,
       std::string linkUrl,
-      int role,
-      const std::vector<std::string>& controlsNodes,
-      int validationResult);
+      int role);
 
   void updateCustomAction(int id,
                           std::string label,

@@ -85,6 +85,7 @@ Future<void> buildMacOS({
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
       globals.logger,
+      globals.flutterUsage,
       globals.analytics,
     ),
     MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
@@ -111,9 +112,7 @@ Future<void> buildMacOS({
   final ProjectMigration migration = ProjectMigration(migrators);
   await migration.run();
 
-  final Directory flutterBuildDir = flutterProject.directory.childDirectory(
-    getMacOSBuildDirectory(),
-  );
+  final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
@@ -247,6 +246,7 @@ Future<void> buildMacOS({
   }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
   final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'xcode-macos', elapsedDuration);
   globals.analytics.send(
     Event.timing(
       workflow: 'build',

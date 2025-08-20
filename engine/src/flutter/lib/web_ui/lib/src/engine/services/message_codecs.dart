@@ -453,11 +453,14 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   /// [readValueOfType].
   int readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
-    return switch (value) {
-      254 => buffer.getUint16(),
-      255 => buffer.getUint32(),
-      _ => value,
-    };
+    switch (value) {
+      case 254:
+        return buffer.getUint16();
+      case 255:
+        return buffer.getUint32();
+      default:
+        return value;
+    }
   }
 }
 

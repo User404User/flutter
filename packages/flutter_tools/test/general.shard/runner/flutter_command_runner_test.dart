@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -29,6 +30,7 @@ void main() {
   group('FlutterCommandRunner', () {
     late MemoryFileSystem fileSystem;
     late Platform platform;
+    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
     setUpAll(() {
@@ -40,6 +42,7 @@ void main() {
       fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
       fileSystem.directory(_kProjectRoot).createSync(recursive: true);
       fileSystem.currentDirectory = _kProjectRoot;
+      testUsage = TestUsage();
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -207,6 +210,7 @@ void main() {
 
           await runner.run(<String>['--version']);
           expect(version.didFetchTagsAndUpdate, true);
+          expect(testUsage.commands, contains(const TestUsageCommand('version')));
           expect(
             fakeAnalytics.sentEvents,
             contains(
@@ -224,6 +228,7 @@ void main() {
           Platform: () => platform,
           FlutterVersion: () => FakeFlutterVersion(),
           OutputPreferences: () => OutputPreferences.test(),
+          Usage: () => testUsage,
           Analytics: () => fakeAnalytics,
         },
       );

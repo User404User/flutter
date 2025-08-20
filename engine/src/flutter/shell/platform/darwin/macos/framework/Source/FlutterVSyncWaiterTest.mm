@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 
 #import "flutter/testing/testing.h"
@@ -36,12 +35,7 @@
 
 @end
 
-class FlutterVSyncWaiterTest : public testing::Test {
- public:
-  void SetUp() override { [FlutterRunLoop ensureMainLoopInitialized]; }
-};
-
-TEST_F(FlutterVSyncWaiterTest, RequestsInitialVSync) {
+TEST(FlutterVSyncWaiterTest, RequestsInitialVSync) {
   TestDisplayLink* displayLink = [[TestDisplayLink alloc] init];
   EXPECT_TRUE(displayLink.paused);
   // When created waiter requests a reference vsync to determine vsync phase.
@@ -66,7 +60,7 @@ static void BusyWait(CFTimeInterval duration) {
 // See FlutterVSyncWaiter.mm for the original definition.
 static const CFTimeInterval kTimerLatencyCompensation = 0.001;
 
-TEST_F(FlutterVSyncWaiterTest, FirstVSyncIsSynthesized) {
+TEST(FlutterVSyncWaiterTest, FirstVSyncIsSynthesized) {
   TestDisplayLink* displayLink = [[TestDisplayLink alloc] init];
   displayLink.nominalOutputRefreshPeriod = 1.0 / 60.0;
 
@@ -120,7 +114,7 @@ TEST_F(FlutterVSyncWaiterTest, FirstVSyncIsSynthesized) {
   test(0.040, 3 * displayLink.nominalOutputRefreshPeriod);
 }
 
-TEST_F(FlutterVSyncWaiterTest, VSyncWorks) {
+TEST(FlutterVSyncWaiterTest, VSyncWorks) {
   TestDisplayLink* displayLink = [[TestDisplayLink alloc] init];
   displayLink.nominalOutputRefreshPeriod = 1.0 / 60.0;
   const uintptr_t kWarmUpBaton = 0xFFFFFFFF;

@@ -246,22 +246,6 @@ Matcher isSameColorAs(Color color, {double threshold = colorEpsilon}) {
   return _ColorMatcher(color, threshold);
 }
 
-/// Asserts that the object is a [TextScaler] that reflects the user's font
-/// scale preferences from the platform's accessibility settings.
-///
-/// This matcher is useful for verifying the text scaling within a widget subtree
-/// respects the user accessibility preferences, and not accidentally being
-/// shadowed by a [MediaQuery] with a different type of [TextScaler].
-///
-/// In widget tests, the value of the system font scale preference can be
-/// changed via [TestPlatformDispatcher.textScaleFactorTestValue].
-///
-/// If `withScaleFactor` is specified and non-null, this matcher also asserts
-/// that the [TextScaler]'s' `textScaleFactor` equals `withScaleFactor`.
-Matcher isSystemTextScaler({double? withScaleFactor}) {
-  return _IsSystemTextScaler(withScaleFactor);
-}
-
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
@@ -685,14 +669,11 @@ Matcher matchesSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
-  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
-  ui.SemanticsInputType? inputType,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
   bool isCheckStateMixed = false,
   bool isSelected = false,
-  bool hasSelectedState = false,
   bool isButton = false,
   bool isSlider = false,
   bool isKeyboardKey = false,
@@ -717,8 +698,6 @@ Matcher matchesSemantics({
   bool hasImplicitScrolling = false,
   bool hasExpandedState = false,
   bool isExpanded = false,
-  bool hasRequiredState = false,
-  bool isRequired = false,
   // Actions //
   bool hasTapAction = false,
   bool hasFocusAction = false,
@@ -770,14 +749,11 @@ Matcher matchesSemantics({
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
-    validationResult: validationResult,
-    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
     isCheckStateMixed: isCheckStateMixed,
     isSelected: isSelected,
-    hasSelectedState: hasSelectedState,
     isButton: isButton,
     isSlider: isSlider,
     isKeyboardKey: isKeyboardKey,
@@ -802,8 +778,6 @@ Matcher matchesSemantics({
     hasImplicitScrolling: hasImplicitScrolling,
     hasExpandedState: hasExpandedState,
     isExpanded: isExpanded,
-    hasRequiredState: hasRequiredState,
-    isRequired: isRequired,
     // Actions
     hasTapAction: hasTapAction,
     hasFocusAction: hasFocusAction,
@@ -883,14 +857,11 @@ Matcher containsSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
-  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
-  ui.SemanticsInputType? inputType,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
   bool? isCheckStateMixed,
   bool? isSelected,
-  bool? hasSelectedState,
   bool? isButton,
   bool? isSlider,
   bool? isKeyboardKey,
@@ -915,8 +886,6 @@ Matcher containsSemantics({
   bool? hasImplicitScrolling,
   bool? hasExpandedState,
   bool? isExpanded,
-  bool? hasRequiredState,
-  bool? isRequired,
   // Actions
   bool? hasTapAction,
   bool? hasFocusAction,
@@ -968,14 +937,11 @@ Matcher containsSemantics({
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
-    validationResult: validationResult,
-    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
     isCheckStateMixed: isCheckStateMixed,
     isSelected: isSelected,
-    hasSelectedState: hasSelectedState,
     isButton: isButton,
     isSlider: isSlider,
     isKeyboardKey: isKeyboardKey,
@@ -1000,8 +966,6 @@ Matcher containsSemantics({
     hasImplicitScrolling: hasImplicitScrolling,
     hasExpandedState: hasExpandedState,
     isExpanded: isExpanded,
-    hasRequiredState: hasRequiredState,
-    isRequired: isRequired,
     // Actions
     hasTapAction: hasTapAction,
     hasFocusAction: hasFocusAction,
@@ -1238,58 +1202,6 @@ class _IsNotInCard extends Matcher {
 
   @override
   Description describe(Description description) => description.add('not in card');
-}
-
-class _IsSystemTextScaler extends Matcher {
-  const _IsSystemTextScaler(this.expectedUserTextScaleFactor);
-
-  final double? expectedUserTextScaleFactor;
-
-  // TODO(LongCatIsLooong): update the runtime type after introducing _SystemTextScaler.
-  static final Type _expectedRuntimeType = (const TextScaler.linear(2)).runtimeType;
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is! TextScaler) {
-      return failWithDescription(matchState, '${item.runtimeType} is not a TextScaler');
-    }
-    if (!identical(item.runtimeType, _expectedRuntimeType)) {
-      return failWithDescription(matchState, '${item.runtimeType} is not a system TextScaler');
-    }
-    final double actualTextScaleFactor = item.textScaleFactor;
-    if (expectedUserTextScaleFactor != null &&
-        expectedUserTextScaleFactor != actualTextScaleFactor) {
-      return failWithDescription(
-        matchState,
-        'expecting a scale factor of $expectedUserTextScaleFactor, but got $actualTextScaleFactor',
-      );
-    }
-    return true;
-  }
-
-  @override
-  Description describe(Description description) {
-    final String scaleFactorExpectation =
-        expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
-    return description.add(
-      'A TextScaler that reflects the font scale settings in the system user preference ($_expectedRuntimeType$scaleFactorExpectation)',
-    );
-  }
-
-  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
-    matchState['failure'] = description;
-    return false;
-  }
-
-  @override
-  Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
-  ) {
-    return mismatchDescription.add(matchState['failure'] as String);
-  }
 }
 
 class _HasOneLineDescription extends Matcher {
@@ -2406,14 +2318,11 @@ class _MatchesSemanticsData extends Matcher {
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
-    required this.validationResult,
-    required this.inputType,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
     required bool? isCheckStateMixed,
     required bool? isSelected,
-    required bool? hasSelectedState,
     required bool? isButton,
     required bool? isSlider,
     required bool? isKeyboardKey,
@@ -2438,8 +2347,6 @@ class _MatchesSemanticsData extends Matcher {
     required bool? hasImplicitScrolling,
     required bool? hasExpandedState,
     required bool? isExpanded,
-    required bool? hasRequiredState,
-    required bool? isRequired,
     // Actions
     required bool? hasTapAction,
     required bool? hasFocusAction,
@@ -2473,7 +2380,6 @@ class _MatchesSemanticsData extends Matcher {
          if (isChecked != null) SemanticsFlag.isChecked: isChecked,
          if (isCheckStateMixed != null) SemanticsFlag.isCheckStateMixed: isCheckStateMixed,
          if (isSelected != null) SemanticsFlag.isSelected: isSelected,
-         if (hasSelectedState != null) SemanticsFlag.hasSelectedState: hasSelectedState,
          if (isButton != null) SemanticsFlag.isButton: isButton,
          if (isSlider != null) SemanticsFlag.isSlider: isSlider,
          if (isKeyboardKey != null) SemanticsFlag.isKeyboardKey: isKeyboardKey,
@@ -2500,8 +2406,6 @@ class _MatchesSemanticsData extends Matcher {
          if (isSlider != null) SemanticsFlag.isSlider: isSlider,
          if (hasExpandedState != null) SemanticsFlag.hasExpandedState: hasExpandedState,
          if (isExpanded != null) SemanticsFlag.isExpanded: isExpanded,
-         if (hasRequiredState != null) SemanticsFlag.hasRequiredState: hasRequiredState,
-         if (isRequired != null) SemanticsFlag.isRequired: isRequired,
        },
        actions = <SemanticsAction, bool>{
          if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
@@ -2561,9 +2465,7 @@ class _MatchesSemanticsData extends Matcher {
   final int? platformViewId;
   final int? maxValueLength;
   final int? currentValueLength;
-  final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
-  final SemanticsValidationResult validationResult;
 
   /// There are three possible states for these two maps:
   ///
@@ -2608,9 +2510,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (tooltip != null) {
       description.add(' with tooltip: $tooltip');
-    }
-    if (inputType != null) {
-      description.add(' with inputType: $inputType');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> expectedActions =
@@ -2679,9 +2578,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (hintOverrides != null) {
       description.add(' with custom hints: $hintOverrides');
-    }
-    if (validationResult != SemanticsValidationResult.none) {
-      description.add(' with validation result: $validationResult');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -2818,12 +2714,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
-    }
-    if (validationResult != data.validationResult) {
-      return failWithDescription(matchState, 'validationResult was: ${data.validationResult}');
-    }
-    if (inputType != null && inputType != data.inputType) {
-      return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];

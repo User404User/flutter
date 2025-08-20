@@ -21,9 +21,15 @@ sealed class WebCompilerConfig {
   /// Build environment flag for [sourceMaps].
   static const String kSourceMapsEnabled = 'SourceMaps';
 
-  /// Calculates the optimization level for the compiler for the given
+  /// Calculates the optimization level for dart2js/dart2wasm for the given
   /// build mode.
-  int optimizationLevelForBuildMode(BuildMode mode);
+  int optimizationLevelForBuildMode(BuildMode mode) =>
+      optimizationLevel ??
+      switch (mode) {
+        BuildMode.debug => 0,
+        BuildMode.profile || BuildMode.release => 4,
+        BuildMode.jitRelease => throw ArgumentError('Invalid build mode for web'),
+      };
 
   /// The compiler optimization level specified by the user.
   ///
@@ -105,15 +111,13 @@ class JsCompilerConfig extends WebCompilerConfig {
   ];
 
   @override
-  int optimizationLevelForBuildMode(BuildMode mode) =>
-      optimizationLevel ??
-      switch (mode) {
-        // dart2js optimization level 0 is not well supported. Use
-        // 1 instead.
-        BuildMode.debug => 1,
-        BuildMode.profile || BuildMode.release => 4,
-        BuildMode.jitRelease => throw ArgumentError('Invalid build mode for web'),
-      };
+  int optimizationLevelForBuildMode(BuildMode mode) {
+    final int level = super.optimizationLevelForBuildMode(mode);
+
+    // dart2js optimization level 0 is not well supported. Use
+    // 1 instead.
+    return level == 0 ? 1 : level;
+  }
 
   /// Arguments to use in the full JS compile, but not CFE-only.
   ///
@@ -158,19 +162,6 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
-
-  @override
-  int optimizationLevelForBuildMode(BuildMode mode) =>
-      optimizationLevel ??
-      switch (mode) {
-        BuildMode.debug => 0,
-
-        // The optimization level of O2 uses only sound optimizations. We default
-        // to this level because our web benchmarks have shown that the difference
-        // between O2 and O4 is marginal enough that we would prefer soundness here.
-        BuildMode.profile || BuildMode.release => 2,
-        BuildMode.jitRelease => throw ArgumentError('Invalid build mode for web'),
-      };
 
   List<String> toCommandOptions(BuildMode buildMode) {
     final bool stripSymbols = buildMode == BuildMode.release && stripWasm;

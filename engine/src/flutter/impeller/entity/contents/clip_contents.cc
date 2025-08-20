@@ -10,7 +10,6 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
@@ -80,7 +79,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   info.depth = GetShaderClipDepth(clip_depth);
 
   auto options = OptionsFromPass(pass);
-  options.blend_mode = BlendMode::kDst;
+  options.blend_mode = BlendMode::kDestination;
 
   pass.SetStencilReference(0);
 
@@ -158,7 +157,7 @@ bool RenderClipRestore(const ContentContext& renderer,
 
   pass.SetCommandLabel("Restore Clip");
   auto options = OptionsFromPass(pass);
-  options.blend_mode = BlendMode::kDst;
+  options.blend_mode = BlendMode::kDestination;
   options.stencil_mode =
       ContentContextOptions::StencilMode::kOverdrawPreventionRestore;
   options.primitive_type = PrimitiveType::kTriangleStrip;

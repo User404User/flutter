@@ -133,7 +133,8 @@ Future<void> testHarnessTestsRunner() async {
   }
 }
 
-/// Verify the Flutter Engine is the revision in `bin/cache/engine.stamp`.
+/// Verify the Flutter Engine is the revision in
+/// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
   final String flutterTester = path.join(
     flutterRoot,
@@ -145,7 +146,6 @@ Future<void> _validateEngineHash() async {
     'flutter_tester$exe',
   );
 
-  // TODO(matanlurey): Revisit with the Dart team if this is true now that they use FLUTTER_PREBUILT_ENGINE_VERSION=...
   if (runningInDartHHHBot) {
     // The Dart HHH bots intentionally modify the local artifact cache
     // and then use this script to run Flutter's test suites.

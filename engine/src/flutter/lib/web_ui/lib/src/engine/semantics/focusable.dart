@@ -168,12 +168,8 @@ class AccessibilityFocusManager {
     final _FocusTarget newTarget = (
       semanticsNodeId: semanticsNodeId,
       element: element,
-      domFocusListener: createDomEventListener((DomEvent _) {
-        _didReceiveDomFocus();
-      }),
-      domBlurListener: createDomEventListener((DomEvent _) {
-        _didReceiveDomBlur();
-      }),
+      domFocusListener: createDomEventListener((_) => _didReceiveDomFocus()),
+      domBlurListener: createDomEventListener((_) => _didReceiveDomBlur()),
     );
     _target = newTarget;
     _lastEvent = AccessibilityFocusManagerEvent.nothing;

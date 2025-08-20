@@ -5,7 +5,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
 FLUTTER_ASSERT_ARC
@@ -52,13 +51,11 @@ FLUTTER_ASSERT_ARC
   return MTLPixelFormatBGRA8Unorm;
 }
 - (BOOL)isWideGamutSupported {
-  FML_DCHECK(self.screen);
-
-  // Wide Gamut is not supported for iOS Extensions due to memory limitations
-  // (see https://github.com/flutter/flutter/issues/165086).
-  if (FlutterSharedApplication.isAppExtension) {
+  if (!self.delegate.isUsingImpeller) {
     return NO;
   }
+
+  FML_DCHECK(self.screen);
 
   // This predicates the decision on the capabilities of the iOS device's
   // display.  This means external displays will not support wide gamut if the
@@ -108,11 +105,12 @@ static void PrintWideGamutWarningOnce() {
     layer.contentsScale = screenScale;
     layer.rasterizationScale = screenScale;
     layer.framebufferOnly = flutter::Settings::kSurfaceDataAccessible ? NO : YES;
-    if (_isWideGamutEnabled && self.isWideGamutSupported) {
+    BOOL isWideGamutSupported = self.isWideGamutSupported;
+    if (_isWideGamutEnabled && isWideGamutSupported) {
       fml::CFRef<CGColorSpaceRef> srgb(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = srgb;
       layer.pixelFormat = MTLPixelFormatBGRA10_XR;
-    } else if (_isWideGamutEnabled && !self.isWideGamutSupported) {
+    } else if (_isWideGamutEnabled && !isWideGamutSupported) {
       PrintWideGamutWarningOnce();
     }
   }
@@ -120,9 +118,19 @@ static void PrintWideGamutWarningOnce() {
   [super layoutSubviews];
 }
 
+static BOOL _forceSoftwareRendering;
+
++ (BOOL)forceSoftwareRendering {
+  return _forceSoftwareRendering;
+}
+
++ (void)setForceSoftwareRendering:(BOOL)forceSoftwareRendering {
+  _forceSoftwareRendering = forceSoftwareRendering;
+}
+
 + (Class)layerClass {
   return flutter::GetCoreAnimationLayerClassForRenderingAPI(
-      flutter::GetRenderingAPIForProcess(/*force_software=*/false));
+      flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering));
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {

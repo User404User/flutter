@@ -11,7 +11,6 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -131,7 +130,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 }
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
-  late CurvedAnimation _opacityAnimation;
+  CurvedAnimation? _opacityAnimation;
 
   @override
   void initState() {
@@ -146,12 +145,12 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         oldWidget.route.animation != widget.route.animation ||
         oldWidget.route.selectedIndex != widget.route.selectedIndex ||
         widget.route.items.length != oldWidget.route.items.length) {
-      _opacityAnimation.dispose();
       _setOpacityAnimation();
     }
   }
 
   void _setOpacityAnimation() {
+    _opacityAnimation?.dispose();
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
       _opacityAnimation = CurvedAnimation(
@@ -205,7 +204,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
   @override
   void dispose() {
-    _opacityAnimation.dispose();
+    _opacityAnimation?.dispose();
     super.dispose();
   }
 
@@ -227,11 +226,11 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         child: child,
       );
     }
-    child = FadeTransition(opacity: _opacityAnimation, child: child);
+    child = FadeTransition(opacity: _opacityAnimation!, child: child);
     if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(shortcuts: _webShortcuts, child: child);
     }
-    return Semantics(role: SemanticsRole.menuItem, child: child);
+    return child;
   }
 }
 
@@ -333,7 +332,6 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           getSelectedItemOffset: () => route.getItemOffset(route.selectedIndex),
         ),
         child: Semantics(
-          role: SemanticsRole.menu,
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
@@ -1305,7 +1303,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   late Map<Type, Action<Intent>> _actionMap;
   bool _isHovering = false;
   bool _hasPrimaryFocus = false;
-  bool _isMenuExpanded = false;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -1349,7 +1346,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
-    _isMenuExpanded = false;
     _dropdownRoute = null;
     _lastOrientation = null;
   }
@@ -1447,7 +1443,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     });
 
     widget.onTap?.call();
-    _isMenuExpanded = true;
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1457,15 +1452,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   double get _denseButtonHeight {
     final double fontSize =
         _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
-    final double lineHeight =
-        _textStyle!.height ?? Theme.of(context).textTheme.titleMedium!.height ?? 1.0;
-    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize * lineHeight);
+    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize);
     return math.max(scaledFontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
   Color get _iconColor {
     // These colors are not defined in the Material Design spec.
-    final Brightness brightness = Theme.brightnessOf(context);
+    final Brightness brightness = Theme.of(context).brightness;
     if (_enabled) {
       return widget.iconEnabledColor ??
           switch (brightness) {
@@ -1531,9 +1524,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     final EdgeInsetsGeometry padding =
-        ButtonTheme.of(context).alignedDropdown && widget._inputDecoration == null
-            ? _kAlignedButtonPadding
-            : _kUnalignedButtonPadding;
+        ButtonTheme.of(context).alignedDropdown ? _kAlignedButtonPadding : _kUnalignedButtonPadding;
 
     // If value is null (then _selectedIndex is null) then we
     // display the hint or nothing at all.
@@ -1676,7 +1667,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
     return Semantics(
       button: !childHasButtonSemantic,
-      expanded: _isMenuExpanded,
       child: Actions(actions: _actionMap, child: result),
     );
   }
@@ -1730,8 +1720,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
     InputDecoration? decoration,
     super.onSaved,
     super.validator,
-    super.errorBuilder,
-    super.forceErrorText,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
     bool? enableFeedback,
@@ -1757,8 +1745,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
-           InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-               .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+           final InputDecoration decorationArg = decoration ?? const InputDecoration();
+           final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
+             Theme.of(field.context).inputDecorationTheme,
+           );
 
            final bool showSelectedItem =
                items != null &&
@@ -1774,22 +1764,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    ? effectiveHint != null
                    : effectiveHint != null || effectiveDisabledHint != null;
            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable;
-
-           if (field.errorText != null || effectiveDecoration.hintText != null) {
-             final Widget? error =
-                 field.errorText != null && errorBuilder != null
-                     ? errorBuilder(state.context, field.errorText!)
-                     : null;
-             final String? errorText = error == null ? field.errorText : null;
-             // Clear the decoration hintText because DropdownButton has its own hint logic.
-             final String? hintText = effectiveDecoration.hintText != null ? '' : null;
-
-             effectiveDecoration = effectiveDecoration.copyWith(
-               error: error,
-               errorText: errorText,
-               hintText: hintText,
-             );
-           }
 
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
@@ -1824,7 +1798,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
                      enableFeedback: enableFeedback,
                      alignment: alignment,
                      borderRadius: borderRadius,
-                     inputDecoration: effectiveDecoration,
+                     // Clear the decoration hintText because DropdownButton has its own hint logic.
+                     inputDecoration: effectiveDecoration.copyWith(
+                       errorText: field.errorText,
+                       hintText: effectiveDecoration.hintText != null ? '' : null,
+                     ),
                      isEmpty: isEmpty,
                      padding: padding,
                    ),

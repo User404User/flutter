@@ -89,10 +89,7 @@ class BrowserPlatformLocation implements PlatformLocation {
 
   @visibleForTesting
   DomEventListener getOrCreateDomEventListener(EventListener fn) {
-    final DomEventListener jsListener = createDomEventListener((DomEvent event) {
-      fn(event);
-    });
-    return _popStateListenersCache.putIfAbsent(fn, () => jsListener);
+    return _popStateListenersCache.putIfAbsent(fn, () => createDomEventListener(fn));
   }
 
   @override
@@ -117,7 +114,7 @@ class BrowserPlatformLocation implements PlatformLocation {
   String get search => _location.search!;
 
   @override
-  String get hash => _location.hash;
+  String get hash => _location.locationHash;
 
   @override
   Object? get state => _history.state;

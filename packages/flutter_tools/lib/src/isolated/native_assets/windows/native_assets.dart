@@ -30,9 +30,8 @@ Future<CCompilerConfig?> cCompilerConfigWindows() async {
     compiler: compiler,
     archiver: archiver,
     linker: linker,
-    windows: WindowsCCompilerConfig(
-      developerCommandPrompt: DeveloperCommandPrompt(script: envScript, arguments: <String>[]),
-    ),
+    envScript: envScript,
+    envScriptArgs: <String>[],
   );
 }
 

@@ -85,6 +85,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           body: BottomSheet(
             onClosing: () {},
@@ -313,7 +314,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
+        theme: ThemeData.light().copyWith(
           bottomSheetTheme: const BottomSheetThemeData(
             elevation: lightElevation,
             backgroundColor: lightBackgroundColor,

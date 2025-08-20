@@ -99,8 +99,9 @@ void main() {
         arguments: <String>['--no-pub', '--template=app'],
       );
 
-      await runCommandIn(projectPath);
+      final BuildBundleCommand command = await runCommandIn(projectPath);
 
+      expect((await command.usageValues).commandBuildBundleIsModule, false);
       expect(
         fakeAnalytics.sentEvents,
         contains(
@@ -124,10 +125,7 @@ void main() {
 
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
-    expect(
-      (await command.unifiedAnalyticsUsageValues('bundle')).eventData['buildBundleTargetPlatform'],
-      'android-arm',
-    );
+    expect((await command.usageValues).commandBuildBundleTargetPlatform, 'android-arm');
   });
 
   testUsingContext(
@@ -301,8 +299,6 @@ void main() {
               kBuildMode: 'debug',
               kTargetPlatform: 'android-arm',
               kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-              kDartDefines:
-                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               kTrackWidgetCreation: 'true',
               kFileSystemScheme: 'org-dartlang-root',
               kIconTreeShakerFlag: 'false',
@@ -345,8 +341,7 @@ void main() {
               kTargetFile: globals.fs.path.join('lib', 'main.dart'),
               kTrackWidgetCreation: 'true',
               kFileSystemScheme: 'org-dartlang-root',
-              kDartDefines:
-                  'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kDartDefines: 'Zm9vPWJhcg==',
               kIconTreeShakerFlag: 'false',
               kDeferredComponents: 'false',
               kDartObfuscation: 'false',
@@ -385,8 +380,6 @@ void main() {
               kBuildMode: 'debug',
               kTargetPlatform: 'android-arm',
               kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-              kDartDefines:
-                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               kTrackWidgetCreation: 'true',
               kFileSystemScheme: 'org-dartlang-root2',
               kIconTreeShakerFlag: 'false',
@@ -427,8 +420,6 @@ void main() {
               kBuildMode: 'debug',
               kTargetPlatform: 'android-arm',
               kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-              kDartDefines:
-                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               kTrackWidgetCreation: 'true',
               kFileSystemScheme: 'org-dartlang-root',
               kFileSystemRoots: 'test1,test2',
@@ -470,8 +461,6 @@ void main() {
               kBuildMode: 'debug',
               kTargetPlatform: 'android-arm',
               kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-              kDartDefines:
-                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               kTrackWidgetCreation: 'true',
               kFileSystemScheme: 'org-dartlang-root',
               kExtraFrontEndOptions: '--testflag,--testflag2',
@@ -513,8 +502,6 @@ void main() {
               kBuildMode: 'debug',
               kTargetPlatform: 'android-arm',
               kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-              kDartDefines:
-                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               kTrackWidgetCreation: 'true',
               kFileSystemScheme: 'org-dartlang-root',
               kExtraGenSnapshotOptions: '--testflag,--testflag2',
@@ -561,8 +548,7 @@ void main() {
               kBuildMode: 'profile',
               kTargetPlatform: 'android-arm',
               kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-              kDartDefines:
-                  'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kDartDefines: 'Zm9vPWJhcg==',
               kTrackWidgetCreation: 'true',
               kFileSystemScheme: 'org-dartlang-root',
               kFileSystemRoots: 'test1,test2',
@@ -611,8 +597,7 @@ void main() {
               kBuildMode: 'release',
               kTargetPlatform: 'android-arm',
               kTargetFile: globals.fs.path.join('lib', 'main.dart'),
-              kDartDefines:
-                  'Zm9vPWJhcg==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              kDartDefines: 'Zm9vPWJhcg==',
               kTrackWidgetCreation: 'true',
               kFileSystemScheme: 'org-dartlang-root',
               kFileSystemRoots: 'test1,test2',

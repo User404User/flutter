@@ -52,15 +52,6 @@ static bool DeviceSupportsComputeSubgroups(id<MTLDevice> device) {
   return supports_subgroups;
 }
 
-// See "Extended Range and wide color pixel formats" in the metal feature set
-// tables.
-static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
-  if (@available(macOS 10.15, iOS 13, tvOS 13, *)) {
-    return [device supportsFamily:MTLGPUFamilyApple3];
-  }
-  return false;
-}
-
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
     id<MTLDevice> device,
     PixelFormat color_format) {
@@ -80,20 +71,16 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .SetSupportsTriangleFan(false)
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
-      .SetSupportsExtendedRangeFormats(
-          DeviceSupportsExtendedRangeFormats(device))
       .Build();
 }
 
 ContextMTL::ContextMTL(
-    const Flags& flags,
     id<MTLDevice> device,
     id<MTLCommandQueue> command_queue,
     NSArray<id<MTLLibrary>>* shader_libraries,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     std::optional<PixelFormat> pixel_format_override)
-    : Context(flags),
-      device_(device),
+    : device_(device),
       command_queue_(command_queue),
       is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)) {
   // Validate device.
@@ -237,7 +224,6 @@ static id<MTLCommandQueue> CreateMetalCommandQueue(id<MTLDevice> device) {
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
-    const Flags& flags,
     const std::vector<std::string>& shader_library_paths,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch) {
   auto device = CreateMetalDevice();
@@ -246,7 +232,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     return nullptr;
   }
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      flags, device, command_queue,
+      device, command_queue,
       MTLShaderLibraryFromFilePaths(device, shader_library_paths),
       std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
@@ -257,7 +243,6 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
-    const Flags& flags,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     const std::string& library_label,
@@ -268,7 +253,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     return nullptr;
   }
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      flags, device, command_queue,
+      device, command_queue,
       MTLShaderLibraryFromFileData(device, shader_libraries_data,
                                    library_label),
       std::move(is_gpu_disabled_sync_switch), pixel_format_override));
@@ -280,14 +265,13 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
-    const Flags& flags,
     id<MTLDevice> device,
     id<MTLCommandQueue> command_queue,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     const std::string& library_label) {
   auto context = std::shared_ptr<ContextMTL>(
-      new ContextMTL(flags, device, command_queue,
+      new ContextMTL(device, command_queue,
                      MTLShaderLibraryFromFileData(device, shader_libraries_data,
                                                   library_label),
                      std::move(is_gpu_disabled_sync_switch)));
@@ -428,26 +412,8 @@ void ContextMTL::FlushTasksAwaitingGPU() {
     Lock lock(tasks_awaiting_gpu_mutex_);
     std::swap(tasks_awaiting_gpu, tasks_awaiting_gpu_);
   }
-  std::vector<PendingTasks> tasks_to_queue;
   for (const auto& task : tasks_awaiting_gpu) {
-    is_gpu_disabled_sync_switch_->Execute(fml::SyncSwitch::Handlers()
-                                              .SetIfFalse([&] { task.task(); })
-                                              .SetIfTrue([&] {
-                                                // Lost access to the GPU
-                                                // immediately after it was
-                                                // activated. This may happen if
-                                                // the app was quickly
-                                                // foregrounded/backgrounded
-                                                // from a push notification.
-                                                // Store the tasks on the
-                                                // context again.
-                                                tasks_to_queue.push_back(task);
-                                              }));
-  }
-  if (!tasks_to_queue.empty()) {
-    Lock lock(tasks_awaiting_gpu_mutex_);
-    tasks_awaiting_gpu_.insert(tasks_awaiting_gpu_.end(),
-                               tasks_to_queue.begin(), tasks_to_queue.end());
+    task.task();
   }
 }
 

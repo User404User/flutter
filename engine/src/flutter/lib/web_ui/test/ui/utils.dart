@@ -32,6 +32,9 @@ FlutterView get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 /// Returns [true] if this test is running in the CanvasKit renderer.
 bool get isCanvasKit => renderer is CanvasKitRenderer;
 
+/// Returns [true] if this test is running in the HTML renderer.
+bool get isHtml => renderer is HtmlRenderer;
+
 bool get isSkwasm => renderer is SkwasmRenderer;
 
 bool get isMultiThreaded => isSkwasm && (renderer as SkwasmRenderer).isMultiThreaded;

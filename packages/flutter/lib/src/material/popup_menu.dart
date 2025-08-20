@@ -6,8 +6,6 @@
 /// @docImport 'text_button.dart';
 library;
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -112,53 +110,13 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({
-    super.key,
-    this.height = _kMenuDividerHeight,
-    this.thickness,
-    this.indent,
-    this.endIndent,
-    this.radius,
-    this.color,
-  });
+  const PopupMenuDivider({super.key, this.height = _kMenuDividerHeight});
 
   /// The height of the divider entry.
   ///
   /// Defaults to 16 pixels.
   @override
   final double height;
-
-  /// The thickness of the line drawn within the [PopupMenuDivider].
-  ///
-  /// {@macro flutter.material.Divider.thickness}
-  final double? thickness;
-
-  /// The amount of empty space to the leading edge of the [PopupMenuDivider].
-  ///
-  /// {@macro flutter.material.Divider.indent}
-  final double? indent;
-
-  /// The amount of empty space to the trailing edge of the [PopupMenuDivider].
-  ///
-  /// {@macro flutter.material.Divider.endIndent}
-  final double? endIndent;
-
-  /// The amount of radius for the border of the [PopupMenuDivider].
-  ///
-  /// {@macro flutter.material.Divider.radius}
-  final BorderRadiusGeometry? radius;
-
-  /// {@macro flutter.material.Divider.color}
-  ///
-  /// {@tool snippet}
-  ///
-  /// ```dart
-  /// const PopupMenuDivider(
-  ///   color: Colors.deepOrange,
-  /// )
-  /// ```
-  /// {@end-tool}
-  final Color? color;
 
   @override
   bool represents(void value) => false;
@@ -169,16 +127,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
   @override
-  Widget build(BuildContext context) {
-    return Divider(
-      height: widget.height,
-      thickness: widget.thickness,
-      indent: widget.indent,
-      color: widget.color,
-      endIndent: widget.endIndent,
-      radius: widget.radius,
-    );
-  }
+  Widget build(BuildContext context) => Divider(height: widget.height);
 }
 
 // This widget only exists to enable _PopupMenuRoute to save the sizes of
@@ -450,7 +399,6 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 
     return MergeSemantics(
       child: Semantics(
-        role: SemanticsRole.menuItem,
         enabled: widget.enabled,
         button: true,
         child: InkWell(
@@ -738,7 +686,6 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
       child: IntrinsicWidth(
         stepWidth: _kMenuWidthStep,
         child: Semantics(
-          role: SemanticsRole.menu,
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
@@ -1568,7 +1515,6 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
-  bool _isMenuExpanded = false;
   RelativeRect _positionBuilder(BuildContext _, BoxConstraints constraints) {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
@@ -1616,7 +1562,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
       widget.onOpened?.call();
-      _isMenuExpanded = true;
       showMenu<T?>(
         context: context,
         elevation: widget.elevation ?? popupMenuTheme.elevation,
@@ -1643,7 +1588,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           return null;
         }
         widget.onSelected?.call(newValue);
-        _isMenuExpanded = false;
       });
     }
   }
@@ -1690,22 +1634,20 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: child,
         );
       }
-      return Semantics(expanded: _isMenuExpanded, child: child);
+      return child;
     }
 
-    return Semantics(
-      child: IconButton(
-        key: StandardComponentType.moreButton.key,
-        icon: Semantics(expanded: _isMenuExpanded, child: widget.icon ?? Icon(Icons.adaptive.more)),
-        padding: widget.padding,
-        splashRadius: widget.splashRadius,
-        iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
-        color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
-        tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
-        onPressed: widget.enabled ? showButtonMenu : null,
-        enableFeedback: enableFeedback,
-        style: widget.style,
-      ),
+    return IconButton(
+      key: StandardComponentType.moreButton.key,
+      icon: widget.icon ?? Icon(Icons.adaptive.more),
+      padding: widget.padding,
+      splashRadius: widget.splashRadius,
+      iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
+      color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
+      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+      onPressed: widget.enabled ? showButtonMenu : null,
+      enableFeedback: enableFeedback,
+      style: widget.style,
     );
   }
 }

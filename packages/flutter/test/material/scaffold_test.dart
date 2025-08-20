@@ -2475,6 +2475,7 @@ void main() {
     FlutterError.onError = oldHandler;
 
     expect(exceptions.length, 1);
+    // ignore: avoid_dynamic_calls
     expect(exceptions.single.runtimeType, FlutterError);
     final FlutterError error = exceptions.first as FlutterError;
     expect(error.diagnostics.length, 5);
@@ -2695,7 +2696,7 @@ void main() {
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
           return MaterialApp(
-            theme: themeIsLight ? ThemeData() : ThemeData.dark(),
+            theme: themeIsLight ? ThemeData.light() : ThemeData.dark(),
             home: Scaffold(
               bottomSheet:
                   defaultBottomSheet == null
@@ -2953,9 +2954,9 @@ void main() {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('I am a snack bar.'), showCloseIcon: true),
-                    snackBarAnimationStyle: const AnimationStyle(
-                      duration: Duration(milliseconds: 1200),
-                      reverseDuration: Duration(milliseconds: 600),
+                    snackBarAnimationStyle: AnimationStyle(
+                      duration: const Duration(milliseconds: 1200),
+                      reverseDuration: const Duration(milliseconds: 600),
                     ),
                   );
                 },
@@ -3025,9 +3026,9 @@ void main() {
     // Test custom animation style.
     await tester.pumpWidget(
       buildSnackBar(
-        const AnimationStyle(
-          duration: Duration(milliseconds: 800),
-          reverseDuration: Duration(milliseconds: 400),
+        AnimationStyle(
+          duration: const Duration(milliseconds: 800),
+          reverseDuration: const Duration(milliseconds: 400),
         ),
       ),
     );
@@ -3097,7 +3098,7 @@ void main() {
 
     // Test custom animation style with only reverseDuration.
     await tester.pumpWidget(
-      buildSnackBar(const AnimationStyle(reverseDuration: Duration(milliseconds: 400))),
+      buildSnackBar(AnimationStyle(reverseDuration: const Duration(milliseconds: 400))),
     );
 
     // Tap the button to show the SnackBar.
@@ -3234,9 +3235,9 @@ void main() {
     // Test custom animation style.
     await tester.pumpWidget(
       buildWidget(
-        sheetAnimationStyle: const AnimationStyle(
-          duration: Duration(milliseconds: 800),
-          reverseDuration: Duration(milliseconds: 400),
+        sheetAnimationStyle: AnimationStyle(
+          duration: const Duration(milliseconds: 800),
+          reverseDuration: const Duration(milliseconds: 400),
         ),
       ),
     );

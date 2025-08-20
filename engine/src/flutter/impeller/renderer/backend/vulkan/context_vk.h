@@ -85,7 +85,6 @@ class ContextVK final : public Context,
     bool enable_surface_control = false;
     /// If validations are requested but cannot be enabled, log a fatal error.
     bool fatal_missing_validations = false;
-    Flags flags;
 
     std::optional<EmbedderData> embedder_data;
 
@@ -301,7 +300,7 @@ class ContextVK final : public Context,
 
   bool is_valid_ = false;
 
-  explicit ContextVK(const Flags& flags);
+  ContextVK();
 
   void Setup(Settings settings);
 

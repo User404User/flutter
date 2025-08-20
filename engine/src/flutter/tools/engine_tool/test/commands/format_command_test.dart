@@ -222,11 +222,11 @@ FakeProcessManager _formatProcessManager({
   return FakeProcessManager(
     canRun: canRun ?? (Object? exe, {String? workingDirectory}) => true,
     onRun:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
+        (List<String> cmd) => switch (cmd) {
           _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
         },
     onStart:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
+        (List<String> cmd) => switch (cmd) {
           [final String exe, final String fmt, ...final List<String> rest]
               when exe.endsWith('dart') &&
                   fmt.endsWith('ci/bin/format.dart') &&

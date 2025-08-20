@@ -410,7 +410,6 @@ class _RecompileRequest extends _CompilationRequest {
     this.suppressErrors, {
     this.additionalSourceUri,
     this.nativeAssetsYamlUri,
-    required this.recompileRestart,
   });
 
   Uri mainUri;
@@ -420,7 +419,6 @@ class _RecompileRequest extends _CompilationRequest {
   bool suppressErrors;
   final Uri? additionalSourceUri;
   final Uri? nativeAssetsYamlUri;
-  final bool recompileRestart;
 
   @override
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async => compiler._recompile(this);
@@ -535,9 +533,6 @@ abstract class ResidentCompiler {
   /// If [checkDartPluginRegistry] is true, it is the caller's responsibility
   /// to ensure that the generated registrant file has been updated such that
   /// it is wrapping [mainUri].
-  ///
-  /// If [recompileRestart] is true, uses the `recompile-restart` instruction
-  /// intended for a hot restart instead.
   Future<CompilerOutput?> recompile(
     Uri mainUri,
     List<Uri>? invalidatedFiles, {
@@ -549,7 +544,6 @@ abstract class ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
-    bool recompileRestart = false,
   });
 
   Future<CompilerOutput?> compileExpression(
@@ -701,7 +695,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? projectRootPath,
     FileSystem? fs,
     Uri? nativeAssetsYaml,
-    bool recompileRestart = false,
   }) async {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
@@ -724,7 +717,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
         suppressErrors,
         additionalSourceUri: additionalSourceUri,
         nativeAssetsYamlUri: nativeAssetsYaml,
-        recompileRestart: recompileRestart,
       ),
     );
     return completer.future;
@@ -767,11 +759,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       server.stdin.writeln('native-assets $nativeAssets');
       _logger.printTrace('<- native-assets $nativeAssets');
     }
-    if (request.recompileRestart) {
-      server.stdin.writeln('recompile-restart $mainUri $inputKey');
-    } else {
-      server.stdin.writeln('recompile $mainUri $inputKey');
-    }
+    server.stdin.writeln('recompile $mainUri $inputKey');
     _logger.printTrace('<- recompile $mainUri $inputKey');
     final List<Uri>? invalidatedFiles = request.invalidatedFiles;
     if (invalidatedFiles != null) {

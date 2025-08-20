@@ -166,7 +166,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       _buildWidget(
         scaffoldKey,
@@ -258,6 +258,7 @@ void main() {
         data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
         child: MaterialApp(
           useInheritedMediaQuery: true,
+          theme: ThemeData.light(),
           home: Scaffold(
             key: scaffoldKey,
             drawer: NavigationDrawer(
@@ -326,7 +327,6 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
-        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -337,7 +337,6 @@ void main() {
         label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
-        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -351,7 +350,6 @@ void main() {
         label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
-        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -363,7 +361,6 @@ void main() {
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
-        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -374,7 +371,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
     const Color color = Color(0xff0000ff);
     const ShapeBorder shape = RoundedRectangleBorder();
 

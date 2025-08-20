@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,21 +88,26 @@ void main() {
     expect(editable.getMaxIntrinsicHeight(double.infinity), 10);
   });
 
-  test('strutStyle affects intrinsics', () {
-    final RenderEditable editable = RenderEditable(
-      text: const TextSpan(style: TextStyle(fontSize: 10), text: 'Hello World'),
-      textDirection: TextDirection.ltr,
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
-    );
+  test(
+    'strutStyle affects intrinsics',
+    () {
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(style: TextStyle(fontSize: 10), text: 'Hello World'),
+        textDirection: TextDirection.ltr,
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: delegate,
+      );
 
-    expect(editable.getMaxIntrinsicHeight(double.infinity), 10);
+      expect(editable.getMaxIntrinsicHeight(double.infinity), 10);
 
-    editable.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
-    expect(editable.getMaxIntrinsicHeight(double.infinity), 100);
-  });
+      editable.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
+      expect(editable.getMaxIntrinsicHeight(double.infinity), 100);
+    },
+    // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243.
+    skip: kIsWeb && !isSkiaWeb,
+  );
 }
 
 class _FakeEditableTextState with TextSelectionDelegate {

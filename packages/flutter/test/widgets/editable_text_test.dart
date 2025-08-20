@@ -3013,62 +3013,6 @@ void main() {
     }
   });
 
-  testWidgets(
-    'Read-only fields can be traversed on all platforms',
-    (WidgetTester tester) async {
-      final TextEditingController controller1 = TextEditingController();
-      addTearDown(controller1.dispose);
-      final TextEditingController controller2 = TextEditingController();
-      addTearDown(controller2.dispose);
-      final FocusNode focusNode1 = FocusNode();
-      addTearDown(focusNode1.dispose);
-      final FocusNode focusNode2 = FocusNode();
-      addTearDown(focusNode2.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Column(
-            children: <Widget>[
-              EditableText(
-                focusNode: focusNode1,
-                autofocus: true,
-                controller: controller1,
-                backgroundCursorColor: Colors.grey,
-                style: textStyle,
-                cursorColor: cursorColor,
-              ),
-              EditableText(
-                readOnly: true,
-                focusNode: focusNode2,
-                controller: controller2,
-                backgroundCursorColor: Colors.grey,
-                style: textStyle,
-                cursorColor: cursorColor,
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(focusNode1.hasPrimaryFocus, true);
-      expect(focusNode2.hasPrimaryFocus, false);
-
-      // Change focus to the readonly EditableText.
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-
-      expect(focusNode1.hasPrimaryFocus, false);
-      expect(focusNode2.hasPrimaryFocus, true);
-
-      // Change focus back to the first EditableText.
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-
-      expect(focusNode1.hasPrimaryFocus, true);
-      expect(focusNode2.hasPrimaryFocus, false);
-    },
-    variant: TargetPlatformVariant.all(),
-    skip: kIsWeb, // [intended]
-  );
-
   testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;
     late StateSetter setState;
@@ -3147,50 +3091,6 @@ void main() {
     await tester.pump();
 
     expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
-  });
-
-  testWidgets('Sends "updateConfig" when keyboardType is changed', (WidgetTester tester) async {
-    TextInputType keyboardType = TextInputType.text;
-    late StateSetter setState;
-    controller.text = 'Lorem';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter stateSetter) {
-            setState = stateSetter;
-            return EditableText(
-              keyboardType: keyboardType,
-              controller: controller,
-              backgroundCursorColor: Colors.grey,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-            );
-          },
-        ),
-      ),
-    );
-
-    // Interact with the field to establish the input connection.
-    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
-    await tester.tapAt(topLeft + const Offset(0.0, 5.0));
-    await tester.pump();
-
-    expect(
-      (tester.testTextInput.setClientArgs!['inputType'] as Map<dynamic, dynamic>)['name'],
-      'TextInputType.text',
-    );
-
-    setState(() {
-      keyboardType = TextInputType.number;
-    });
-    await tester.pump();
-
-    expect(
-      (tester.testTextInput.setClientArgs!['inputType'] as Map<dynamic, dynamic>)['name'],
-      'TextInputType.number',
-    );
   });
 
   testWidgets('Sends viewId and updates config when it changes', (WidgetTester tester) async {
@@ -4135,8 +4035,8 @@ void main() {
       ),
     );
 
-    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
-    final int semanticsId = node.id;
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+    final int semanticsId = render.debugSemantics!.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
@@ -4241,8 +4141,8 @@ void main() {
       ),
     );
 
-    final SemanticsNode node = find.semantics.byValue('test for words').evaluate().first;
-    final int semanticsId = node.id;
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+    final int semanticsId = render.debugSemantics!.id;
 
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 14);
@@ -4356,8 +4256,8 @@ void main() {
       ),
     );
 
-    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
-    final int semanticsId = node.id;
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+    final int semanticsId = render.debugSemantics!.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
@@ -4473,8 +4373,8 @@ void main() {
       ),
     );
 
-    final SemanticsNode node = find.semantics.byValue('test for words').evaluate().first;
-    final int semanticsId = node.id;
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+    final int semanticsId = render.debugSemantics!.id;
 
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 14);
@@ -4932,7 +4832,7 @@ void main() {
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-      const int expectedNodeId = 4;
+      const int expectedNodeId = 5;
 
       expect(
         semantics,
@@ -5016,8 +4916,7 @@ void main() {
         await tester.pump();
 
         final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-        final SemanticsNode node = find.semantics.byValue('ABCDEFG').evaluate().first;
-        final int expectedNodeId = node.id;
+        const int expectedNodeId = 5;
 
         expect(controller.value.selection.isCollapsed, isTrue);
 
@@ -10017,7 +9916,7 @@ void main() {
       final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
       addTearDown(controller.dispose);
       const Color color = Color.fromARGB(255, 1, 2, 3);
-      final ThemeData lightTheme = ThemeData();
+      final ThemeData lightTheme = ThemeData.light();
       await tester.pumpWidget(
         MaterialApp(
           theme: lightTheme.copyWith(
@@ -12068,44 +11967,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(myIntentWasCalled, isTrue);
     expect(focusNode.hasFocus, true);
-  });
-
-  testWidgets('can change tap up outside behavior by overriding actions', (
-    WidgetTester tester,
-  ) async {
-    bool myIntentWasCalled = false;
-    final CallbackAction<EditableTextTapUpOutsideIntent> overrideAction =
-        CallbackAction<EditableTextTapUpOutsideIntent>(
-          onInvoke: (EditableTextTapUpOutsideIntent intent) {
-            myIntentWasCalled = true;
-            return null;
-          },
-        );
-    final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Column(
-          children: <Widget>[
-            SizedBox(key: key, width: 200, height: 200),
-            Actions(
-              actions: <Type, Action<Intent>>{EditableTextTapUpOutsideIntent: overrideAction},
-              child: EditableText(
-                controller: controller,
-                focusNode: focusNode,
-                style: textStyle,
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                autofocus: true,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.tap(find.byKey(key), warnIfMissed: false);
-    await tester.pump();
-    expect(myIntentWasCalled, isTrue);
   });
 
   testWidgets('ignore key event from web platform', (WidgetTester tester) async {
@@ -17016,152 +16877,6 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
     skip: kIsWeb, // [intended]
   );
-
-  testWidgets('onTapOutside is called upon tap outside', (WidgetTester tester) async {
-    int tapOutsideCount = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                EditableText(
-                  autofocus: true,
-                  controller: controller,
-                  focusNode: focusNode,
-                  style: textStyle,
-                  cursorColor: Colors.blue,
-                  backgroundCursorColor: Colors.grey,
-                  onTapOutside: (PointerEvent event) {
-                    tapOutsideCount += 1;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump(); // Wait for autofocus to take effect.
-
-    expect(tapOutsideCount, 0);
-    await tester.tap(find.byType(EditableText));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    expect(tapOutsideCount, 3);
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/134341.
-  testWidgets('onTapOutside is not called upon tap outside when field is not focused', (
-    WidgetTester tester,
-  ) async {
-    int tapOutsideCount = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                EditableText(
-                  controller: controller,
-                  focusNode: focusNode,
-                  style: textStyle,
-                  cursorColor: Colors.blue,
-                  backgroundCursorColor: Colors.grey,
-                  onTapOutside: (PointerEvent event) {
-                    tapOutsideCount += 1;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(tapOutsideCount, 0);
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    expect(tapOutsideCount, 0);
-  });
-
-  testWidgets('onTapUpOutside is called upon tap up outside', (WidgetTester tester) async {
-    int tapOutsideCount = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                EditableText(
-                  autofocus: true,
-                  controller: controller,
-                  focusNode: focusNode,
-                  style: textStyle,
-                  cursorColor: Colors.blue,
-                  backgroundCursorColor: Colors.grey,
-                  onTapUpOutside: (PointerEvent event) {
-                    tapOutsideCount += 1;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump(); // Wait for autofocus to take effect.
-
-    expect(tapOutsideCount, 0);
-    await tester.tap(find.byType(EditableText));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    expect(tapOutsideCount, 3);
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/162573
-  testWidgets('onTapUpOutside is not called upon tap up outside when field is not focused', (
-    WidgetTester tester,
-  ) async {
-    int tapOutsideCount = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                EditableText(
-                  controller: controller,
-                  focusNode: focusNode,
-                  style: textStyle,
-                  cursorColor: Colors.blue,
-                  backgroundCursorColor: Colors.grey,
-                  onTapUpOutside: (PointerEvent event) {
-                    tapOutsideCount += 1;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(tapOutsideCount, 0);
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    expect(tapOutsideCount, 0);
-  });
 }
 
 class UnsettableController extends TextEditingController {

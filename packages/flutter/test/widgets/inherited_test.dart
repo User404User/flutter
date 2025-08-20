@@ -545,7 +545,10 @@ void main() {
       StatefulBuilder(
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
-          return Theme(data: ThemeData(cardTheme: cardThemeData), child: const ThemedCard());
+          return Theme(
+            data: ThemeData(cardTheme: CardTheme(data: cardThemeData)),
+            child: const ThemedCard(),
+          );
         },
       ),
     );

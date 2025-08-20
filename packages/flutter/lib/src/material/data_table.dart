@@ -879,25 +879,22 @@ class DataTable extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
-    label = Semantics(
-      role: SemanticsRole.columnHeader,
-      child: Row(
-        textDirection: numeric ? TextDirection.rtl : null,
-        mainAxisAlignment: headingRowAlignment,
-        children: <Widget>[
-          if (headingRowAlignment == MainAxisAlignment.center && onSort != null)
-            const SizedBox(width: _SortArrowState._arrowIconSize + _sortArrowPadding),
-          label,
-          if (onSort != null) ...<Widget>[
-            _SortArrow(
-              visible: sorted,
-              up: sorted ? ascending : null,
-              duration: _sortArrowAnimationDuration,
-            ),
-            const SizedBox(width: _sortArrowPadding),
-          ],
+    label = Row(
+      textDirection: numeric ? TextDirection.rtl : null,
+      mainAxisAlignment: headingRowAlignment,
+      children: <Widget>[
+        if (headingRowAlignment == MainAxisAlignment.center && onSort != null)
+          const SizedBox(width: _SortArrowState._arrowIconSize + _sortArrowPadding),
+        label,
+        if (onSort != null) ...<Widget>[
+          _SortArrow(
+            visible: sorted,
+            up: sorted ? ascending : null,
+            duration: _sortArrowAnimationDuration,
+          ),
+          const SizedBox(width: _sortArrowPadding),
         ],
-      ),
+      ],
     );
 
     final TextStyle effectiveHeadingTextStyle =
@@ -1016,7 +1013,7 @@ class DataTable extends StatelessWidget {
         child: label,
       );
     }
-    return TableCell(child: label);
+    return label;
   }
 
   @override

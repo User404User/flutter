@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -354,7 +353,7 @@ void main() {
     // Test for Material 3
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme),
+        theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Row(
@@ -1114,7 +1113,7 @@ void main() {
   });
 
   testWidgets('IconButton defaults - M3', (WidgetTester tester) async {
-    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme);
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled IconButton
     await tester.pumpWidget(
@@ -1192,7 +1191,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1251,7 +1250,7 @@ void main() {
   });
 
   testWidgets('IconButton.fill defaults - M3', (WidgetTester tester) async {
-    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme);
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled IconButton
     await tester.pumpWidget(
@@ -1332,7 +1331,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1391,7 +1390,7 @@ void main() {
   });
 
   testWidgets('Toggleable IconButton.fill defaults - M3', (WidgetTester tester) async {
-    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme);
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled selected IconButton
     await tester.pumpWidget(
@@ -1504,7 +1503,7 @@ void main() {
   });
 
   testWidgets('IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
-    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme);
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled IconButton.tonal
     await tester.pumpWidget(
@@ -1589,7 +1588,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1648,7 +1647,7 @@ void main() {
   });
 
   testWidgets('Toggleable IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
-    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme);
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled selected IconButton
     await tester.pumpWidget(
@@ -1765,7 +1764,7 @@ void main() {
   });
 
   testWidgets('IconButton.outlined defaults - M3', (WidgetTester tester) async {
-    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme);
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled IconButton.tonal
     await tester.pumpWidget(
@@ -1849,7 +1848,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1908,7 +1907,7 @@ void main() {
   });
 
   testWidgets('Toggleable IconButton.outlined defaults - M3', (WidgetTester tester) async {
-    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme);
+    final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled selected IconButton
     await tester.pumpWidget(
@@ -2027,7 +2026,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
           home: Scaffold(
             body: Center(
               child: IconButton(
@@ -2101,7 +2100,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
@@ -2168,7 +2167,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Theme(
-            data: ThemeData(),
+            data: ThemeData(useMaterial3: true),
             child: IconButton(
               style: const ButtonStyle(
                 // Specifying minimumSize to mimic the original minimumSize for
@@ -2214,7 +2213,7 @@ void main() {
   ) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize) {
       return Theme(
-        data: ThemeData(materialTapTargetSize: tapTargetSize),
+        data: ThemeData(materialTapTargetSize: tapTargetSize, useMaterial3: true),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
@@ -2239,7 +2238,7 @@ void main() {
     // Use [IconButton]'s padding property to override default value.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: Scaffold(
           body: Center(
             child: IconButton(
@@ -2260,7 +2259,7 @@ void main() {
     // Use [IconButton.style]'s padding property to override default value.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: Scaffold(
           body: Center(
             child: IconButton(
@@ -2282,7 +2281,7 @@ void main() {
     // values are not null.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: Scaffold(
           body: Center(
             child: IconButton(
@@ -2305,7 +2304,7 @@ void main() {
   testWidgets('Default IconButton is not selectable - M3', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: IconButton(icon: const Icon(Icons.ac_unit), onPressed: () {}),
       ),
     );
@@ -2341,7 +2340,7 @@ void main() {
     bool isSelected = false;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return IconButton(
@@ -2393,7 +2392,7 @@ void main() {
     bool isSelected = true;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return IconButton(
@@ -2438,7 +2437,7 @@ void main() {
     bool isSelected = false;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return IconButton(
@@ -2480,7 +2479,7 @@ void main() {
       bool isSelected = false;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return IconButton(
@@ -2518,7 +2517,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: const IconButton(
           isSelected: true,
           icon: Icon(Icons.account_box),
@@ -2544,7 +2543,7 @@ void main() {
     }) async {
       return tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: colorScheme).copyWith(
+          theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
             iconButtonTheme: IconButtonThemeData(
               style: IconButton.styleFrom(visualDensity: iconButtonThemeVisualDensity),
             ),
@@ -2741,6 +2740,7 @@ void main() {
         MaterialApp(
           theme: ThemeData.from(
             colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
           ).copyWith(iconTheme: const IconThemeData(color: Colors.red, size: 37)),
           home: IconButton(icon: const Icon(Icons.account_box), onPressed: () {}),
         ),
@@ -2753,7 +2753,7 @@ void main() {
       // custom IconTheme outside of IconButton
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
           home: IconTheme.merge(
             data: const IconThemeData(color: Colors.pink, size: 35),
             child: IconButton(icon: const Icon(Icons.account_box), onPressed: () {}),
@@ -2772,7 +2772,10 @@ void main() {
       // When IconButtonTheme and IconTheme both exist in ThemeData, the IconButtonTheme can override IconTheme.
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: const ColorScheme.light()).copyWith(
+          theme: ThemeData.from(
+            colorScheme: const ColorScheme.light(),
+            useMaterial3: true,
+          ).copyWith(
             iconTheme: const IconThemeData(color: Colors.red, size: 25),
             iconButtonTheme: IconButtonThemeData(
               style: IconButton.styleFrom(foregroundColor: Colors.green, iconSize: 27),
@@ -2793,7 +2796,7 @@ void main() {
       // When IconButtonTheme is closer to IconButton, IconButtonTheme overrides IconTheme
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
           home: IconTheme.merge(
             data: const IconThemeData(color: Colors.orange, size: 36),
             child: IconButtonTheme(
@@ -2813,7 +2816,7 @@ void main() {
       // When IconTheme is closer to IconButton, IconButtonTheme still overrides IconTheme
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
           home: IconTheme.merge(
             data: const IconThemeData(color: Colors.blue, size: 35),
             child: IconButtonTheme(
@@ -2838,6 +2841,7 @@ void main() {
         MaterialApp(
           theme: ThemeData.from(
             colorScheme: const ColorScheme.dark(),
+            useMaterial3: true,
           ).copyWith(iconTheme: const IconThemeData(color: Colors.white)),
           home: IconButton(icon: const Icon(Icons.account_box), onPressed: () {}),
         ),
@@ -2857,7 +2861,7 @@ void main() {
         // Brightness.dark
         await tester.pumpWidget(
           MaterialApp(
-            theme: ThemeData(colorScheme: darkScheme),
+            theme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
             home: Scaffold(
               body: IconTheme.merge(
                 data: const IconThemeData(size: 26),
@@ -2882,7 +2886,7 @@ void main() {
         // Brightness.dark
         await tester.pumpWidget(
           MaterialApp(
-            theme: ThemeData(colorScheme: lightScheme),
+            theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
             home: Scaffold(
               body: IconTheme.merge(
                 data: const IconThemeData(size: 26),
@@ -2926,7 +2930,10 @@ void main() {
       // This is a regression test for https://github.com/flutter/flutter/issues/130708.
       Widget buildWidget(bool showIconButton) {
         return showIconButton
-            ? MaterialApp(home: IconButton(onPressed: () {}, icon: const Icon(Icons.search)))
+            ? MaterialApp(
+              theme: ThemeData(useMaterial3: true),
+              home: IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+            )
             : const SizedBox();
       }
 
@@ -3310,62 +3317,6 @@ void main() {
     await tester.pump();
     expect(onLongPressed, false);
   });
-
-  testWidgets('does not draw focus color when focused by semantics on the web', (
-    WidgetTester tester,
-  ) async {
-    // Regression test for https://github.com/flutter/flutter/issues/158527.
-
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-
-    const Color focusColor = Colors.orange;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: IconButton(
-            focusColor: focusColor,
-            focusNode: focusNode,
-            icon: const Icon(Icons.headphones),
-            onPressed: () {},
-          ),
-        ),
-      ),
-    );
-
-    // Make sure we are in "traditional mode" where the button could potentially draw focus highlights.
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
-    expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-
-    expect(focusNode.hasFocus, isFalse);
-
-    // Focus on it with semantics.
-    tester.platformDispatcher.onSemanticsActionEvent!(
-      SemanticsActionEvent(
-        type: SemanticsAction.focus,
-        viewId: tester.view.viewId,
-        nodeId: tester.semantics.find(find.byIcon(Icons.headphones)).id,
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    // Make sure no focus highlight was drawn.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
-    expect(focusNode.hasFocus, isTrue);
-    expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
-    expect(inkFeatures, isNot(paints..rect(color: focusColor)));
-
-    // Check that focus highlight is drawn in traditional mode.
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
-    expect(focusNode.hasFocus, isTrue);
-    expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-    expect(inkFeatures, paints..rect(color: focusColor));
-  }, skip: !isBrowser); // [intended] tests web-specific behavior.
 }
 
 Widget buildAllVariants({
@@ -3415,7 +3366,7 @@ Widget buildAllVariants({
 Widget wrap({required Widget child, required bool useMaterial3}) {
   return useMaterial3
       ? MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: FocusTraversalGroup(
           policy: ReadingOrderTraversalPolicy(),
           child: Directionality(textDirection: TextDirection.ltr, child: Center(child: child)),

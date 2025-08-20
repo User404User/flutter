@@ -25,6 +25,7 @@ class GlobalHtmlAttributes {
 
   void applyAttributes({
     required int viewId,
+    required bool autoDetectRenderer,
     required String rendererTag,
     required String buildMode,
   }) {
@@ -38,7 +39,10 @@ class GlobalHtmlAttributes {
     //     document.querySelector('flutter-view[flt-view-id="$viewId"]')
     rootElement.setAttribute(flutterViewIdAttributeName, viewId);
 
-    hostElement.setAttribute('flt-renderer', rendererTag);
+    // How was the current renderer selected?
+    final String rendererSelection = autoDetectRenderer ? 'auto-selected' : 'requested explicitly';
+
+    hostElement.setAttribute('flt-renderer', '$rendererTag ($rendererSelection)');
     hostElement.setAttribute('flt-build-mode', buildMode);
     // TODO(mdebbar): Disable spellcheck until changes in the framework and
     // engine are complete.

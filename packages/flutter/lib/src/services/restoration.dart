@@ -518,7 +518,9 @@ class RestorationBucket {
       _debugOwner = debugOwner;
       return true;
     }());
-    assert(debugMaybeDispatchCreated('services', 'RestorationBucket', this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   /// Creates the root [RestorationBucket] for the provided restoration
@@ -552,7 +554,9 @@ class RestorationBucket {
       _debugOwner = manager;
       return true;
     }());
-    assert(debugMaybeDispatchCreated('services', 'RestorationBucket', this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   /// Creates a child bucket initialized with the data that the provided
@@ -576,7 +580,9 @@ class RestorationBucket {
       _debugOwner = debugOwner;
       return true;
     }());
-    assert(debugMaybeDispatchCreated('services', 'RestorationBucket', this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      _maybeDispatchObjectCreation();
+    }
   }
 
   static const String _childrenMapKey = 'c';
@@ -955,6 +961,19 @@ class RestorationBucket {
     _parent?._addChildData(this);
   }
 
+  // TODO(polina-c): stop duplicating code across disposables
+  // https://github.com/flutter/flutter/issues/137435
+  /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
+  void _maybeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/services.dart',
+        className: '$RestorationBucket',
+        object: this,
+      );
+    }
+  }
+
   /// Deletes the bucket and all the data stored in it from the bucket
   /// hierarchy.
   ///
@@ -969,7 +988,11 @@ class RestorationBucket {
   /// This method must only be called by the object's owner.
   void dispose() {
     assert(_debugAssertNotDisposed());
-    assert(debugMaybeDispatchDisposed(this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _visitChildren(_dropChild, concurrentModification: true);
     _claimedChildren.clear();
     _childrenToAdd.clear();

@@ -26,7 +26,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
   SkwasmPath.fromHandle(PathHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawPath> _registry = SkwasmFinalizationRegistry<RawPath>(
-    (PathHandle handle) => pathDispose(handle),
+    pathDispose,
   );
 
   @override
@@ -168,13 +168,6 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
     withStackScope((StackScope s) {
       pathAddRRect(handle, s.convertRRectToNative(rrect));
     });
-  }
-
-  @override
-  void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    addRRect(rsuperellipse.toApproximateRRect());
   }
 
   @override

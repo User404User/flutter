@@ -4,14 +4,12 @@
 
 import 'package:file/file.dart';
 
-import '../../src/package_config.dart';
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
 
 const String _kDefaultHtml = '''
 <html>
     <head>
-        <meta charset='utf-8'>
         <title>Hello, World</title>
     </head>
     <body>
@@ -67,7 +65,7 @@ abstract class Project {
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
-    writePackageConfigFile(directory: dir, mainLibName: 'test');
+    writePackageConfig(dir.path);
     await getPackages(dir.path);
   }
 

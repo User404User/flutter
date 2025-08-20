@@ -9,12 +9,11 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_locale_keymap/web_locale_keymap.dart' as locale_keymap;
 
+import '../engine.dart' show registerHotRestartListener;
 import 'dom.dart';
-import 'initialization.dart';
 import 'key_map.g.dart';
 import 'platform_dispatcher.dart';
 import 'raw_keyboard.dart';
-import 'renderer.dart';
 import 'semantics.dart';
 
 typedef _VoidCallback = void Function();
@@ -142,7 +141,7 @@ class KeyboardBinding {
   final Map<String, DomEventListener> _listeners = <String, DomEventListener>{};
 
   void _addEventListener(String eventName, DartDomEventListener handler) {
-    void loggedHandler(DomEvent event) {
+    JSVoid loggedHandler(DomEvent event) {
       if (_debugLogKeyEvents) {
         print(event.type);
       }
@@ -151,16 +150,16 @@ class KeyboardBinding {
       }
     }
 
-    final DomEventListener wrappedHandler = loggedHandler.toJS;
+    final DomEventListener wrappedHandler = createDomEventListener(loggedHandler);
     assert(!_listeners.containsKey(eventName));
     _listeners[eventName] = wrappedHandler;
-    domWindow.addEventListener(eventName, wrappedHandler, true.toJS);
+    domWindow.addEventListener(eventName, wrappedHandler, true);
   }
 
   /// Remove all active event listeners.
   void _clearListeners() {
     _listeners.forEach((String eventName, DomEventListener listener) {
-      domWindow.removeEventListener(eventName, listener, true.toJS);
+      domWindow.removeEventListener(eventName, listener, true);
     });
     _listeners.clear();
   }
@@ -599,14 +598,6 @@ class KeyboardConverter {
     // Autofill on Chrome sends keyboard events whose key and code are null.
     if (event.key == null || event.code == null) {
       return;
-    }
-
-    if (kDebugMode &&
-        event.key == 'F10' &&
-        event.altKey &&
-        event.type == 'keydown' &&
-        !(event.repeat ?? false)) {
-      renderer.dumpDebugInfo();
     }
 
     assert(_dispatchKeyData == null);

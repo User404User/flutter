@@ -430,7 +430,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   bool _isDark() {
-    return Theme.brightnessOf(context) == Brightness.dark;
+    return Theme.of(context).brightness == Brightness.dark;
   }
 
   bool _isLabel() {
@@ -593,7 +593,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       );
     }
 
-    final Color cancelColor = switch (Theme.brightnessOf(context)) {
+    final Color cancelColor = switch (Theme.of(context).brightness) {
       Brightness.light => Colors.black54,
       Brightness.dark => Colors.white70,
     };

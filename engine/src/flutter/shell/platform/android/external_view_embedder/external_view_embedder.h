@@ -74,10 +74,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
                 const fml::RefPtr<fml::RasterThreadMerger>&
                     raster_thread_merger) override;
 
-  // |ExternalViewEmbedder|
   bool SupportsDynamicThreadMerging() override;
 
-  // |ExternalViewEmbedder|
   void Teardown() override;
 
   // Gets the rect based on the device pixel ratio of a platform view displayed

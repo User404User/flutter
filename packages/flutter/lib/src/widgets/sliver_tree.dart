@@ -490,7 +490,7 @@ class TreeSliver<T> extends StatefulWidget {
 
   /// The default [AnimationStyle] used for node expand and collapse animations,
   /// when one has not been provided in [toggleAnimationStyle].
-  static AnimationStyle defaultToggleAnimationStyle = const AnimationStyle(
+  static AnimationStyle defaultToggleAnimationStyle = AnimationStyle(
     curve: defaultAnimationCurve,
     duration: defaultAnimationDuration,
   );

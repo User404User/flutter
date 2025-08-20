@@ -30,11 +30,11 @@ void main() {
         ),
         processRunner: ProcessRunner(
           processManager: FakeProcessManager(
-            onStart: (FakeCommandLogEntry entry) {
-              runHistory.add(entry.command);
+            onStart: (command) {
+              runHistory.add(command);
               return FakeProcess();
             },
-            onRun: (_) {
+            onRun: (command) {
               // Should not be executed.
               assert(false);
               return io.ProcessResult(81, 1, '', '');

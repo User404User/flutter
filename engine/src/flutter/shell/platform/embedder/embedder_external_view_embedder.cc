@@ -145,42 +145,42 @@ struct PlatformView {
     view_identifier = view->GetViewIdentifier();
     params = view->GetEmbeddedViewParams();
 
-    DlRect clip = ToDlRect(view->GetEmbeddedViewParams()->finalBoundingRect());
-    DlMatrix matrix;
+    clipped_frame = view->GetEmbeddedViewParams()->finalBoundingRect();
+    SkMatrix transform;
     for (auto i = params->mutatorsStack().Begin();
          i != params->mutatorsStack().End(); ++i) {
       const auto& m = *i;
       switch (m->GetType()) {
-        case MutatorType::kClipRect: {
-          auto rect = m->GetRect().TransformAndClipBounds(matrix);
-          clip = clip.IntersectionOrEmpty(rect);
+        case kClipRect: {
+          auto rect = transform.mapRect(m->GetRect());
+          if (!clipped_frame.intersect(rect)) {
+            clipped_frame = SkRect::MakeEmpty();
+          }
           break;
         }
-        case MutatorType::kClipRRect: {
-          auto rect = m->GetRRect().GetBounds().TransformAndClipBounds(matrix);
-          clip = clip.IntersectionOrEmpty(rect);
+        case kClipRRect: {
+          auto rect = transform.mapRect(m->GetRRect().getBounds());
+          if (!clipped_frame.intersect(rect)) {
+            clipped_frame = SkRect::MakeEmpty();
+          }
           break;
         }
-        case MutatorType::kClipRSE: {
-          auto rect = m->GetRSE().GetBounds().TransformAndClipBounds(matrix);
-          clip = clip.IntersectionOrEmpty(rect);
+        case kClipPath: {
+          auto rect = transform.mapRect(m->GetPath().getBounds());
+          if (!clipped_frame.intersect(rect)) {
+            clipped_frame = SkRect::MakeEmpty();
+          }
           break;
         }
-        case MutatorType::kClipPath: {
-          auto rect = m->GetPath().GetBounds().TransformAndClipBounds(matrix);
-          clip = clip.IntersectionOrEmpty(rect);
+        case kTransform: {
+          transform.preConcat(m->GetMatrix());
           break;
         }
-        case MutatorType::kTransform: {
-          matrix = matrix * m->GetMatrix();
-          break;
-        }
-        case MutatorType::kOpacity:
-        case MutatorType::kBackdropFilter:
+        case kOpacity:
+        case kBackdropFilter:
           break;
       }
     }
-    clipped_frame = ToSkRect(clip);
   }
 };
 

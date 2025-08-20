@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:package_config/package_config_types.dart';
 
 export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, DynamicLoadingBundled;
 
@@ -12,7 +13,8 @@ export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, Dyna
 /// relies on doing process calls to `pub` and the local file system.
 class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunner {
   FakeFlutterNativeAssetsBuildRunner({
-    this.packagesWithNativeAssetsResult = const <String>[],
+    this.hasPackageConfigResult = true,
+    this.packagesWithNativeAssetsResult = const <Package>[],
     this.onBuild,
     this.onLink,
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
@@ -21,41 +23,46 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     this.ndkCCompilerConfigResult,
   });
 
-  // TODO(dcharkes): Cleanup this fake https://github.com/flutter/flutter/issues/162061
-  final BuildResult? Function(BuildInput)? onBuild;
-  final LinkResult? Function(LinkInput)? onLink;
+  final BuildResult? Function(BuildConfig)? onBuild;
+  final LinkResult? Function(LinkConfig)? onLink;
   final BuildResult? buildResult;
   final LinkResult? linkResult;
-  final List<String> packagesWithNativeAssetsResult;
+  final bool hasPackageConfigResult;
+  final List<Package> packagesWithNativeAssetsResult;
   final CCompilerConfig? cCompilerConfigResult;
   final CCompilerConfig? ndkCCompilerConfigResult;
 
   int buildInvocations = 0;
   int linkInvocations = 0;
+  int hasPackageConfigInvocations = 0;
   int packagesWithNativeAssetsInvocations = 0;
 
   @override
   Future<BuildResult?> build({
-    required List<ProtocolExtension> extensions,
+    required List<String> buildAssetTypes,
+    required BuildConfigValidator configValidator,
+    required BuildConfigCreator configCreator,
+    required BuildValidator buildValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
+    required bool includeParentEnvironment,
+    required Uri workingDirectory,
     required bool linkingEnabled,
   }) async {
     BuildResult? result = buildResult;
-    for (final String package in packagesWithNativeAssetsResult) {
-      final BuildInputBuilder input =
-          BuildInputBuilder()
-            ..setupShared(
-              packageRoot: Uri.parse('$package/'),
-              packageName: package,
+    for (final Package package in packagesWithNativeAssetsResult) {
+      final BuildConfigBuilder configBuilder =
+          configCreator()
+            ..setupHookConfig(
+              packageRoot: package.root,
+              packageName: package.name,
+              buildAssetTypes: buildAssetTypes,
+            )
+            ..setupBuildConfig(dryRun: false, linkingEnabled: linkingEnabled)
+            ..setupBuildRunConfig(
               outputDirectory: Uri.parse('build-out-dir'),
               outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              outputFile: Uri.file('output.json'),
-            )
-            ..setupBuildInput()
-            ..config.setupBuild(linkingEnabled: linkingEnabled);
-      for (final ProtocolExtension extension in extensions) {
-        extension.setupBuildInput(input);
-      }
-      final BuildInput buildConfig = BuildInput(input.json);
+            );
+      final BuildConfig buildConfig = BuildConfig(configBuilder.json);
       if (onBuild != null) {
         result = onBuild!(buildConfig);
       }
@@ -66,25 +73,30 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
 
   @override
   Future<LinkResult?> link({
-    required List<ProtocolExtension> extensions,
+    required List<String> buildAssetTypes,
+    required LinkConfigCreator configCreator,
+    required LinkConfigValidator configValidator,
+    required LinkValidator linkValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
+    required bool includeParentEnvironment,
+    required Uri workingDirectory,
     required BuildResult buildResult,
   }) async {
     LinkResult? result = linkResult;
-    for (final String package in packagesWithNativeAssetsResult) {
-      final LinkInputBuilder input =
-          LinkInputBuilder()
-            ..setupShared(
-              packageRoot: Uri.parse('$package/'),
-              packageName: package,
+    for (final Package package in packagesWithNativeAssetsResult) {
+      final LinkConfigBuilder configBuilder =
+          configCreator()
+            ..setupHookConfig(
+              packageRoot: package.root,
+              packageName: package.name,
+              buildAssetTypes: buildAssetTypes,
+            )
+            ..setupLinkRunConfig(
               outputDirectory: Uri.parse('build-out-dir'),
               outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              outputFile: Uri.file('output.json'),
-            )
-            ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
-      for (final ProtocolExtension extension in extensions) {
-        extension.setupLinkInput(input);
-      }
-      final LinkInput buildConfig = LinkInput(input.json);
+              recordedUsesFile: null,
+            );
+      final LinkConfig buildConfig = LinkConfig(configBuilder.json);
       if (onLink != null) {
         result = onLink!(buildConfig);
       }
@@ -94,7 +106,13 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }
 
   @override
-  Future<List<String>> packagesWithNativeAssets() async {
+  Future<bool> hasPackageConfig() async {
+    hasPackageConfigInvocations++;
+    return hasPackageConfigResult;
+  }
+
+  @override
+  Future<List<Package>> packagesWithNativeAssets() async {
     packagesWithNativeAssetsInvocations++;
     return packagesWithNativeAssetsResult;
   }

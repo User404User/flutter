@@ -124,7 +124,7 @@ class LocalSignals implements Signals {
 
     // If _handlersList[signal] is empty, then lookup the cached stream
     // controller and unsubscribe from the stream.
-    if (_handlersList[signal]!.isEmpty) {
+    if (_handlersList.isEmpty) {
       await _streamSubscriptions[signal]?.cancel();
     }
     return true;

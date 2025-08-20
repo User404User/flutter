@@ -64,8 +64,7 @@ PlatformViewIOS::PlatformViewIOS(
                                          delegate.OnPlatformViewGetSettings().enable_impeller
                                              ? IOSRenderingBackend::kImpeller
                                              : IOSRenderingBackend::kSkia,
-                                         is_gpu_disabled_sync_switch,
-                                         delegate.OnPlatformViewGetSettings()),
+                                         is_gpu_disabled_sync_switch),
                       platform_views_controller,
                       task_runners) {}
 
@@ -146,12 +145,17 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
                       "has no ViewController.";
     return nullptr;
   }
-  return ios_surface_->CreateGPUSurface();
+  return ios_surface_->CreateGPUSurface(ios_context_->GetMainContext().get());
 }
 
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder> PlatformViewIOS::CreateExternalViewEmbedder() {
   return std::make_shared<IOSExternalViewEmbedder>(platform_views_controller_, ios_context_);
+}
+
+// |PlatformView|
+sk_sp<GrDirectContext> PlatformViewIOS::CreateResourceContext() const {
+  return ios_context_->CreateResourceContext();
 }
 
 // |PlatformView|
@@ -182,8 +186,7 @@ void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
 }
 
 // |PlatformView|
-void PlatformViewIOS::UpdateSemantics(int64_t view_id,
-                                      flutter::SemanticsNodeUpdates update,
+void PlatformViewIOS::UpdateSemantics(flutter::SemanticsNodeUpdates update,
                                       flutter::CustomAccessibilityActionUpdates actions) {
   FML_DCHECK(owner_controller_);
   if (accessibility_bridge_) {

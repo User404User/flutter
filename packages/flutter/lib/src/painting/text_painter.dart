@@ -561,6 +561,8 @@ class _LineCaretMetrics {
   }
 }
 
+const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
+
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -583,9 +585,8 @@ class _LineCaretMetrics {
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
 ///
-/// The default text style color is white on non-web platforms and black on
-/// the web. If developing across both platforms, always set the text color
-/// explicitly.
+/// The default text style is white. To change the color of the text,
+/// pass a [TextStyle] object to the [TextSpan] in `text`.
 class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
@@ -627,7 +628,15 @@ class TextPainter {
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
        _textHeightBehavior = textHeightBehavior {
-    assert(debugMaybeDispatchCreated('painting', 'TextPainter', this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
+        className: '$TextPainter',
+        object: this,
+      );
+    }
   }
 
   /// Computes the width of a configured [TextPainter].
@@ -1519,7 +1528,9 @@ class TextPainter {
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
     // If nothing is laid out, top start is the only reasonable place to place
     // the cursor.
-    if (cachedLayout.paragraph.numberOfLines < 1) {
+    // The HTML renderer reports numberOfLines == 1 when the text is empty:
+    // https://github.com/flutter/flutter/issues/143331
+    if (cachedLayout.paragraph.numberOfLines < 1 || plainText.isEmpty) {
       // TODO(LongCatIsLooong): assert when an invalid position is given.
       return null;
     }
@@ -1577,16 +1588,31 @@ class TextPainter {
       boxHeightStyle: ui.BoxHeightStyle.strut,
     );
 
-    final bool anchorToLeft = switch (glyphInfo.writingDirection) {
-      TextDirection.ltr => anchorToLeadingEdge,
-      TextDirection.rtl => !anchorToLeadingEdge,
-    };
-    final TextBox box = anchorToLeft ? boxes.first : boxes.last;
-    metrics = _LineCaretMetrics(
-      offset: Offset(anchorToLeft ? box.left : box.right, box.top),
-      writingDirection: box.direction,
-      height: box.bottom - box.top,
-    );
+    if (boxes.isNotEmpty) {
+      final bool anchorToLeft = switch (glyphInfo.writingDirection) {
+        TextDirection.ltr => anchorToLeadingEdge,
+        TextDirection.rtl => !anchorToLeadingEdge,
+      };
+      final TextBox box = anchorToLeft ? boxes.first : boxes.last;
+      metrics = _LineCaretMetrics(
+        offset: Offset(anchorToLeft ? box.left : box.right, box.top),
+        writingDirection: box.direction,
+        height: box.bottom - box.top,
+      );
+    } else {
+      // Fall back to glyphInfo. This should only happen when using the HTML renderer.
+      assert(kIsWeb && !isSkiaWeb);
+      final Rect graphemeBounds = glyphInfo.graphemeClusterLayoutBounds;
+      final double dx = switch (glyphInfo.writingDirection) {
+        TextDirection.ltr => anchorToLeadingEdge ? graphemeBounds.left : graphemeBounds.right,
+        TextDirection.rtl => anchorToLeadingEdge ? graphemeBounds.right : graphemeBounds.left,
+      };
+      metrics = _LineCaretMetrics(
+        offset: Offset(dx, graphemeBounds.top),
+        writingDirection: glyphInfo.writingDirection,
+        height: graphemeBounds.height,
+      );
+    }
 
     cachedLayout._previousCaretPositionKey = caretPositionCacheKey;
     return _caretMetrics = metrics;
@@ -1777,7 +1803,11 @@ class TextPainter {
       _disposed = true;
       return true;
     }());
-    assert(debugMaybeDispatchDisposed(this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();

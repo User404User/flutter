@@ -108,26 +108,6 @@ enum class MaliGPU {
   kUnknown,
 };
 
-// Ordered by approximate release date. We currently don't attempt to
-// parse the exact power VR GPU variant so newer names will fall back
-// to OpenGL. This is acceptable for now.
-enum class PowerVRGPU {
-  kUnknown,
-  // Not good.
-  kRogue,
-  // Vulkan may work, but not tested.
-  kAXE,
-  kAXM,
-  kAXT,
-  kBXE,
-  kBXM,
-  kBXS,
-  kBXT,
-  // First good vulkan drivers.
-  kCXT,
-  kDXT,
-};
-
 enum class VendorVK {
   kUnknown,
   //----------------------------------------------------------------------------
@@ -142,7 +122,6 @@ enum class VendorVK {
   kNvidia,
   kIntel,
   kHuawei,
-  kSamsung,
   //----------------------------------------------------------------------------
   /// Includes the LLVM Pipe CPU implementation.
   ///
@@ -271,12 +250,6 @@ class DriverInfoVK {
   ///
   std::optional<AdrenoGPU> GetAdrenoGPUInfo() const;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Returns PowerVR GPU info if this is a PowerVR GPU, otherwise
-  ///             std::nullopt.
-  ///
-  std::optional<PowerVRGPU> GetPowerVRGPUInfo() const;
-
  private:
   bool is_valid_ = false;
   Version api_version_;
@@ -286,7 +259,6 @@ class DriverInfoVK {
   // identified Adreno GPU.
   std::optional<AdrenoGPU> adreno_gpu_ = std::nullopt;
   std::optional<MaliGPU> mali_gpu_ = std::nullopt;
-  std::optional<PowerVRGPU> powervr_gpu_ = std::nullopt;
   std::string driver_name_;
 };
 

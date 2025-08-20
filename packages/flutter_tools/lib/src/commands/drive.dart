@@ -17,7 +17,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/signals.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
@@ -26,6 +25,7 @@ import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../macos/macos_ipad_device.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
     show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
@@ -61,15 +61,11 @@ class DriveCommand extends RunCommandBase {
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
-    required Terminal terminal,
-    required OutputPreferences outputPreferences,
     required this.signals,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
-       _terminal = terminal,
-       _outputPreferences = outputPreferences,
        _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
@@ -159,6 +155,12 @@ class DriveCommand extends RunCommandBase {
             'Location of the Chrome binary. '
             'Works only if "browser-name" is set to "chrome".',
       )
+      ..addOption(
+        'write-sksl-on-exit',
+        help:
+            'Attempts to write an SkSL file when the drive process is finished '
+            'to the provided file, overwriting it if necessary.',
+      )
       ..addMultiOption(
         'test-arguments',
         help:
@@ -205,8 +207,6 @@ class DriveCommand extends RunCommandBase {
   final FileSystem _fileSystem;
   final Logger _logger;
   final Platform _platform;
-  final Terminal _terminal;
-  final OutputPreferences _outputPreferences;
   final FileSystemUtils _fsUtils;
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
@@ -270,6 +270,9 @@ class DriveCommand extends RunCommandBase {
       if (device is! AndroidDevice) {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
+      if (device is MacOSDesignedForIPadDevice) {
+        throwToolExit('Mac Designed for iPad is currently not supported for flutter drive.');
+      }
     }
     return super.validateCommand();
   }
@@ -281,15 +284,6 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
-      // A very common source of error is holding "flutter drive" wrong,
-      // and providing the "test_driver/foo_test.dart" as the target, when
-      // the intention was to provide "lib/foo.dart".
-      if (_fileSystem.path.isWithin('test_driver', targetFile)) {
-        _logger.printError(
-          'The file path passed to --target should be an app entrypoint that '
-          'contains a "main()". Did you mean "flutter drive --driver $targetFile"?',
-        );
-      }
       throwToolExit('Test file not found: $testFile');
     }
     final Device? device = await targetedDevice;
@@ -305,8 +299,6 @@ class DriveCommand extends RunCommandBase {
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
       platform: _platform,
-      terminal: _terminal,
-      outputPreferences: _outputPreferences,
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
@@ -384,7 +376,11 @@ class DriveCommand extends RunCommandBase {
       if (boolArg('keep-app-running')) {
         _logger.printStatus('Leaving the application running.');
       } else {
-        await driverService.stop(userIdentifier: userIdentifier);
+        final File? skslFile =
+            stringArg('write-sksl-on-exit') != null
+                ? _fileSystem.file(stringArg('write-sksl-on-exit'))
+                : null;
+        await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
       }
       if (testResult != 0) {
         throwToolExit(null);

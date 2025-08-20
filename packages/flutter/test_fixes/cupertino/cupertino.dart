@@ -286,7 +286,4 @@ void main() {
     inactiveColor: Colors.red,
     fillColor: WidgetStatePropertyAll(CupertinoColors.white),
   );
-
-  // https://github.com/flutter/flutter/pull/161295
-  CupertinoButton(minSize: 60.0);
 }

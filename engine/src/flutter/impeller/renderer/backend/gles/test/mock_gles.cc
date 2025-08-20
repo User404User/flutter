@@ -39,23 +39,13 @@ auto const kExtensions = std::vector<const char*>{
 };
 
 namespace {
-
-template <typename T>
-struct function_traits;
-
-template <typename C, typename Ret, typename... Args>
-struct function_traits<Ret (C::*)(Args...)> {
-  using return_type = Ret;
-};
-
 template <typename Func, typename... Args>
-auto CallMockMethod(Func func, Args&&... args) {
+void CallMockMethod(Func func, Args&&... args) {
   if (auto mock_gles = g_mock_gles.lock()) {
     if (mock_gles->GetImpl()) {
-      return (mock_gles->GetImpl()->*func)(std::forward<Args>(args)...);
+      (mock_gles->GetImpl()->*func)(std::forward<Args>(args)...);
     }
   }
-  return typename function_traits<Func>::return_type();
 }
 }  // namespace
 
@@ -204,13 +194,6 @@ void mockObjectLabelKHR(GLenum identifier,
 static_assert(CheckSameSignature<decltype(mockObjectLabelKHR),  //
                                  decltype(glObjectLabelKHR)>::value);
 
-GLboolean mockIsTexture(GLuint texture) {
-  return CallMockMethod(&IMockGLESImpl::IsTexture, texture);
-}
-
-static_assert(CheckSameSignature<decltype(mockGenTextures),  //
-                                 decltype(glGenTextures)>::value);
-
 // static
 std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
@@ -274,8 +257,6 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockObjectLabelKHR);
   } else if (strcmp(name, "glGenBuffers") == 0) {
     return reinterpret_cast<void*>(mockGenBuffers);
-  } else if (strcmp(name, "glIsTexture") == 0) {
-    return reinterpret_cast<void*>(mockIsTexture);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }

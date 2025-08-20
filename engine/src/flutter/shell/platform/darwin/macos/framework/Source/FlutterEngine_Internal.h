@@ -14,10 +14,8 @@
 #include "flutter/shell/platform/common/app_lifecycle_state.h"
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMac.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -168,6 +166,13 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 - (void)sendPointerEvent:(const FlutterPointerEvent&)event;
 
 /**
+ * Dispatches the given pointer event data to engine.
+ */
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(nullable FlutterKeyEventCallback)callback
+            userData:(nullable void*)userData;
+
+/**
  * Registers an external texture with the given id. Returns YES on success.
  */
 - (BOOL)registerTextureWithID:(int64_t)textureId;
@@ -214,30 +219,13 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
                         withPriority:(NSAccessibilityPriorityLevel)priority;
 
 /**
- * Returns keyboard manager for the engine.
- */
-@property(nonatomic, readonly) FlutterKeyboardManager* keyboardManager;
-
-/**
- * Returns text input plugin for the engine.
- */
-@property(nonatomic, readonly) FlutterTextInputPlugin* textInputPlugin;
-
-/**
  * Returns an array of screen objects representing all of the screens available on the system.
  */
 - (NSArray<NSScreen*>*)screens;
+@end
 
-/**
- * Returns engine for the identifier. The identifier must be valid for an engine
- * that is currently running, otherwise the behavior is undefined.
- *
- * The identifier can be obtained in Dart code through
- * `PlatformDispatcher.instance.engineId`.
- *
- * This function must be called on the main thread.
- */
-+ (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
+@interface FlutterEngine (Tests)
+- (nonnull FlutterThreadSynchronizer*)testThreadSynchronizer;
 @end
 
 NS_ASSUME_NONNULL_END

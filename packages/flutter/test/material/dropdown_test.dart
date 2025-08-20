@@ -14,10 +14,10 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -1347,7 +1347,6 @@ void main() {
       tester.getSemantics(find.text('test')),
       matchesSemantics(
         isButton: true,
-        hasExpandedState: true,
         label: 'test',
         hasTapAction: true,
         hasFocusAction: true,
@@ -1364,7 +1363,6 @@ void main() {
       tester.getSemantics(find.text('three')),
       matchesSemantics(
         isButton: true,
-        hasExpandedState: true,
         label: 'three',
         hasTapAction: true,
         hasFocusAction: true,
@@ -1392,7 +1390,6 @@ void main() {
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
-                  role: SemanticsRole.menu,
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                   label: 'Popup menu',
                   children: <TestSemantics>[
@@ -1402,7 +1399,6 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
-                              role: SemanticsRole.menuItem,
                               label: 'one',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1417,7 +1413,6 @@ void main() {
                               ],
                             ),
                             TestSemantics(
-                              role: SemanticsRole.menuItem,
                               label: 'two',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1431,7 +1426,6 @@ void main() {
                               ],
                             ),
                             TestSemantics(
-                              role: SemanticsRole.menuItem,
                               label: 'three',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[
@@ -1445,7 +1439,6 @@ void main() {
                               ],
                             ),
                             TestSemantics(
-                              role: SemanticsRole.menuItem,
                               label: 'four',
                               textDirection: TextDirection.ltr,
                               flags: <SemanticsFlag>[

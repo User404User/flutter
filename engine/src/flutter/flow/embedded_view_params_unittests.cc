@@ -23,10 +23,10 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithNoMutations) {
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithScale) {
   MutatorsStack stack;
-  DlMatrix matrix = DlMatrix::MakeScale({2, 2, 1});
+  SkMatrix matrix = SkMatrix::Scale(2, 2);
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
+  EmbeddedViewParams params(matrix, SkSize::Make(1, 1), stack);
   const SkRect& rect = params.finalBoundingRect();
   ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), 0));
   ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 0));
@@ -36,10 +36,10 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithScale) {
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithTranslate) {
   MutatorsStack stack;
-  DlMatrix matrix = DlMatrix::MakeTranslation({1, 1});
+  SkMatrix matrix = SkMatrix::Translate(1, 1);
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
+  EmbeddedViewParams params(matrix, SkSize::Make(1, 1), stack);
   const SkRect& rect = params.finalBoundingRect();
   ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), 1));
   ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 1));
@@ -49,10 +49,11 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithTranslate) {
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation90) {
   MutatorsStack stack;
-  DlMatrix matrix = DlMatrix::MakeRotationZ(DlDegrees(90));
+  SkMatrix matrix;
+  matrix.setRotate(90);
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
+  EmbeddedViewParams params(matrix, SkSize::Make(1, 1), stack);
   const SkRect& rect = params.finalBoundingRect();
 
   ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), -1));
@@ -63,10 +64,11 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation90) {
 
 TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation45) {
   MutatorsStack stack;
-  DlMatrix matrix = DlMatrix::MakeRotationZ(DlDegrees(45));
+  SkMatrix matrix;
+  matrix.setRotate(45);
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
+  EmbeddedViewParams params(matrix, SkSize::Make(1, 1), stack);
   const SkRect& rect = params.finalBoundingRect();
   ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), -sqrt(2) / 2));
   ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 0));
@@ -76,14 +78,14 @@ TEST(EmbeddedViewParams, GetBoundingRectAfterMutationsWithRotation45) {
 
 TEST(EmbeddedViewParams,
      GetBoundingRectAfterMutationsWithTranslateScaleAndRotation) {
-  DlMatrix matrix = DlMatrix::MakeTranslation({2, 2}) *
-                    DlMatrix::MakeScale({3, 3, 1}) *
-                    DlMatrix::MakeRotationZ(DlDegrees(90));
+  SkMatrix matrix = SkMatrix::Translate(2, 2);
+  matrix.preScale(3, 3);
+  matrix.preRotate(90);
 
   MutatorsStack stack;
   stack.PushTransform(matrix);
 
-  EmbeddedViewParams params(ToSkMatrix(matrix), SkSize::Make(1, 1), stack);
+  EmbeddedViewParams params(matrix, SkSize::Make(1, 1), stack);
   const SkRect& rect = params.finalBoundingRect();
   ASSERT_TRUE(SkScalarNearlyEqual(rect.x(), -1));
   ASSERT_TRUE(SkScalarNearlyEqual(rect.y(), 2));

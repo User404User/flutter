@@ -139,33 +139,26 @@ DlMatrix DlSkCanvasAdapter::GetMatrix() const {
 }
 
 void DlSkCanvasAdapter::ClipRect(const DlRect& rect,
-                                 DlClipOp clip_op,
+                                 ClipOp clip_op,
                                  bool is_aa) {
   delegate_->clipRect(ToSkRect(rect), ToSk(clip_op), is_aa);
 }
 
 void DlSkCanvasAdapter::ClipOval(const DlRect& bounds,
-                                 DlClipOp clip_op,
+                                 ClipOp clip_op,
                                  bool is_aa) {
   delegate_->clipRRect(SkRRect::MakeOval(ToSkRect(bounds)), ToSk(clip_op),
                        is_aa);
 }
 
 void DlSkCanvasAdapter::ClipRoundRect(const DlRoundRect& rrect,
-                                      DlClipOp clip_op,
+                                      ClipOp clip_op,
                                       bool is_aa) {
   delegate_->clipRRect(ToSkRRect(rrect), ToSk(clip_op), is_aa);
 }
 
-void DlSkCanvasAdapter::ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
-                                              DlClipOp clip_op,
-                                              bool is_aa) {
-  // Skia doesn't support round superellipse, thus fall back to round rectangle.
-  delegate_->clipRRect(ToApproximateSkRRect(rse), ToSk(clip_op), is_aa);
-}
-
 void DlSkCanvasAdapter::ClipPath(const DlPath& path,
-                                 DlClipOp clip_op,
+                                 ClipOp clip_op,
                                  bool is_aa) {
   path.WillRenderSkPath();
   delegate_->clipPath(path.GetSkPath(), ToSk(clip_op), is_aa);
@@ -242,12 +235,6 @@ void DlSkCanvasAdapter::DrawDiffRoundRect(const DlRoundRect& outer,
   delegate_->drawDRRect(ToSkRRect(outer), ToSkRRect(inner), ToSk(paint));
 }
 
-void DlSkCanvasAdapter::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
-                                              const DlPaint& paint) {
-  // Skia doesn't support round superellipse, thus fall back to round rectangle.
-  delegate_->drawRRect(ToApproximateSkRRect(rse), ToSk(paint));
-}
-
 void DlSkCanvasAdapter::DrawPath(const DlPath& path, const DlPaint& paint) {
   path.WillRenderSkPath();
   delegate_->drawPath(path.GetSkPath(), ToSk(paint));
@@ -261,7 +248,7 @@ void DlSkCanvasAdapter::DrawArc(const DlRect& bounds,
   delegate_->drawArc(ToSkRect(bounds), start, sweep, useCenter, ToSk(paint));
 }
 
-void DlSkCanvasAdapter::DrawPoints(DlPointMode mode,
+void DlSkCanvasAdapter::DrawPoints(PointMode mode,
                                    uint32_t count,
                                    const DlPoint pts[],
                                    const DlPaint& paint) {
@@ -290,7 +277,7 @@ void DlSkCanvasAdapter::DrawImageRect(const sk_sp<DlImage>& image,
                                       const DlRect& dst,
                                       DlImageSampling sampling,
                                       const DlPaint* paint,
-                                      DlSrcRectConstraint constraint) {
+                                      SrcRectConstraint constraint) {
   SkOptionalPaint sk_paint(paint);
   sk_sp<SkImage> sk_image = image->skia_image();
   delegate_->drawImageRect(sk_image.get(), ToSkRect(src), ToSkRect(dst),
@@ -379,13 +366,11 @@ void DlSkCanvasAdapter::DrawShadow(const DlPath& path,
 }
 
 void DlSkCanvasAdapter::Flush() {
-#if defined(SK_GANESH)
   auto dContext = GrAsDirectContext(delegate_->recordingContext());
 
   if (dContext) {
     dContext->flushAndSubmit();
   }
-#endif  // defined(SK_GANESH)
 }
 
 }  // namespace flutter

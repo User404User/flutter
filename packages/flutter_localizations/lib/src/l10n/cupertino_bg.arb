@@ -27,7 +27,5 @@
   "menuDismissLabel": "Отхвърляне на менюто",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Търсене в мрежата",
-  "shareButtonLabel": "Споделяне...",
-  "cancelButtonLabel": "Отказ",
-  "backButtonLabel": "Назад"
+  "shareButtonLabel": "Споделяне..."
 }

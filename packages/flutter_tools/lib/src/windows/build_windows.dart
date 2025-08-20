@@ -21,7 +21,6 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 import '../migrations/cmake_native_assets_migration.dart';
-import '../shorebird/shorebird_yaml.dart';
 import 'migrations/build_architecture_migration.dart';
 import 'migrations/show_window_migration.dart';
 import 'migrations/version_migration.dart';
@@ -206,6 +205,7 @@ Future<void> _runCmakeGeneration({
     throwToolExit('Unable to generate build files');
   }
   final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'windows-cmake-generation', elapsedDuration);
   globals.analytics.send(
     Event.timing(
       workflow: 'build',
@@ -259,6 +259,7 @@ Future<void> _runBuild(
     throwToolExit('Build process failed.');
   }
   final Duration elapsedDuration = sw.elapsed;
+  globals.flutterUsage.sendTiming('build', 'windows-cmake-build', elapsedDuration);
   globals.analytics.send(
     Event.timing(
       workflow: 'build',

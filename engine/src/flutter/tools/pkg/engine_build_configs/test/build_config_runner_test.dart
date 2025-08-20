@@ -116,8 +116,7 @@ void main() {
     // Check that the events for the Ninja command are correct.
     expect(events[2] is RunnerStart, isTrue);
     expect(events[2].name, equals('$buildName: ninja'));
-    final String rootPath = path.dirname(path.dirname(engine.srcDir.path));
-    expect(events[2].command[0], equals('$rootPath/third_party/ninja/ninja'));
+    expect(events[2].command[0], contains('ninja'));
     final String configPath = '${engine.srcDir.path}/out/${targetBuild.ninja.config}';
     expect(events[2].command.contains(configPath), isTrue);
     for (final String target in targetBuild.ninja.targets) {
@@ -828,11 +827,11 @@ FakeProcessManager _fakeProcessManager({
   return FakeProcessManager(
     canRun: canRun ?? (Object? exe, {String? workingDirectory}) => true,
     onRun:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
+        (List<String> cmd) => switch (cmd) {
           _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
         },
     onStart:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
+        (List<String> cmd) => switch (cmd) {
           [final String exe, ...] when exe.endsWith('gn') => fakeProcess(gnResult),
           [final String exe, ...] when exe.endsWith('bootstrap') => fakeProcess(bootstrapResult),
           [final String exe, ...] when exe.endsWith('ninja') => fakeProcess(ninjaResult),

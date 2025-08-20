@@ -52,26 +52,26 @@ std::optional<BlendMode> InvertPorterDuffBlend(BlendMode blend_mode) {
   switch (blend_mode) {
     case BlendMode::kClear:
       return BlendMode::kClear;
-    case BlendMode::kSrc:
-      return BlendMode::kDst;
-    case BlendMode::kDst:
-      return BlendMode::kSrc;
-    case BlendMode::kSrcOver:
-      return BlendMode::kDstOver;
-    case BlendMode::kDstOver:
-      return BlendMode::kSrcOver;
-    case BlendMode::kSrcIn:
-      return BlendMode::kDstIn;
-    case BlendMode::kDstIn:
-      return BlendMode::kSrcIn;
-    case BlendMode::kSrcOut:
-      return BlendMode::kDstOut;
-    case BlendMode::kDstOut:
-      return BlendMode::kSrcOut;
-    case BlendMode::kSrcATop:
-      return BlendMode::kDstATop;
-    case BlendMode::kDstATop:
-      return BlendMode::kSrcATop;
+    case BlendMode::kSource:
+      return BlendMode::kDestination;
+    case BlendMode::kDestination:
+      return BlendMode::kSource;
+    case BlendMode::kSourceOver:
+      return BlendMode::kDestinationOver;
+    case BlendMode::kDestinationOver:
+      return BlendMode::kSourceOver;
+    case BlendMode::kSourceIn:
+      return BlendMode::kDestinationIn;
+    case BlendMode::kDestinationIn:
+      return BlendMode::kSourceIn;
+    case BlendMode::kSourceOut:
+      return BlendMode::kDestinationOut;
+    case BlendMode::kDestinationOut:
+      return BlendMode::kSourceOut;
+    case BlendMode::kSourceATop:
+      return BlendMode::kDestinationATop;
+    case BlendMode::kDestinationATop:
+      return BlendMode::kSourceATop;
     case BlendMode::kXor:
       return BlendMode::kXor;
     case BlendMode::kPlus:
@@ -84,7 +84,7 @@ std::optional<BlendMode> InvertPorterDuffBlend(BlendMode blend_mode) {
 }
 
 BlendFilterContents::BlendFilterContents() {
-  SetBlendMode(BlendMode::kSrcOver);
+  SetBlendMode(BlendMode::kSourceOver);
 }
 
 BlendFilterContents::~BlendFilterContents() = default;
@@ -187,7 +187,7 @@ static std::optional<Entity> AdvancedBlend(
 
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;
-    options.blend_mode = BlendMode::kSrc;
+    options.blend_mode = BlendMode::kSource;
     PipelineRef pipeline = std::invoke(pipeline_proc, renderer, options);
 
 #ifdef IMPELLER_DEBUG
@@ -199,9 +199,14 @@ static std::optional<Entity> AdvancedBlend(
     typename FS::BlendInfo blend_info;
     typename VS::FrameInfo frame_info;
 
+    auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
+    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
+      dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
+      dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
+    }
     raw_ptr<const Sampler> dst_sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            dst_snapshot->sampler_descriptor);
+            dst_sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
@@ -217,9 +222,14 @@ static std::optional<Entity> AdvancedBlend(
       // binding.
       FS::BindTextureSamplerSrc(pass, dst_snapshot->texture, dst_sampler);
     } else {
+      auto src_sampler_descriptor = src_snapshot->sampler_descriptor;
+      if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
+        src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
+        src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
+      }
       raw_ptr<const Sampler> src_sampler =
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-              src_snapshot->sampler_descriptor);
+              src_sampler_descriptor);
       blend_info.color_factor = 0;
       blend_info.src_input_alpha = src_snapshot->opacity;
       FS::BindTextureSamplerSrc(pass, src_snapshot->texture, src_sampler);
@@ -362,9 +372,14 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     FS::BlendInfo blend_info;
     VS::FrameInfo frame_info;
 
+    auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
+    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
+      dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
+      dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
+    }
     raw_ptr<const Sampler> dst_sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            dst_snapshot->sampler_descriptor);
+            dst_sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
 
@@ -425,7 +440,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     return std::nullopt;
   }
 
-  if (blend_mode == BlendMode::kDst) {
+  if (blend_mode == BlendMode::kDestination) {
     return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode());
   }
 
@@ -464,9 +479,14 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
         entity.GetShaderClipDepth(), pass,
         entity.GetTransform() * dst_snapshot->transform);
 
+    auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
+    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
+      dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
+      dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
+    }
     raw_ptr<const Sampler> dst_sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            dst_snapshot->sampler_descriptor);
+            dst_sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.texture_sampler_y_coord_scale =
         dst_snapshot->texture->GetYCoordScale();
@@ -583,7 +603,7 @@ static std::optional<Entity> PipelineBlend(
     };
 
     // Draw the first texture using kSource.
-    options.blend_mode = BlendMode::kSrc;
+    options.blend_mode = BlendMode::kSource;
     pass.SetPipeline(renderer.GetTexturePipeline(options));
     if (!add_blend_command(dst_snapshot)) {
       return true;
@@ -727,7 +747,6 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       // Next, we render the second contents to a snapshot, or create a 1x1
       // texture for the foreground color.
       std::shared_ptr<Texture> src_texture;
-      SamplerDescriptor src_sampler_descriptor = SamplerDescriptor{};
       if (foreground_color.has_value()) {
         src_texture = foreground_texture;
       } else {
@@ -740,7 +759,6 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
         // different, but we only need to support blending two contents together
         // in limited circumstances (mask blur).
         src_texture = src_snapshot->texture;
-        src_sampler_descriptor = src_snapshot->sampler_descriptor;
       }
 
       std::array<VS::PerVertexData, 4> vertices = {
@@ -751,7 +769,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       };
 
       auto options = OptionsFromPass(pass);
-      options.blend_mode = BlendMode::kSrc;
+      options.blend_mode = BlendMode::kSource;
       options.primitive_type = PrimitiveType::kTriangleStrip;
 
       pass.SetCommandLabel("Framebuffer Advanced Blend Filter");
@@ -822,6 +840,11 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       VS::FrameInfo frame_info;
       FS::FragInfo frag_info;
 
+      auto src_sampler_descriptor = SamplerDescriptor{};
+      if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
+        src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
+        src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
+      }
       raw_ptr<const Sampler> src_sampler =
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
               src_sampler_descriptor);
@@ -955,7 +978,7 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
 
   if (inputs.size() == 1 && !foreground_color_.has_value()) {
     // Nothing to blend.
-    return PipelineBlend(inputs, renderer, entity, coverage, BlendMode::kSrc,
+    return PipelineBlend(inputs, renderer, entity, coverage, BlendMode::kSource,
                          std::nullopt, GetAbsorbOpacity(), GetAlpha());
   }
 

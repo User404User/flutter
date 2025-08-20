@@ -34,9 +34,9 @@ export 'package:flutter/foundation.dart'
         visibleForTesting;
 export 'package:flutter/foundation.dart'
     show ErrorDescription, ErrorHint, ErrorSummary, FlutterError, debugPrint, debugPrintStack;
+export 'package:flutter/foundation.dart' show ValueChanged, ValueGetter, ValueSetter, VoidCallback;
 export 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticsNode;
 export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
-export 'package:flutter/foundation.dart' show ValueChanged, ValueGetter, ValueSetter, VoidCallback;
 export 'package:flutter/rendering.dart'
     show RenderBox, RenderObject, debugDumpLayerTree, debugDumpRenderTree;
 
@@ -822,6 +822,8 @@ enum _StateLifecycle {
 /// The signature of [State.setState] functions.
 typedef StateSetter = void Function(VoidCallback fn);
 
+const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
+
 /// The logic and internal state for a [StatefulWidget].
 ///
 /// State is information that (1) can be read synchronously when the widget is
@@ -1007,7 +1009,13 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
-    assert(debugMaybeDispatchCreated('widgets', 'State', this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterWidgetsLibrary,
+        className: '$State',
+        object: this,
+      );
+    }
   }
 
   /// Called whenever the widget configuration changes.
@@ -1337,7 +1345,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       _debugLifecycleState = _StateLifecycle.defunct;
       return true;
     }());
-    assert(debugMaybeDispatchDisposed(this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
   }
 
   /// Describes the part of the user interface represented by this widget.
@@ -2899,7 +2909,7 @@ class BuildOwner {
           ErrorHint(
             'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
             'indicates a bug in the widgets framework. Please report it:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
           ),
         ]);
       }
@@ -3503,7 +3513,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// Typically called by an override of [Widget.createElement].
   Element(Widget widget) : _widget = widget {
-    assert(debugMaybeDispatchCreated('widgets', 'Element', this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterWidgetsLibrary,
+        className: '$Element',
+        object: this,
+      );
+    }
   }
 
   Element? _parent;
@@ -4748,7 +4764,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(owner != null);
-    assert(debugMaybeDispatchDisposed(this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     // Use the private property to avoid a CastError during hot reload.
     final Key? key = _widget?.key;
     if (key is GlobalKey) {
@@ -6929,6 +6947,7 @@ mixin RootElementMixin on Element {
   /// to [runApp]. The binding is responsible for driving the build pipeline by
   /// calling the build owner's [BuildOwner.buildScope] method. See
   /// [WidgetsBinding.drawFrame].
+  // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void assignOwner(BuildOwner owner) {
     _owner = owner;
     _parentBuildScope = BuildScope();

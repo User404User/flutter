@@ -284,9 +284,7 @@ class Checkbox extends StatefulWidget {
   /// {@macro flutter.material.themedata.visualDensity}
   ///
   /// If null, then the value of [CheckboxThemeData.visualDensity] is used. If
-  /// that is also null and if [ThemeData.useMaterial3] is false, then the
-  /// value of [ThemeData.visualDensity] is used. Otherwise, the default value
-  /// is [VisualDensity.standard].
+  /// that is also null, then the value of [ThemeData.visualDensity] is used.
   ///
   /// See also:
   ///
@@ -1043,7 +1041,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
 
   @override
-  VisualDensity get visualDensity => VisualDensity.standard;
+  VisualDensity get visualDensity => _theme.visualDensity;
 
   @override
   OutlinedBorder get shape => const RoundedRectangleBorder(

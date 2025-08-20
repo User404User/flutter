@@ -457,9 +457,7 @@ sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
 // |SnapshotDelegate|
 void Rasterizer::CacheRuntimeStage(
     const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {
-  if (snapshot_controller_) {
-    snapshot_controller_->CacheRuntimeStage(runtime_stage);
-  }
+  snapshot_controller_->CacheRuntimeStage(runtime_stage);
 }
 
 fml::Milliseconds Rasterizer::GetFrameBudget() const {

@@ -172,15 +172,22 @@ class Xcode {
 
   /// Verifies that simctl is installed by trying to run it.
   bool get isSimctlInstalled {
-    // This command will error if additional components need to be installed in
-    // xcode 9.2 and above.
-    _isSimctlInstalled ??= _processUtils.exitsHappySync(<String>[
-      ...xcrunCommand(),
-      'simctl',
-      'list',
-      'devices',
-      'booted',
-    ]);
+    if (_isSimctlInstalled == null) {
+      try {
+        // This command will error if additional components need to be installed in
+        // xcode 9.2 and above.
+        final RunResult result = _processUtils.runSync(<String>[
+          ...xcrunCommand(),
+          'simctl',
+          'list',
+          'devices',
+          'booted',
+        ]);
+        _isSimctlInstalled = result.exitCode == 0;
+      } on ProcessException {
+        _isSimctlInstalled = false;
+      }
+    }
     return _isSimctlInstalled ?? false;
   }
 
@@ -190,15 +197,20 @@ class Xcode {
   /// to run it. `devicectl` is made available in Xcode 15.
   bool get isDevicectlInstalled {
     if (_isDevicectlInstalled == null) {
-      if (currentVersion == null || currentVersion!.major < 15) {
+      try {
+        if (currentVersion == null || currentVersion!.major < 15) {
+          _isDevicectlInstalled = false;
+          return _isDevicectlInstalled!;
+        }
+        final RunResult result = _processUtils.runSync(<String>[
+          ...xcrunCommand(),
+          'devicectl',
+          '--version',
+        ]);
+        _isDevicectlInstalled = result.exitCode == 0;
+      } on ProcessException {
         _isDevicectlInstalled = false;
-        return _isDevicectlInstalled!;
       }
-      _isDevicectlInstalled = _processUtils.exitsHappySync(<String>[
-        ...xcrunCommand(),
-        'devicectl',
-        '--version',
-      ]);
     }
     return _isDevicectlInstalled ?? false;
   }

@@ -258,7 +258,10 @@ void verifyOptions(String? command, Iterable<Option> options) {
     );
 
     // Deprecated options and flags should be hidden but still have help text.
-    const List<String> deprecatedOptions = <String>[];
+    const List<String> deprecatedOptions = <String>[
+      FlutterOptions.kNullSafety,
+      FlutterOptions.kNullAssertions,
+    ];
     final bool isOptionDeprecated = deprecatedOptions.contains(option.name);
     if (!isOptionDeprecated) {
       expect(

@@ -4,7 +4,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#include "shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 
 #include <objc/objc.h>
 
@@ -33,6 +32,8 @@
 
 // CREATE_NATIVE_ENTRY and MOCK_ENGINE_PROC are leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
+constexpr int64_t kImplicitViewId = 0ll;
 
 @interface FlutterEngine (Test)
 /**
@@ -525,15 +526,9 @@ TEST_F(FlutterEngineTest, Compositor) {
                 result:^(id result){
                 }];
 
-  // Wait up to 1 second for Flutter to emit a frame.
-  CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
+  [engine.testThreadSynchronizer blockUntilFrameAvailable];
+
   CALayer* rootLayer = viewController.flutterView.layer;
-  while (rootLayer.sublayers.count == 0) {
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
-    if (CFAbsoluteTimeGetCurrent() - start > 1) {
-      break;
-    }
-  }
 
   // There are two layers with Flutter contents and one view
   EXPECT_EQ(rootLayer.sublayers.count, 2u);
@@ -623,7 +618,6 @@ TEST_F(FlutterEngineTest, DartEntrypointArguments) {
 
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
   EXPECT_TRUE(called);
-  [engine shutDownEngine];
 }
 
 // Verify that the engine is not retained indirectly via the binary messenger held by channels and
@@ -869,40 +863,15 @@ TEST_F(FlutterEngineTest, ResponseFromBackgroundThread) {
   }
 }
 
-TEST_F(FlutterEngineTest, CanGetEngineForId) {
-  FlutterEngine* engine = GetFlutterEngine();
-
-  fml::AutoResetWaitableEvent latch;
-  std::optional<int64_t> engineId;
-  AddNativeCallback("NotifyEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      const auto argument = Dart_GetNativeArgument(args, 0);
-                      if (!Dart_IsNull(argument)) {
-                        const auto id = tonic::DartConverter<int64_t>::FromDart(argument);
-                        engineId = id;
-                      }
-                      latch.Signal();
-                    }));
-
-  EXPECT_TRUE([engine runWithEntrypoint:@"testEngineId"]);
-  latch.Wait();
-
-  EXPECT_TRUE(engineId.has_value());
-  if (!engineId.has_value()) {
-    return;
-  }
-  EXPECT_EQ(engine, [FlutterEngine engineForIdentifier:*engineId]);
-  ShutDownEngine();
-}
-
-TEST_F(FlutterEngineTest, ResizeSynchronizerNotBlockingRasterThreadAfterShutdown) {
-  FlutterResizeSynchronizer* threadSynchronizer = [[FlutterResizeSynchronizer alloc] init];
-  [threadSynchronizer shutDown];
+TEST_F(FlutterEngineTest, ThreadSynchronizerNotBlockingRasterThreadAfterShutdown) {
+  FlutterThreadSynchronizer* threadSynchronizer = [[FlutterThreadSynchronizer alloc] init];
+  [threadSynchronizer shutdown];
 
   std::thread rasterThread([&threadSynchronizer] {
-    [threadSynchronizer performCommitForSize:CGSizeMake(100, 100)
+    [threadSynchronizer performCommitForView:kImplicitViewId
+                                        size:CGSizeMake(100, 100)
                                       notify:^{
-                                      }
-                                       delay:0];
+                                      }];
   });
 
   rasterThread.join();
@@ -986,15 +955,7 @@ TEST_F(FlutterEngineTest, RemovingViewDisposesCompositorResources) {
   viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
 
   EXPECT_TRUE([engine runWithEntrypoint:@"drawIntoAllViews"]);
-  // Wait up to 1 second for Flutter to emit a frame.
-  CFTimeInterval start = CACurrentMediaTime();
-  while (engine.macOSCompositor->DebugNumViews() == 0) {
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
-    if (CACurrentMediaTime() - start > 1) {
-      break;
-    }
-  }
-
+  [engine.testThreadSynchronizer blockUntilFrameAvailable];
   EXPECT_EQ(engine.macOSCompositor->DebugNumViews(), 1u);
 
   engine.viewController = nil;

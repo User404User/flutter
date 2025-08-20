@@ -7,6 +7,7 @@
 import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
@@ -34,61 +35,33 @@ import 'windows/native_assets.dart';
 final class DartBuildResult {
   const DartBuildResult(this.codeAssets, this.dependencies);
 
-  const DartBuildResult.empty()
-    : codeAssets = const <FlutterCodeAsset>[],
-      dependencies = const <Uri>[];
+  const DartBuildResult.empty() : codeAssets = const <CodeAsset>[], dependencies = const <Uri>[];
 
   factory DartBuildResult.fromJson(Map<String, Object?> json) {
     final List<Uri> dependencies = <Uri>[
       for (final Object? encodedUri in json['dependencies']! as List<Object?>)
         Uri.parse(encodedUri! as String),
     ];
-    final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[
+    final List<CodeAsset> codeAssets = <CodeAsset>[
       for (final Object? json in json['code_assets']! as List<Object?>)
-        FlutterCodeAsset(
-          codeAsset: CodeAsset.fromEncoded(
-            EncodedAsset.fromJson(
-              (json! as Map<String, Object?>)['asset']! as Map<String, Object?>,
-            ),
-          ),
-          target: Target.fromString((json as Map<String, Object?>)['target']! as String),
-        ),
+        CodeAsset.fromEncoded(EncodedAsset.fromJson(json! as Map<String, Object?>)),
     ];
     return DartBuildResult(codeAssets, dependencies);
   }
 
-  final List<FlutterCodeAsset> codeAssets;
+  final List<CodeAsset> codeAssets;
   final List<Uri> dependencies;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'dependencies': <Object?>[for (final Uri dep in dependencies) dep.toString()],
-    'code_assets': <Object?>[
-      for (final FlutterCodeAsset code in codeAssets)
-        <String, Object>{
-          'asset': code.codeAsset.encode().toJson(),
-          'target': code.target.toString(),
-        },
-    ],
+    'code_assets': <Object?>[for (final CodeAsset code in codeAssets) code.encode().toJson()],
   };
 
   /// The files that eventually should be bundled with the app.
   List<Uri> get filesToBeBundled => <Uri>[
-    for (final FlutterCodeAsset code in codeAssets)
-      if (code.codeAsset.linkMode is DynamicLoadingBundled) code.codeAsset.file!,
+    for (final CodeAsset code in codeAssets)
+      if (code.linkMode is DynamicLoadingBundled) code.file!,
   ];
-}
-
-/// A [CodeAsset] for a specific [target].
-///
-/// Flutter builds [CodeAsset]s for multiple architectures (on MacOS and iOS).
-/// This class distinguishes the (otherwise identical) [codeAsset]s on different
-/// [target]s. These are then later combined into a single [KernelAsset] before
-/// being added to the native assets manifest.
-class FlutterCodeAsset {
-  FlutterCodeAsset({required this.codeAsset, required this.target});
-
-  final CodeAsset codeAsset;
-  final Target target;
 }
 
 /// Invokes the build of all transitive Dart packages and prepares code assets
@@ -150,7 +123,7 @@ Future<void> installCodeAssets({
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
-  final Map<FlutterCodeAsset, KernelAsset> assetTargetLocations = assetTargetLocationsForOS(
+  final Map<CodeAsset, KernelAsset> assetTargetLocations = assetTargetLocationsForOS(
     targetOS,
     dartBuildResult.codeAssets,
     flutterTester,
@@ -177,18 +150,36 @@ Future<void> installCodeAssets({
 /// It enables mocking `package:native_assets_builder` package.
 /// It also enables mocking native toolchain discovery via [cCompilerConfig].
 abstract interface class FlutterNativeAssetsBuildRunner {
+  /// Whether the project has a `.dart_tools/package_config.json`.
+  ///
+  /// If there is no package config, [packagesWithNativeAssets], [build] and
+  /// [link] must not be invoked.
+  Future<bool> hasPackageConfig();
+
   /// All packages in the transitive dependencies that have a `build.dart`.
-  Future<List<String>> packagesWithNativeAssets();
+  Future<List<Package>> packagesWithNativeAssets();
 
   /// Runs all [packagesWithNativeAssets] `build.dart`.
   Future<BuildResult?> build({
-    required List<ProtocolExtension> extensions,
+    required List<String> buildAssetTypes,
+    required BuildConfigValidator configValidator,
+    required BuildConfigCreator configCreator,
+    required BuildValidator buildValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
+    required bool includeParentEnvironment,
+    required Uri workingDirectory,
     required bool linkingEnabled,
   });
 
   /// Runs all [packagesWithNativeAssets] `link.dart`.
   Future<LinkResult?> link({
-    required List<ProtocolExtension> extensions,
+    required List<String> buildAssetTypes,
+    required LinkConfigValidator configValidator,
+    required LinkConfigCreator configCreator,
+    required LinkValidator linkValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
+    required bool includeParentEnvironment,
+    required Uri workingDirectory,
     required BuildResult buildResult,
   });
 
@@ -202,18 +193,18 @@ abstract interface class FlutterNativeAssetsBuildRunner {
 /// Uses `package:native_assets_builder` for its implementation.
 class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunner {
   FlutterNativeAssetsBuildRunnerImpl(
+    this.projectUri,
     this.packageConfigPath,
     this.packageConfig,
     this.fileSystem,
     this.logger,
-    this.runPackageName,
   );
 
+  final Uri projectUri;
   final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
   final Logger logger;
-  final String runPackageName;
 
   late final logging.Logger _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
@@ -240,42 +231,90 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
       .uri
       .resolve('bin/cache/dart-sdk/bin/dart');
 
-  late final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
-    fileSystem,
-    packageConfig,
-    Uri.file(packageConfigPath),
-    runPackageName,
-  );
-
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
     logger: _logger,
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
-    packageLayout: packageLayout,
+    hookEnvironment: filteredEnvironment(NativeAssetsBuildRunner.hookEnvironmentVariablesFilter),
   );
 
+  static Map<String, String> filteredEnvironment(Set<String> allowList) => <String, String>{
+    for (final MapEntry<String, String> entry in const LocalPlatform().environment.entries)
+      if (allowList.contains(entry.key.toUpperCase())) entry.key: entry.value,
+  };
+
   @override
-  Future<List<String>> packagesWithNativeAssets() async {
+  Future<bool> hasPackageConfig() {
+    return fileSystem.file(packageConfigPath).exists();
+  }
+
+  @override
+  Future<List<Package>> packagesWithNativeAssets() async {
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
+      fileSystem,
+      packageConfig,
+      Uri.file(packageConfigPath),
+    );
     // It suffices to only check for build hooks. If no packages have a build
     // hook. Then no build hook will output any assets for any link hook, and
     // thus the link hooks will never be run.
-    return _buildRunner.packagesWithBuildHooks();
+    return packageLayout.packagesWithAssets(Hook.build);
   }
 
   @override
   Future<BuildResult?> build({
-    required List<ProtocolExtension> extensions,
+    required List<String> buildAssetTypes,
+    required BuildConfigValidator configValidator,
+    required BuildConfigCreator configCreator,
+    required BuildValidator buildValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
+    required bool includeParentEnvironment,
+    required Uri workingDirectory,
     required bool linkingEnabled,
   }) {
-    return _buildRunner.build(linkingEnabled: linkingEnabled, extensions: extensions);
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
+      fileSystem,
+      packageConfig,
+      Uri.file(packageConfigPath),
+    );
+    return _buildRunner.build(
+      buildAssetTypes: buildAssetTypes,
+      configCreator: configCreator,
+      configValidator: configValidator,
+      buildValidator: buildValidator,
+      applicationAssetValidator: applicationAssetValidator,
+      workingDirectory: workingDirectory,
+      packageLayout: packageLayout,
+      linkingEnabled: linkingEnabled,
+    );
   }
 
   @override
   Future<LinkResult?> link({
-    required List<ProtocolExtension> extensions,
+    required List<String> buildAssetTypes,
+    required LinkConfigValidator configValidator,
+    required LinkConfigCreator configCreator,
+    required LinkValidator linkValidator,
+    required ApplicationAssetValidator applicationAssetValidator,
+    required bool includeParentEnvironment,
+    required Uri workingDirectory,
     required BuildResult buildResult,
   }) {
-    return _buildRunner.link(extensions: extensions, buildResult: buildResult);
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
+      fileSystem,
+      packageConfig,
+      Uri.file(packageConfigPath),
+    );
+    return _buildRunner.link(
+      buildAssetTypes: buildAssetTypes,
+      configCreator: configCreator,
+      configValidator: configValidator,
+      linkValidator: linkValidator,
+      applicationAssetValidator: applicationAssetValidator,
+      workingDirectory: workingDirectory,
+      packageLayout: packageLayout,
+      buildResult: buildResult,
+    );
   }
 
   @override
@@ -356,8 +395,25 @@ bool _nativeAssetsLinkingEnabled(BuildMode buildMode) {
   }
 }
 
+/// Checks whether this project does not yet have a package config file.
+///
+/// A project has no package config when `pub get` has not yet been run.
+///
+/// Native asset builds cannot be run without a package config. If there is
+/// no package config, leave a logging trace about that.
+Future<bool> _hasNoPackageConfig(FlutterNativeAssetsBuildRunner buildRunner) async {
+  final bool packageConfigExists = await buildRunner.hasPackageConfig();
+  if (!packageConfigExists) {
+    globals.logger.printTrace('No package config found. Skipping native assets compilation.');
+  }
+  return !packageConfigExists;
+}
+
 Future<bool> _nativeBuildRequired(FlutterNativeAssetsBuildRunner buildRunner) async {
-  final List<String> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
+  if (await _hasNoPackageConfig(buildRunner)) {
+    return false;
+  }
+  final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     globals.logger.printTrace(
       'No packages with native assets. Skipping native assets compilation.',
@@ -366,7 +422,7 @@ Future<bool> _nativeBuildRequired(FlutterNativeAssetsBuildRunner buildRunner) as
   }
 
   if (!featureFlags.isNativeAssetsEnabled) {
-    final String packageNames = packagesWithNativeAssets.join(' ');
+    final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
     throwToolExit(
       'Package(s) $packageNames require the native assets feature to be enabled. '
       'Enable using `flutter config --enable-native-assets`.',
@@ -385,14 +441,17 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   FileSystem fileSystem,
   FlutterNativeAssetsBuildRunner buildRunner,
 ) async {
-  final List<String> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
+  if (await _hasNoPackageConfig(buildRunner)) {
+    return;
+  }
+  final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     globals.logger.printTrace(
       'No packages with native assets. Skipping native assets compilation.',
     );
     return;
   }
-  final String packageNames = packagesWithNativeAssets.join(' ');
+  final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
   throwToolExit(
     'Package(s) $packageNames require the native assets feature. '
     'This feature has not yet been implemented for `$os`. '
@@ -407,18 +466,18 @@ Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
   return projectUri.resolve('$buildDir/native_assets/$os/');
 }
 
-Map<FlutterCodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(
-  List<FlutterCodeAsset> assets,
+Map<CodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(
+  List<CodeAsset> assets,
   Uri? absolutePath,
 ) {
-  return <FlutterCodeAsset, KernelAsset>{
-    for (final FlutterCodeAsset asset in assets)
+  return <CodeAsset, KernelAsset>{
+    for (final CodeAsset asset in assets)
       asset: _targetLocationSingleArchitecture(asset, absolutePath),
   };
 }
 
-KernelAsset _targetLocationSingleArchitecture(FlutterCodeAsset asset, Uri? absolutePath) {
-  final LinkMode linkMode = asset.codeAsset.linkMode;
+KernelAsset _targetLocationSingleArchitecture(CodeAsset asset, Uri? absolutePath) {
+  final LinkMode linkMode = asset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
     case DynamicLoadingSystem _:
@@ -428,7 +487,7 @@ KernelAsset _targetLocationSingleArchitecture(FlutterCodeAsset asset, Uri? absol
     case LookupInProcess _:
       kernelAssetPath = KernelAssetInProcess();
     case DynamicLoadingBundled _:
-      final String fileName = asset.codeAsset.file!.pathSegments.last;
+      final String fileName = asset.file!.pathSegments.last;
       Uri uri;
       if (absolutePath != null) {
         // Flutter tester needs full host paths.
@@ -443,12 +502,16 @@ KernelAsset _targetLocationSingleArchitecture(FlutterCodeAsset asset, Uri? absol
     default:
       throw Exception('Unsupported asset link mode ${linkMode.runtimeType} in asset $asset');
   }
-  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
+  return KernelAsset(
+    id: asset.id,
+    target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+    path: kernelAssetPath,
+  );
 }
 
-Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsForOS(
+Map<CodeAsset, KernelAsset> assetTargetLocationsForOS(
   OS targetOS,
-  List<FlutterCodeAsset> codeAssets,
+  List<CodeAsset> codeAssets,
   bool flutterTester,
   Uri buildUri,
 ) {
@@ -474,7 +537,7 @@ Future<void> _copyNativeCodeAssetsForOS(
   Uri buildUri,
   BuildMode buildMode,
   FileSystem fileSystem,
-  Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
+  Map<CodeAsset, KernelAsset> assetTargetLocations,
   String? codesignIdentity,
   bool flutterTester,
 ) async {
@@ -482,10 +545,9 @@ Future<void> _copyNativeCodeAssetsForOS(
   // If a code asset that use a linking mode of [LookupInProcess],
   // [LookupInExecutable] or [DynamicLoadingSystem] do not have anything to
   // bundle as part of the app.
-  assetTargetLocations = <FlutterCodeAsset, KernelAsset>{
-    for (final FlutterCodeAsset codeAsset in assetTargetLocations.keys)
-      if (codeAsset.codeAsset.linkMode is DynamicLoadingBundled)
-        codeAsset: assetTargetLocations[codeAsset]!,
+  assetTargetLocations = <CodeAsset, KernelAsset>{
+    for (final CodeAsset codeAsset in assetTargetLocations.keys)
+      if (codeAsset.linkMode is DynamicLoadingBundled) codeAsset: assetTargetLocations[codeAsset]!,
   };
 
   if (assetTargetLocations.isEmpty) {
@@ -493,7 +555,7 @@ Future<void> _copyNativeCodeAssetsForOS(
   }
 
   globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-  final List<FlutterCodeAsset> codeAssets = assetTargetLocations.keys.toList();
+  final List<CodeAsset> codeAssets = assetTargetLocations.keys.toList();
   switch (targetOS) {
     case OS.windows:
     case OS.linux:
@@ -558,7 +620,7 @@ Future<DartBuildResult> _runDartBuild({
           : architectures.toList().toString();
 
   globals.logger.printTrace('Building native assets for $targetOS $architectureString.');
-  final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[];
+  final List<EncodedAsset> assets = <EncodedAsset>[];
   final Set<Uri> dependencies = <Uri>{};
 
   final EnvironmentType? environmentType;
@@ -580,30 +642,42 @@ Future<DartBuildResult> _runDartBuild({
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
   assert(codesignIdentity == null || targetOS == OS.iOS || targetOS == OS.macOS);
 
-  final AndroidCodeConfig? androidConfig =
+  final AndroidConfig? androidConfig =
       targetOS == OS.android
-          ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi(environmentDefines))
+          ? AndroidConfig(targetNdkApi: targetAndroidNdkApi(environmentDefines))
           : null;
-  final IOSCodeConfig? iosConfig =
+  final IOSConfig? iosConfig =
       targetOS == OS.iOS
-          ? IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType!))
+          ? IOSConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType!))
           : null;
-  final MacOSCodeConfig? macOSConfig =
-      targetOS == OS.macOS ? MacOSCodeConfig(targetVersion: targetMacOSVersion) : null;
+  final MacOSConfig? macOSConfig =
+      targetOS == OS.macOS ? MacOSConfig(targetVersion: targetMacOSVersion) : null;
   for (final Architecture architecture in architectures) {
-    final Target target = Target.fromArchitectureAndOS(architecture, targetOS!);
     final BuildResult? buildResult = await buildRunner.build(
-      extensions: <ProtocolExtension>[
-        CodeAssetExtension(
-          targetArchitecture: architecture,
-          linkModePreference: LinkModePreference.dynamic,
-          cCompiler: cCompilerConfig,
-          targetOS: targetOS,
-          android: androidConfig,
-          iOS: iosConfig,
-          macOS: macOSConfig,
-        ),
-      ],
+      buildAssetTypes: <String>[CodeAsset.type],
+      configCreator:
+          () =>
+              BuildConfigBuilder()..setupCodeConfig(
+                targetArchitecture: architecture,
+                linkModePreference: LinkModePreference.dynamic,
+                cCompilerConfig: cCompilerConfig,
+                targetOS: targetOS!,
+                androidConfig: androidConfig,
+                iOSConfig: iosConfig,
+                macOSConfig: macOSConfig,
+              ),
+      configValidator:
+          (BuildConfig config) async => <String>[...await validateCodeAssetBuildConfig(config)],
+      buildValidator:
+          (BuildConfig config, BuildOutput output) async => <String>[
+            ...await validateCodeAssetBuildOutput(config, output),
+          ],
+      applicationAssetValidator:
+          (List<EncodedAsset> assets) async => <String>[
+            ...await validateCodeAssetInApplication(assets),
+          ],
+      workingDirectory: projectUri,
+      includeParentEnvironment: true,
       linkingEnabled: linkingEnabled,
     );
     if (buildResult == null) {
@@ -611,42 +685,51 @@ Future<DartBuildResult> _runDartBuild({
     }
     dependencies.addAll(buildResult.dependencies);
     if (!linkingEnabled) {
-      codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
+      assets.addAll(buildResult.encodedAssets);
     } else {
       final LinkResult? linkResult = await buildRunner.link(
-        extensions: <ProtocolExtension>[
-          CodeAssetExtension(
-            targetArchitecture: architecture,
-            linkModePreference: LinkModePreference.dynamic,
-            cCompiler: cCompilerConfig,
-            targetOS: targetOS,
-            android: androidConfig,
-            iOS: iosConfig,
-            macOS: macOSConfig,
-          ),
-        ],
+        buildAssetTypes: <String>[CodeAsset.type],
+        configCreator:
+            () =>
+                LinkConfigBuilder()..setupCodeConfig(
+                  targetArchitecture: architecture,
+                  linkModePreference: LinkModePreference.dynamic,
+                  cCompilerConfig: cCompilerConfig,
+                  targetOS: targetOS!,
+                  androidConfig: androidConfig,
+                  iOSConfig: iosConfig,
+                  macOSConfig: macOSConfig,
+                ),
+        configValidator:
+            (LinkConfig config) async => <String>[...await validateCodeAssetLinkConfig(config)],
+        linkValidator:
+            (LinkConfig config, LinkOutput output) async => <String>[
+              ...await validateCodeAssetLinkOutput(config, output),
+            ],
+        applicationAssetValidator:
+            (List<EncodedAsset> assets) async => <String>[
+              ...await validateCodeAssetInApplication(assets),
+            ],
+        workingDirectory: projectUri,
+        includeParentEnvironment: true,
         buildResult: buildResult,
       );
       if (linkResult == null) {
         _throwNativeAssetsLinkFailed();
       }
-      codeAssets.addAll(_filterCodeAssets(linkResult.encodedAssets, target));
+      assets.addAll(linkResult.encodedAssets);
       dependencies.addAll(linkResult.dependencies);
     }
   }
 
+  final List<CodeAsset> codeAssets =
+      assets
+          .where((EncodedAsset asset) => asset.type == CodeAsset.type)
+          .map<CodeAsset>(CodeAsset.fromEncoded)
+          .toList();
   globals.logger.printTrace('Building native assets for $targetOS $architectureString done.');
   return DartBuildResult(codeAssets, dependencies.toList());
 }
-
-List<FlutterCodeAsset> _filterCodeAssets(List<EncodedAsset> assets, Target target) =>
-    assets
-        .where((EncodedAsset asset) => asset.isCodeAsset)
-        .map<FlutterCodeAsset>(
-          (EncodedAsset encodedAsset) =>
-              FlutterCodeAsset(codeAsset: encodedAsset.asCodeAsset, target: target),
-        )
-        .toList();
 
 List<Architecture> _architecturesForOS(
   TargetPlatform targetPlatform,
@@ -706,7 +789,7 @@ Architecture _getNativeArchitecture(TargetPlatform targetPlatform) {
 
 Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   Uri buildUri,
-  Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
+  Map<CodeAsset, KernelAsset> assetTargetLocations,
   BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
@@ -716,8 +799,8 @@ Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   if (!buildDir.existsSync()) {
     buildDir.createSync(recursive: true);
   }
-  for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
-    final Uri source = assetMapping.key.codeAsset.file!;
+  for (final MapEntry<CodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
+    final Uri source = assetMapping.key.file!;
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
     final Uri targetUri = buildUri.resolveUri(target);
     final String targetFullPath = targetUri.toFilePath();

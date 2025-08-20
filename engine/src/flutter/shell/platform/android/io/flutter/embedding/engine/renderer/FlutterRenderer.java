@@ -186,16 +186,39 @@ public class FlutterRenderer implements TextureRegistry {
    */
   @NonNull
   @Override
-  public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
+  public SurfaceProducer createSurfaceProducer() {
+    // Prior to Impeller, Flutter on Android *only* ran on OpenGLES (via Skia). That
+    // meant that
+    // plugins (i.e. end-users) either explicitly created a SurfaceTexture (via
+    // createX/registerX) or an ImageTexture (via createX/registerX).
+    //
+    // In an Impeller world, which for the first time uses (if available) a Vulkan
+    // rendering
+    // backend, it is no longer possible (at least not trivially) to render an
+    // OpenGLES-provided
+    // texture (SurfaceTexture) in a Vulkan context.
+    //
+    // This function picks the "best" rendering surface based on the Android
+    // runtime, and
+    // provides a consumer-agnostic SurfaceProducer (which in turn vends a Surface),
+    // and has
+    // plugins (i.e. end-users) use the Surface instead, letting us "hide" the
+    // consumer-side
+    // of the implementation.
+    //
+    // tl;dr: If ImageTexture is available, we use it, otherwise we use a
+    // SurfaceTexture.
+    // Coincidentally, if ImageTexture is available, we are also on an Android
+    // version that is
+    // running Vulkan, so we don't have to worry about it not being supported.
     final SurfaceProducer entry;
-    if (!debugForceSurfaceProducerGlTextures && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+    if (!debugForceSurfaceProducerGlTextures
+        && Build.VERSION.SDK_INT >= API_LEVELS.API_29
+        && !flutterJNI.ShouldDisableAHB()) {
       final long id = nextTextureId.getAndIncrement();
       final ImageReaderSurfaceProducer producer = new ImageReaderSurfaceProducer(id);
-      boolean reset = lifecycle == SurfaceLifecycle.resetInBackground;
-      registerImageTexture(id, producer, reset);
-      if (reset) {
-        addOnTrimMemoryListener(producer);
-      }
+      registerImageTexture(id, producer);
+      addOnTrimMemoryListener(producer);
       imageReaderProducers.add(producer);
       Log.v(TAG, "New ImageReaderSurfaceProducer ID: " + id);
       entry = producer;
@@ -261,7 +284,7 @@ public class FlutterRenderer implements TextureRegistry {
     final ImageTextureRegistryEntry entry =
         new ImageTextureRegistryEntry(nextTextureId.getAndIncrement());
     Log.v(TAG, "New ImageTextureEntry ID: " + entry.id());
-    registerImageTexture(entry.id(), entry, /*resetOnBackground=*/ false);
+    registerImageTexture(entry.id(), entry);
     return entry;
   }
 
@@ -414,15 +437,7 @@ public class FlutterRenderer implements TextureRegistry {
           TextureRegistry.ImageConsumer,
           TextureRegistry.OnTrimMemoryListener {
     private static final String TAG = "ImageReaderSurfaceProducer";
-    private static final int MAX_IMAGES = 6;
-    // The ImageReaderSurfaceProducer must not close images until the renderer,
-    // either Skia OpenGL, Impeller OpenGL, or Impeller Vulkan is done reading
-    // from them. The Vulkan renderer allows up to two frames in flight before
-    // backpressure is applied. This implies that we may need to keep up to
-    // two images beyond the current image alive. Closing the images before
-    // the frame that references them has finished rendering can result in
-    // tearing or other incorrect rendering.
-    private static final int MAX_DEQUEUED_IMAGES = 2;
+    private static final int MAX_IMAGES = 5;
 
     // Flip when debugging to see verbose logs.
     private static final boolean VERBOSE_LOGS = false;
@@ -465,7 +480,7 @@ public class FlutterRenderer implements TextureRegistry {
     // REQUIRED: The following fields must only be accessed when lock is held.
     private final ArrayDeque<PerImageReader> imageReaderQueue = new ArrayDeque<>();
     private final HashMap<ImageReader, PerImageReader> perImageReaders = new HashMap<>();
-    private ArrayList<PerImage> lastDequeuedImage = new ArrayList<PerImage>();
+    private PerImage lastDequeuedImage = null;
     private PerImageReader lastReaderDequeuedFrom = null;
     private Callback callback = null;
 
@@ -649,25 +664,22 @@ public class FlutterRenderer implements TextureRegistry {
               lastDequeueTime = System.nanoTime();
             }
           }
-          while (lastDequeuedImage.size() > MAX_DEQUEUED_IMAGES) {
-            // We must keep the last image dequeued open until we are done presenting
-            // it. We have just dequeued a new image (r). Close the previously dequeued
-            // image. This is a very conservative check, we know based on the max frames
-            // in flight being 2 that dequing a 4th images implies that the driver is done
-            // reading from the 1st image.
-            PerImage last = lastDequeuedImage.remove(0);
+          if (lastDequeuedImage != null) {
             if (VERBOSE_LOGS) {
               Log.i(
                   TAG,
                   lastReaderDequeuedFrom.reader.hashCode()
                       + " closing image="
-                      + last.image.hashCode());
+                      + lastDequeuedImage.image.hashCode());
             }
-            last.image.close();
+            // We must keep the last image dequeued open until we are done presenting
+            // it. We have just dequeued a new image (r). Close the previously dequeued
+            // image.
+            lastDequeuedImage.image.close();
           }
           // Remember the last image and reader dequeued from. We do this because we must
           // keep both of these alive until we are done presenting the image.
-          lastDequeuedImage.add(r);
+          lastDequeuedImage = r;
           lastReaderDequeuedFrom = reader;
           break;
         }
@@ -727,11 +739,9 @@ public class FlutterRenderer implements TextureRegistry {
           pir.close();
         }
         perImageReaders.clear();
-        if (lastDequeuedImage.size() > 0) {
-          for (PerImage image : lastDequeuedImage) {
-            image.image.close();
-          }
-          lastDequeuedImage.clear();
+        if (lastDequeuedImage != null) {
+          lastDequeuedImage.image.close();
+          lastDequeuedImage = null;
         }
         if (lastReaderDequeuedFrom != null) {
           lastReaderDequeuedFrom.close();
@@ -828,12 +838,6 @@ public class FlutterRenderer implements TextureRegistry {
         Log.i(TAG, pir.reader.hashCode() + " returning surface to render a new frame.");
       }
       return pir.reader.getSurface();
-    }
-
-    @Override
-    public Surface getForcedNewSurface() {
-      createNewReader = true;
-      return getSurface();
     }
 
     @Override
@@ -955,11 +959,6 @@ public class FlutterRenderer implements TextureRegistry {
         }
       }
       return r;
-    }
-
-    @VisibleForTesting
-    public int pendingDequeuedImages() {
-      return lastDequeuedImage.size();
     }
   }
 
@@ -1264,23 +1263,25 @@ public class FlutterRenderer implements TextureRegistry {
         displayFeaturesState);
   }
 
+  // TODO(mattcarroll): describe the native behavior that this invokes
+  // TODO(mattcarroll): determine if this is nullable or nonnull
   public Bitmap getBitmap() {
     return flutterJNI.getBitmap();
   }
 
+  // TODO(mattcarroll): describe the native behavior that this invokes
   public void dispatchPointerDataPacket(@NonNull ByteBuffer buffer, int position) {
     flutterJNI.dispatchPointerDataPacket(buffer, position);
   }
 
+  // TODO(mattcarroll): describe the native behavior that this invokes
   private void registerTexture(long textureId, @NonNull SurfaceTextureWrapper textureWrapper) {
     flutterJNI.registerTexture(textureId, textureWrapper);
   }
 
   private void registerImageTexture(
-      long textureId,
-      @NonNull TextureRegistry.ImageConsumer imageTexture,
-      boolean resetOnBackground) {
-    flutterJNI.registerImageTexture(textureId, imageTexture, resetOnBackground);
+      long textureId, @NonNull TextureRegistry.ImageConsumer imageTexture) {
+    flutterJNI.registerImageTexture(textureId, imageTexture);
   }
 
   @VisibleForTesting
@@ -1288,22 +1289,27 @@ public class FlutterRenderer implements TextureRegistry {
     flutterJNI.scheduleFrame();
   }
 
+  // TODO(mattcarroll): describe the native behavior that this invokes
   private void unregisterTexture(long textureId) {
     flutterJNI.unregisterTexture(textureId);
   }
 
+  // TODO(mattcarroll): describe the native behavior that this invokes
   public boolean isSoftwareRenderingEnabled() {
     return flutterJNI.getIsSoftwareRenderingEnabled();
   }
 
+  // TODO(mattcarroll): describe the native behavior that this invokes
   public void setAccessibilityFeatures(int flags) {
     flutterJNI.setAccessibilityFeatures(flags);
   }
 
+  // TODO(mattcarroll): describe the native behavior that this invokes
   public void setSemanticsEnabled(boolean enabled) {
     flutterJNI.setSemanticsEnabled(enabled);
   }
 
+  // TODO(mattcarroll): describe the native behavior that this invokes
   public void dispatchSemanticsAction(
       int nodeId, int action, @Nullable ByteBuffer args, int argsPosition) {
     flutterJNI.dispatchSemanticsAction(nodeId, action, args, argsPosition);

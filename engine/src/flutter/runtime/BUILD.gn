@@ -12,7 +12,7 @@ source_set("test_font") {
   ]
   deps = [
     "//flutter/skia",
-    "//flutter/txt",
+    "//flutter/third_party/txt",
   ]
   public_configs = [ "//flutter:config" ]
   defines = []
@@ -116,7 +116,7 @@ source_set("runtime") {
     "//flutter/shell/common:display",
     "//flutter/skia",
     "//flutter/third_party/tonic",
-    "//flutter/txt",
+    "//flutter/third_party/txt",
   ]
 
   if (flutter_runtime_mode != "release" && !is_fuchsia) {

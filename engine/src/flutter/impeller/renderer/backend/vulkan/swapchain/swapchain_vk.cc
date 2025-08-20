@@ -11,6 +11,7 @@
 
 #if FML_OS_ANDROID
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_vk.h"
+#include "impeller/toolkit/android/shadow_realm.h"
 #endif  // FML_OS_ANDROID
 
 namespace impeller {
@@ -33,7 +34,6 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
 std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     const std::shared_ptr<Context>& context,
     ANativeWindow* p_window,
-    const CreateTransactionCB& cb,
     bool enable_msaa) {
   TRACE_EVENT0("impeller", "CreateAndroidSwapchain");
   if (!context) {
@@ -58,13 +58,11 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
 
   // Use AHB Swapchains if they are opted in.
   if (ContextVK::Cast(*context).GetShouldEnableSurfaceControlSwapchain() &&
-      AHBSwapchainVK::IsAvailableOnPlatform() &&
-      android_get_device_api_level() >= 34) {
+      AHBSwapchainVK::IsAvailableOnPlatform()) {
     FML_LOG(WARNING) << "Using Android SurfaceControl Swapchain.";
     auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
         context,             //
         window.GetHandle(),  //
-        cb,                  //
         surface,             //
         window.GetSize(),    //
         enable_msaa          //

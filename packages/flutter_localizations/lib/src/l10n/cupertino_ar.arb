@@ -47,7 +47,5 @@
   "menuDismissLabel": "إغلاق القائمة",
   "lookUpButtonLabel": "بحث عام",
   "searchWebButtonLabel": "البحث على الويب",
-  "shareButtonLabel": "مشاركة…",
-  "cancelButtonLabel": "الإلغاء",
-  "backButtonLabel": "رجوع"
+  "shareButtonLabel": "مشاركة…"
 }

@@ -66,7 +66,7 @@ class IOSSimulatorUtils {
   final Xcode _xcode;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
-    if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
+    if (!_xcode.isInstalledAndMeetsVersionCheck) {
       return <IOSSimulator>[];
     }
 
@@ -96,7 +96,7 @@ class IOSSimulatorUtils {
   }
 
   Future<List<IOSSimulatorRuntime>> getAvailableIOSRuntimes() async {
-    if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
+    if (!_xcode.isInstalledAndMeetsVersionCheck) {
       return <IOSSimulatorRuntime>[];
     }
 

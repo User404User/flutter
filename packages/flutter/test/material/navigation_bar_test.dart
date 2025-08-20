@@ -231,7 +231,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // M3 settings from the token database.
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       _buildWidget(
         NavigationBar(
@@ -329,6 +329,7 @@ void main() {
             DefaultWidgetsLocalizations.delegate,
           ],
           child: MaterialApp(
+            theme: ThemeData(useMaterial3: true),
             home: Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(
@@ -359,7 +360,9 @@ void main() {
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
 
-    expect(tester.getSize(find.text(label).last), const Size(14.25, 20.0));
+    if (!kIsWeb || isSkiaWeb) {
+      expect(tester.getSize(find.text(label).last), const Size(14.25, 20.0));
+    }
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -367,7 +370,9 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
 
-    expect(tester.getSize(find.text(label).last), const Size(56.25, 80.0));
+    if (!kIsWeb || isSkiaWeb) {
+      expect(tester.getSize(find.text(label).last), const Size(56.25, 80.0));
+    }
   });
 
   testWidgets('Material3 - NavigationBar label can scale and has maxScaleFactor', (
@@ -408,19 +413,31 @@ void main() {
 
     await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
-    expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(12.5, 16.0)), true);
+    if (!kIsWeb || isSkiaWeb) {
+      // https://github.com/flutter/flutter/issues/99933
+      expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(12.5, 16.0)), true);
+    }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.1)));
     await tester.pumpAndSettle();
 
-    expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(13.7, 18.0)), true);
+    if (!kIsWeb || isSkiaWeb) {
+      // https://github.com/flutter/flutter/issues/99933
+      expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(13.7, 18.0)), true);
+    }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.3)));
 
-    expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
+    if (!kIsWeb || isSkiaWeb) {
+      // https://github.com/flutter/flutter/issues/99933
+      expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
+    }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4)));
-    expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
+    if (!kIsWeb || isSkiaWeb) {
+      // https://github.com/flutter/flutter/issues/99933
+      expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(16.1, 21.0)), true);
+    }
   });
 
   testWidgets('Custom tooltips in NavigationBarDestination', (WidgetTester tester) async {
@@ -459,7 +476,6 @@ void main() {
           destinations: const <Widget>[
             NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC'),
             NavigationDestination(icon: Icon(Icons.access_alarm), label: 'Alarm'),
-            NavigationDestination(icon: Icon(Icons.abc), label: 'ABC'),
           ],
         ),
       );
@@ -470,14 +486,10 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
+        label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
-        isButton: true,
-        hasSelectedState: true,
-        hasEnabledState: true,
-        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -485,27 +497,9 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
+        label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
-        isButton: true,
-        hasSelectedState: true,
-        hasEnabledState: true,
-        isEnabled: true,
-        hasTapAction: true,
-        hasFocusAction: true,
-      ),
-    );
-    expect(
-      tester.getSemantics(find.text('ABC')),
-      matchesSemantics(
-        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
-        textDirection: TextDirection.ltr,
-        isFocusable: true,
-        isButton: true,
-        hasSelectedState: true,
-        hasEnabledState: true,
-        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -516,13 +510,9 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
+        label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
-        isButton: true,
-        hasEnabledState: true,
-        hasSelectedState: true,
-        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -530,57 +520,12 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
+        label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
-        isButton: true,
-        hasEnabledState: true,
-        hasSelectedState: true,
-        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
-      ),
-    );
-    expect(
-      tester.getSemantics(find.text('ABC')),
-      matchesSemantics(
-        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
-        textDirection: TextDirection.ltr,
-        isFocusable: true,
-        isButton: true,
-        hasEnabledState: true,
-        hasSelectedState: true,
-        isEnabled: true,
-        hasTapAction: true,
-        hasFocusAction: true,
-      ),
-    );
-  });
-  testWidgets('Navigation bar disabled semantics', (WidgetTester tester) async {
-    Widget widget({int selectedIndex = 0}) {
-      return _buildWidget(
-        NavigationBar(
-          selectedIndex: selectedIndex,
-          destinations: const <Widget>[
-            NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC', enabled: false),
-            NavigationDestination(icon: Icon(Icons.ac_unit), label: 'Another'),
-          ],
-        ),
-      );
-    }
-
-    await tester.pumpWidget(widget());
-
-    expect(
-      tester.getSemantics(find.text('AC')),
-      matchesSemantics(
-        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
-        textDirection: TextDirection.ltr,
-        isSelected: true,
-        hasSelectedState: true,
-        hasEnabledState: true,
-        isButton: true,
       ),
     );
   });
@@ -604,14 +549,10 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
+        label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
-        isButton: true,
-        hasEnabledState: true,
-        hasSelectedState: true,
-        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -619,13 +560,9 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
+        label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
-        isButton: true,
-        hasEnabledState: true,
-        hasSelectedState: true,
-        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -636,13 +573,9 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
+        label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
-        isButton: true,
-        hasEnabledState: true,
-        hasSelectedState: true,
-        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -650,14 +583,10 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
+        label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
         isFocusable: true,
-        hasEnabledState: true,
-        hasSelectedState: true,
-        isEnabled: true,
         isSelected: true,
-        isButton: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -697,6 +626,7 @@ void main() {
 
     Widget buildWidget({NavigationDestinationLabelBehavior? labelBehavior}) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           bottomNavigationBar: Center(
             child: NavigationBar(
@@ -891,13 +821,14 @@ void main() {
           color: const Color(0x0a000000),
         ),
     );
-  });
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117420.
 
     Widget buildWidget({NavigationDestinationLabelBehavior? labelBehavior}) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           bottomNavigationBar: Center(
             child: NavigationBar(
@@ -958,6 +889,7 @@ void main() {
 
     Widget buildNavigationBar() {
       return MaterialApp(
+        theme: ThemeData.light(),
         home: Scaffold(
           bottomNavigationBar: Center(
             child: NavigationBar(
@@ -1667,37 +1599,6 @@ void main() {
     // Test disabled label text style.
     expect(_getLabelStyle(tester, disabledText).fontSize, equals(disabledTextStyle.fontSize));
     expect(_getLabelStyle(tester, disabledText).color, equals(disabledTextStyle.color));
-  });
-
-  testWidgets('NavigationBar.maintainBottomViewPadding can consume bottom MediaQuery.padding', (
-    WidgetTester tester,
-  ) async {
-    const double bottomPadding = 40;
-    const TextDirection textDirection = TextDirection.ltr;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
-          textDirection: textDirection,
-          child: MediaQuery(
-            data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
-            child: Scaffold(
-              bottomNavigationBar: NavigationBar(
-                maintainBottomViewPadding: true,
-                destinations: const <Widget>[
-                  NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC'),
-                  NavigationDestination(icon: Icon(Icons.access_alarm), label: 'Alarm'),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final double safeAreaBottomPadding =
-        tester.widget<Padding>(find.byType(Padding).first).padding.resolve(textDirection).bottom;
-    expect(safeAreaBottomPadding, equals(0));
   });
 }
 

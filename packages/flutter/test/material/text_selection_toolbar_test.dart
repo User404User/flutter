@@ -206,7 +206,7 @@ void main() {
   }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
 
   for (final ColorScheme colorScheme in <ColorScheme>[
-    ThemeData().colorScheme,
+    ThemeData.light().colorScheme,
     ThemeData.dark().colorScheme,
   ]) {
     testWidgets('default background color', (WidgetTester tester) async {

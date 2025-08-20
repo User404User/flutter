@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
@@ -84,7 +83,7 @@ class RawKeyboard {
   }
 
   void handleHtmlEvent(DomEvent domEvent) {
-    if (!domEvent.isA<DomKeyboardEvent>()) {
+    if (!domInstanceOfString(domEvent, 'KeyboardEvent')) {
       return;
     }
 

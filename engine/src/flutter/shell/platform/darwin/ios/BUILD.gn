@@ -45,19 +45,13 @@ source_set("flutter_framework_source") {
   cflags_objcc = flutter_cflags_objcc
 
   defines = [ "FLUTTER_FRAMEWORK=1" ]
+  if (darwin_extension_safe) {
+    defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
+  }
   public_configs = [
     ":ios_gpu_configuration_config",
     "//flutter:config",
   ]
-
-  configs += [ "//build/config/ios:ios_application_extension" ]
-  if (target_cpu == "arm64") {
-    libs = [ "//flutter/third_party/updater/target/aarch64-apple-ios/release/libupdater.a" ]
-  } else if (target_cpu == "x64") {
-    libs = [ "//flutter/third_party/updater/target/x86_64-apple-ios/release/libupdater.a" ]
-  } else {
-    assert(false, "Unsupported target_cpu")
-  }
 
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
@@ -94,8 +88,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterRestorationPlugin.mm",
     "framework/Source/FlutterSemanticsScrollView.h",
     "framework/Source/FlutterSemanticsScrollView.mm",
-    "framework/Source/FlutterSharedApplication.h",
-    "framework/Source/FlutterSharedApplication.mm",
     "framework/Source/FlutterSpellCheckPlugin.h",
     "framework/Source/FlutterSpellCheckPlugin.mm",
     "framework/Source/FlutterTextInputDelegate.h",
@@ -138,8 +130,12 @@ source_set("flutter_framework_source") {
     "ios_context.mm",
     "ios_context_metal_impeller.h",
     "ios_context_metal_impeller.mm",
+    "ios_context_metal_skia.h",
+    "ios_context_metal_skia.mm",
     "ios_context_noop.h",
     "ios_context_noop.mm",
+    "ios_context_software.h",
+    "ios_context_software.mm",
     "ios_external_texture_metal.h",
     "ios_external_texture_metal.mm",
     "ios_external_view_embedder.h",
@@ -148,8 +144,12 @@ source_set("flutter_framework_source") {
     "ios_surface.mm",
     "ios_surface_metal_impeller.h",
     "ios_surface_metal_impeller.mm",
+    "ios_surface_metal_skia.h",
+    "ios_surface_metal_skia.mm",
     "ios_surface_noop.h",
     "ios_surface_noop.mm",
+    "ios_surface_software.h",
+    "ios_surface_software.mm",
     "platform_message_handler_ios.h",
     "platform_message_handler_ios.mm",
     "platform_view_ios.h",
@@ -176,14 +176,12 @@ source_set("flutter_framework_source") {
 
   deps = [
     ":ios_gpu_configuration",
-    "$dart_src/runtime/bin:elf_loader",
     "//flutter/common:common",
     "//flutter/common/graphics",
     "//flutter/fml",
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/shell/common",
-    "//flutter/shell/common/shorebird",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/darwin/common",
     "//flutter/shell/platform/darwin/common:framework_common",
@@ -235,7 +233,6 @@ shared_library("ios_test_flutter") {
     "framework/Source/FlutterPlatformViewsTest.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
     "framework/Source/FlutterRestorationPluginTest.mm",
-    "framework/Source/FlutterSharedApplicationTest.mm",
     "framework/Source/FlutterSpellCheckPluginTest.mm",
     "framework/Source/FlutterTextInputPluginTest.mm",
     "framework/Source/FlutterTextureRegistryRelayTest.mm",
@@ -263,16 +260,21 @@ shared_library("ios_test_flutter") {
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
+    "//flutter/skia",
     "//flutter/third_party/ocmock:ocmock_shared",
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/spring_animation",
     "//flutter/third_party/tonic",
-    "//flutter/txt",
+    "//flutter/third_party/txt",
   ]
   public_configs = [
     ":ios_gpu_configuration_config",
     "//flutter:config",
   ]
+
+  if (darwin_extension_safe) {
+    defines = [ "APPLICATION_EXTENSION_API_ONLY=1" ]
+  }
 }
 
 shared_library("create_flutter_framework_dylib") {
@@ -282,12 +284,15 @@ shared_library("create_flutter_framework_dylib") {
 
   ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
 
+  if (darwin_extension_safe) {
+    ldflags += [ "-fapplication-extension" ]
+  }
+
   public = _flutter_framework_headers
 
   deps = [ ":flutter_framework_source" ]
 
   public_configs = [ "//flutter:config" ]
-  configs += [ "//build/config/ios:ios_application_extension" ]
 }
 
 copy("copy_dylib") {
@@ -379,11 +384,9 @@ copy("copy_license") {
 shared_library("copy_and_verify_framework_module") {
   framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
-  cflags_objc = [ "-F$framework_search_path" ]
-  ldflags = [
+  cflags_objc = [
     "-F$framework_search_path",
-    "-Xlinker",
-    "-fatal_warnings",
+    "-fapplication-extension",
   ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
@@ -394,7 +397,16 @@ shared_library("copy_and_verify_framework_module") {
     ":copy_framework_privacy_manifest",
   ]
 
-  configs += [ "//build/config/ios:ios_application_extension" ]
+  if (darwin_extension_safe) {
+    ldflags = [
+      "-F$framework_search_path",
+      "-fapplication-extension",
+      "-Xlinker",
+      "-fatal_warnings",
+    ]
+    deps += [ ":copy_dylib" ]
+    frameworks = [ "Flutter.framework" ]
+  }
 }
 
 group("universal_flutter_framework") {

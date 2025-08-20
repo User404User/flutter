@@ -65,9 +65,6 @@ class DlDeferredImageGPUSkia final : public DlImage {
   SkISize dimensions() const override;
 
   // |DlImage|
-  DlISize GetSize() const override;
-
-  // |DlImage|
   virtual size_t GetApproximateByteSize() const override;
 
   // |DlImage|

@@ -10,8 +10,6 @@
 #include <vector>
 
 #include "flutter/common/constants.h"
-#include "flutter/fml/paths.h"
-#include "flutter/shell/common/shorebird/shorebird.h"
 #include "flutter/shell/platform/common/app_lifecycle_state.h"
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -26,7 +24,6 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMouseCursorPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTimeConverter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
@@ -92,10 +89,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
 /**
  * Private interface declaration for FlutterEngine.
  */
-@interface FlutterEngine () <FlutterBinaryMessenger,
-                             FlutterMouseCursorPluginDelegate,
-                             FlutterKeyboardManagerDelegate,
-                             FlutterTextInputPluginDelegate>
+@interface FlutterEngine () <FlutterBinaryMessenger, FlutterMouseCursorPluginDelegate>
 
 /**
  * A mutable array that holds one bool value that determines if responses to platform messages are
@@ -461,6 +455,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // A method channel for miscellaneous platform functionality.
   FlutterMethodChannel* _platformChannel;
 
+  FlutterThreadSynchronizer* _threadSynchronizer;
+
   // Whether the application is currently the active application.
   BOOL _active;
 
@@ -477,12 +473,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // Weak reference to last view that received a pointer event. This is used to
   // pair cursor change with a view.
   __weak FlutterView* _lastViewWithPointerEvent;
-
-  // Pointer to a keyboard manager.
-  FlutterKeyboardManager* _keyboardManager;
-
-  // The text input plugin that handles text editing state for text fields.
-  FlutterTextInputPlugin* _textInputPlugin;
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
@@ -509,9 +499,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
-
-  [FlutterRunLoop ensureMainLoopInitialized];
-
   _pasteboard = [[FlutterPasteboard alloc] init];
   _active = NO;
   _visible = NO;
@@ -526,8 +513,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
   [_isResponseValid addObject:@YES];
-  _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
-  _textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self];
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
@@ -542,6 +527,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                            object:nil];
 
   _platformViewController = [[FlutterPlatformViewController alloc] init];
+  _threadSynchronizer = [[FlutterThreadSynchronizer alloc] init];
   // The macOS compositor must be initialized in the initializer because it is
   // used when adding views, which might happen before runWithEntrypoint.
   _macOSCompositor = std::make_unique<flutter::FlutterCompositor>(
@@ -596,65 +582,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   if (_aotData) {
     _embedderAPI.CollectAOTData(_aotData);
   }
-}
-
-- (FlutterTaskRunnerDescription)createPlatformThreadTaskDescription {
-  static size_t sTaskRunnerIdentifiers = 0;
-  FlutterTaskRunnerDescription cocoa_task_runner_description = {
-      .struct_size = sizeof(FlutterTaskRunnerDescription),
-      // Retain for use in post_task_callback. Released in destruction_callback.
-      .user_data = (__bridge_retained void*)self,
-      .runs_task_on_current_thread_callback = [](void* user_data) -> bool {
-        return [[NSThread currentThread] isMainThread];
-      },
-      .post_task_callback = [](FlutterTask task, uint64_t target_time_nanos,
-                               void* user_data) -> void {
-        FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
-        [engine postMainThreadTask:task targetTimeInNanoseconds:target_time_nanos];
-      },
-      .identifier = ++sTaskRunnerIdentifiers,
-      .destruction_callback =
-          [](void* user_data) {
-            // Balancing release for the retain when setting user_data above.
-            FlutterEngine* engine = (__bridge_transfer FlutterEngine*)user_data;
-            engine = nil;
-          },
-  };
-  return cocoa_task_runner_description;
-}
-
-- (BOOL)configureShorebird:(NSString**)patchPath {
-  NSLog(@"[shorebird] setting up non-linker shorebird");
-  NSString* bundlePath =
-      [[NSBundle bundleWithURL:[NSBundle.mainBundle.privateFrameworksURL
-                                   URLByAppendingPathComponent:@"App.framework"]] bundlePath];
-  bundlePath = [bundlePath stringByAppendingString:@"/App"];
-  NSString* assetsPath = _project.assetsPath;
-  NSURL* shorebirdYamlPath = [NSURL URLWithString:@"shorebird.yaml"
-                                    relativeToURL:[NSURL fileURLWithPath:assetsPath]];
-  NSString* shorebirdYamlContents = [NSString stringWithContentsOfURL:shorebirdYamlPath
-                                                             encoding:NSUTF8StringEncoding
-                                                                error:nil];
-  NSString* appVersion =
-      [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-  NSString* appBuildNumber = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
-  std::string cache_path =
-      fml::paths::JoinPaths({getenv("HOME"), "Library", "Application Support", "shorebird"});
-  flutter::ReleaseVersion release_version = {appVersion.UTF8String, appBuildNumber.UTF8String};
-  flutter::ShorebirdConfigArgs shorebird_args(cache_path, cache_path, bundlePath.UTF8String,
-                                              shorebirdYamlContents.UTF8String, release_version);
-  NSLog(@"[shorebird] calling ConfigureShorebird");
-  std::string patch_path;
-  auto res = flutter::ConfigureShorebird(shorebird_args, patch_path);
-  if (!res) {
-    NSLog(@"[shorebird] ConfigureShorebird failed");
-    return NO;
-  }
-
-  NSLog(@"[shorebird] ConfigureShorebird success!");
-  *patchPath = [NSString stringWithUTF8String:patch_path.c_str()];
-  NSLog(@"[shorebird] patchPath: %@", *patchPath);
-  return YES;
 }
 
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint {
@@ -715,50 +642,34 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     std::cout << message << std::endl;
   };
 
-  flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
-
-  BOOL mergedPlatformUIThread = NO;
-  NSNumber* enableMergedPlatformUIThread =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
-  if (enableMergedPlatformUIThread != nil) {
-    mergedPlatformUIThread = enableMergedPlatformUIThread.boolValue;
-  }
-
-  if (mergedPlatformUIThread) {
-    NSLog(@"Running with merged UI and platform thread. Experimental.");
-  }
-
-  // The task description needs to be created separately for platform task
-  // runner and UI task runner because each one has their own __bridge_retained
-  // engine user data.
-  FlutterTaskRunnerDescription platformTaskRunnerDescription =
-      [self createPlatformThreadTaskDescription];
-  std::optional<FlutterTaskRunnerDescription> uiTaskRunnerDescription;
-  if (mergedPlatformUIThread) {
-    uiTaskRunnerDescription = [self createPlatformThreadTaskDescription];
-  }
-
+  static size_t sTaskRunnerIdentifiers = 0;
+  const FlutterTaskRunnerDescription cocoa_task_runner_description = {
+      .struct_size = sizeof(FlutterTaskRunnerDescription),
+      // Retain for use in post_task_callback. Released in destruction_callback.
+      .user_data = (__bridge_retained void*)self,
+      .runs_task_on_current_thread_callback = [](void* user_data) -> bool {
+        return [[NSThread currentThread] isMainThread];
+      },
+      .post_task_callback = [](FlutterTask task, uint64_t target_time_nanos,
+                               void* user_data) -> void {
+        FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
+        [engine postMainThreadTask:task targetTimeInNanoseconds:target_time_nanos];
+      },
+      .identifier = ++sTaskRunnerIdentifiers,
+      .destruction_callback =
+          [](void* user_data) {
+            // Balancing release for the retain when setting user_data above.
+            FlutterEngine* engine = (__bridge_transfer FlutterEngine*)user_data;
+            engine = nil;
+          },
+  };
   const FlutterCustomTaskRunners custom_task_runners = {
       .struct_size = sizeof(FlutterCustomTaskRunners),
-      .platform_task_runner = &platformTaskRunnerDescription,
-      .thread_priority_setter = SetThreadPriority,
-      .ui_task_runner = uiTaskRunnerDescription ? &uiTaskRunnerDescription.value() : nullptr,
-  };
+      .platform_task_runner = &cocoa_task_runner_description,
+      .thread_priority_setter = SetThreadPriority};
   flutterArguments.custom_task_runners = &custom_task_runners;
 
-  NSString* elfPath;
-  BOOL configureShorebirdRes = [self configureShorebird:&elfPath];
-  if (!configureShorebirdRes) {
-    // No patch exists, or we failed to configure shorebird. This is a fallback.
-    // Upstream, this code lives in -(void)loadAOTData:.
-    //
-    // This is the location where the test fixture places the snapshot file.
-    // For applications built by Flutter tool, this is in "App.framework".
-    elfPath = [NSString pathWithComponents:@[ _project.assetsPath, @"app_elf_snapshot.so" ]];
-  }
-
-  [self loadAOTData:elfPath];
-
+  [self loadAOTData:_project.assetsPath];
   if (_aotData) {
     flutterArguments.aot_data = _aotData;
   }
@@ -776,7 +687,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   };
 
   FlutterRendererConfig rendererConfig = [_renderer createRendererConfig];
-
   FlutterEngineResult result = _embedderAPI.Initialize(
       FLUTTER_ENGINE_VERSION, &rendererConfig, &flutterArguments, (__bridge void*)(self), &_engine);
   if (result != kSuccess) {
@@ -806,7 +716,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   return YES;
 }
 
-- (void)loadAOTData:(NSString*)elfPath {
+- (void)loadAOTData:(NSString*)assetsDir {
   if (!_embedderAPI.RunsAOTCompiledDartCode()) {
     return;
   }
@@ -814,8 +724,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   BOOL isDirOut = false;  // required for NSFileManager fileExistsAtPath.
   NSFileManager* fileManager = [NSFileManager defaultManager];
 
+  // This is the location where the test fixture places the snapshot file.
+  // For applications built by Flutter tool, this is in "App.framework".
+  NSString* elfPath = [NSString pathWithComponents:@[ assetsDir, @"app_elf_snapshot.so" ]];
+
   if (![fileManager fileExistsAtPath:elfPath isDirectory:&isDirOut]) {
-    FML_LOG(INFO) << "in loadAOTData, elfPath does not exist: " << elfPath.UTF8String;
     return;
   }
 
@@ -840,7 +753,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   NSAssert([_viewControllers objectForKey:@(viewIdentifier)] == nil,
            @"The requested view ID is occupied.");
   [_viewControllers setObject:controller forKey:@(viewIdentifier)];
-  [controller setUpWithEngine:self viewIdentifier:viewIdentifier];
+  [controller setUpWithEngine:self
+               viewIdentifier:viewIdentifier
+           threadSynchronizer:_threadSynchronizer];
   NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
   // Verify that the controller's property are updated accordingly. Failing the
   // assertions is likely because either the FlutterViewController or the
@@ -868,7 +783,13 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                           [timeConverter CAMediaTimeToEngineTime:targetTimestamp];
                       FlutterEngine* engine = weakSelf;
                       if (engine) {
-                        engine->_embedderAPI.OnVsync(_engine, baton, timeNanos, targetTimeNanos);
+                        // It is a bit unfortunate that embedder requires OnVSync call on
+                        // platform thread just to immediately redispatch it to UI thread.
+                        // We are already on UI thread right now, but have to do the
+                        // extra hop to main thread.
+                        [engine->_threadSynchronizer performOnPlatformThread:^{
+                          engine->_embedderAPI.OnVsync(_engine, baton, timeNanos, targetTimeNanos);
+                        }];
                       }
                     }];
   FML_DCHECK([_vsyncWaiters objectForKey:@(viewController.viewIdentifier)] == nil);
@@ -1101,6 +1022,12 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _lastViewWithPointerEvent = [self viewControllerForIdentifier:kFlutterImplicitViewId].flutterView;
 }
 
+- (void)sendKeyEvent:(const FlutterKeyEvent&)event
+            callback:(FlutterKeyEventCallback)callback
+            userData:(void*)userData {
+  _embedderAPI.SendKeyEvent(_engine, &event, callback, userData);
+}
+
 - (void)setSemanticsEnabled:(BOOL)enabled {
   if (_semanticsEnabled == enabled) {
     return;
@@ -1197,23 +1124,14 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
     [nextViewController onPreEngineRestart];
   }
-  [_platformViewController reset];
-  _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
 }
 
-// This will be called on UI thread, which maybe or may not be platform thread,
-// depending on the configuration.
 - (void)onVSync:(uintptr_t)baton {
-  auto block = ^{
+  @synchronized(_vsyncWaiters) {
     // TODO(knopp): Use vsync waiter for correct view.
     // https://github.com/flutter/flutter/issues/142845
     FlutterVSyncWaiter* waiter = [_vsyncWaiters objectForKey:@(kFlutterImplicitViewId)];
     [waiter waitForVSync:baton];
-  };
-  if ([NSThread isMainThread]) {
-    block();
-  } else {
-    [FlutterRunLoop.mainRunLoop performBlock:block];
   }
 }
 
@@ -1225,6 +1143,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     return;
   }
 
+  [_threadSynchronizer shutdown];
+  _threadSynchronizer = nil;
+
   FlutterEngineResult result = _embedderAPI.Deinitialize(_engine);
   if (result != kSuccess) {
     NSLog(@"Could not de-initialize the Flutter engine: error %d", result);
@@ -1235,11 +1156,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     NSLog(@"Failed to shut down Flutter engine: error %d", result);
   }
   _engine = nullptr;
-}
-
-+ (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
-  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
-  return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
 }
 
 - (void)setUpPlatformViewChannel {
@@ -1421,6 +1337,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
 - (std::vector<std::string>)switches {
   return flutter::GetSwitchesFromEnvironment();
+}
+
+- (FlutterThreadSynchronizer*)testThreadSynchronizer {
+  return _threadSynchronizer;
 }
 
 #pragma mark - FlutterAppLifecycleDelegate
@@ -1606,37 +1526,34 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
 #pragma mark - Task runner integration
 
+- (void)runTaskOnEmbedder:(FlutterTask)task {
+  if (_engine) {
+    auto result = _embedderAPI.RunTask(_engine, &task);
+    if (result != kSuccess) {
+      NSLog(@"Could not post a task to the Flutter engine.");
+    }
+  }
+}
+
 - (void)postMainThreadTask:(FlutterTask)task targetTimeInNanoseconds:(uint64_t)targetTime {
   __weak FlutterEngine* weakSelf = self;
+  auto worker = ^{
+    [weakSelf runTaskOnEmbedder:task];
+  };
 
   const auto engine_time = _embedderAPI.GetCurrentTime();
-  [FlutterRunLoop.mainRunLoop
-      performBlock:^{
-        FlutterEngine* self = weakSelf;
-        if (self != nil && self->_engine != nil) {
-          auto result = _embedderAPI.RunTask(self->_engine, &task);
-          if (result != kSuccess) {
-            NSLog(@"Could not post a task to the Flutter engine.");
-          }
-        }
-      }
-        afterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC];
+  if (targetTime <= engine_time) {
+    dispatch_async(dispatch_get_main_queue(), worker);
+
+  } else {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, targetTime - engine_time),
+                   dispatch_get_main_queue(), worker);
+  }
 }
 
 // Getter used by test harness, only exposed through the FlutterEngine(Test) category
 - (flutter::FlutterCompositor*)macOSCompositor {
   return _macOSCompositor.get();
-}
-
-#pragma mark - FlutterKeyboardManagerDelegate
-
-/**
- * Dispatches the given pointer event data to engine.
- */
-- (void)sendKeyEvent:(const FlutterKeyEvent&)event
-            callback:(FlutterKeyEventCallback)callback
-            userData:(void*)userData {
-  _embedderAPI.SendKeyEvent(_engine, &event, callback, userData);
 }
 
 @end

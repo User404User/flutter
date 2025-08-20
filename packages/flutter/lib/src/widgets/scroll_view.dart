@@ -118,7 +118,7 @@ abstract class ScrollView extends StatelessWidget {
     this.cacheExtent,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.keyboardDismissBehavior,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.hitTestBehavior = HitTestBehavior.opaque,
@@ -374,14 +374,10 @@ abstract class ScrollView extends StatelessWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// {@template flutter.widgets.scroll_view.keyboardDismissBehavior}
-  /// The [ScrollViewKeyboardDismissBehavior] defines how this [ScrollView] will
+  /// [ScrollViewKeyboardDismissBehavior] the defines how this [ScrollView] will
   /// dismiss the keyboard automatically.
   /// {@endtemplate}
-  ///
-  /// If [keyboardDismissBehavior] is null then it will fallback to
-  /// [scrollBehavior]. If that is also null, the inherited
-  /// [ScrollBehavior.getKeyboardDismissBehavior] will be used.
-  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
@@ -509,12 +505,7 @@ abstract class ScrollView extends StatelessWidget {
             ? PrimaryScrollController.none(child: scrollable)
             : scrollable;
 
-    final ScrollViewKeyboardDismissBehavior effectiveKeyboardDismissBehavior =
-        keyboardDismissBehavior ??
-        scrollBehavior?.getKeyboardDismissBehavior(context) ??
-        ScrollConfiguration.of(context).getKeyboardDismissBehavior(context);
-
-    if (effectiveKeyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
+    if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
       return NotificationListener<ScrollUpdateNotification>(
         child: scrollableResult,
         onNotification: (ScrollUpdateNotification notification) {
@@ -787,7 +778,7 @@ class CustomScrollView extends ScrollView {
   /// be laid out in a viewport (i.e. when scrolling).
   ///
   /// Typically, the simplest way to combine boxes into a sliver environment is
-  /// to use a [SliverList] (maybe using a [ListView], which is a convenient
+  /// to use a [SliverList] (maybe using a [ListView, which is a convenient
   /// combination of a [CustomScrollView] and a [SliverList]). In rare cases,
   /// e.g. if a single [Divider] widget is needed between two [SliverGrid]s,
   /// a [SliverToBoxAdapter] can be used to wrap the box widgets.

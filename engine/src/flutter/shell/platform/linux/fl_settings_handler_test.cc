@@ -19,7 +19,8 @@ TEST(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
 
   EXPECT_CALL(settings, fl_settings_get_clock_format(
@@ -77,7 +78,8 @@ TEST(FlSettingsHandlerTest, PlatformBrightness) {
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
 
   EXPECT_CALL(settings, fl_settings_get_color_scheme(
@@ -133,7 +135,8 @@ TEST(FlSettingsHandlerTest, TextScaleFactor) {
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
 
   EXPECT_CALL(settings, fl_settings_get_text_scaling_factor(

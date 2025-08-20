@@ -51,9 +51,6 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   SkISize dimensions() const override;
 
   // |DlImage|
-  DlISize GetSize() const override;
-
-  // |DlImage|
   size_t GetApproximateByteSize() const override;
 
   // |DlImage|

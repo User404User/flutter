@@ -134,7 +134,7 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
 
   @override
-  VisualDensity get visualDensity => VisualDensity.standard;
+  VisualDensity get visualDensity => _theme.visualDensity;
 
   @override
   OutlinedBorder get shape => const RoundedRectangleBorder(

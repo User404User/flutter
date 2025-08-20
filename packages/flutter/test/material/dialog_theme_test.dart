@@ -416,6 +416,7 @@ void main() {
       alignment: Alignment.topRight,
     );
     final ThemeData theme = ThemeData(
+      useMaterial3: true,
       dialogTheme: const DialogThemeData(alignment: Alignment.bottomLeft),
     );
 
@@ -427,7 +428,10 @@ void main() {
       find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
     );
     expect(bottomLeft.dx, 480.0);
-    expect(bottomLeft.dy, 124.0);
+    if (!kIsWeb || isSkiaWeb) {
+      // https://github.com/flutter/flutter/issues/99933
+      expect(bottomLeft.dy, 124.0);
+    }
   });
 
   testWidgets('Material2 - Dialog alignment takes priority over theme', (
@@ -459,7 +463,10 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(16.0)),
     );
     const AlertDialog dialog = AlertDialog(title: Text('Title'), actions: <Widget>[]);
-    final ThemeData theme = ThemeData(dialogTheme: const DialogThemeData(shape: customBorder));
+    final ThemeData theme = ThemeData(
+      useMaterial3: true,
+      dialogTheme: const DialogThemeData(shape: customBorder),
+    );
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -538,7 +545,7 @@ void main() {
   testWidgets('Material3 - Custom Icon Color - Theme - lowest preference', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
     const AlertDialog dialog = AlertDialog(icon: Icon(Icons.ac_unit), actions: <Widget>[]);
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
@@ -606,7 +613,10 @@ void main() {
     const String titleText = 'Title';
     const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(title: Text(titleText));
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(headlineSmall: titleTextStyle));
+    final ThemeData theme = ThemeData(
+      useMaterial3: true,
+      textTheme: const TextTheme(headlineSmall: titleTextStyle),
+    );
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -720,7 +730,10 @@ void main() {
     const String contentText = 'Content';
     const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(content: Text(contentText));
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(bodyMedium: contentTextStyle));
+    final ThemeData theme = ThemeData(
+      useMaterial3: true,
+      textTheme: const TextTheme(bodyMedium: contentTextStyle),
+    );
 
     await tester.pumpWidget(_appWithDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));

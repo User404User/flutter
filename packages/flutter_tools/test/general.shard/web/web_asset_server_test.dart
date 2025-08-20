@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
-import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
@@ -237,9 +236,8 @@ void main() {
 
       expect(response.statusCode, HttpStatus.ok);
       final Map<String, String> headers = response.headers;
-      for (final MapEntry<String, String> entry in kMultiThreadedHeaders.entries) {
-        expect(headers, containsPair(entry.key, entry.value));
-      }
+      expect(headers['Cross-Origin-Opener-Policy'], 'same-origin');
+      expect(headers['Cross-Origin-Embedder-Policy'], 'credentialless');
     },
   );
 

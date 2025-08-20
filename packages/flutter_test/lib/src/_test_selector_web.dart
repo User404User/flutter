@@ -7,6 +7,7 @@ import 'dart:js_interop';
 import 'dart:ui' as ui;
 import 'dart:ui_web' as ui_web;
 
+import 'package:flutter/foundation.dart' show isSkiaWeb;
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_api/backend.dart';
 
@@ -42,7 +43,13 @@ Future<void> runWebTest(WebTest test) async {
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;
 
-  goldenFileComparator = HttpProxyGoldenComparator(test.goldensUri);
+  // TODO(matanlurey): Remove webGoldenComparator when dart:html is deprecated.
+  // See https://github.com/flutter/flutter/issues/145954.
+  if (isSkiaWeb) {
+    goldenFileComparator = HttpProxyGoldenComparator(test.goldensUri);
+  } else {
+    webGoldenComparator = DefaultWebGoldenComparator(test.goldensUri);
+  }
 
   /// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window
   /// size for the purposes of testing.

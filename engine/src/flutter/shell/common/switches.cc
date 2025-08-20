@@ -532,11 +532,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.merged_platform_ui_thread = !command_line.HasOption(
       FlagForSwitch(Switch::DisableMergedPlatformUIThread));
 
-  settings.impeller_enable_lazy_shader_mode =
-      command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
-  settings.impeller_antialiased_lines =
-      command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
-
   return settings;
 }
 

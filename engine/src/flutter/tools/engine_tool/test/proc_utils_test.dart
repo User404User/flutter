@@ -38,9 +38,9 @@ void main() {
         ),
         processRunner: ProcessRunner(
           processManager: FakeProcessManager(
-            onStart: (FakeCommandLogEntry entry) {
-              runHistory.add(entry.command);
-              switch (entry.command) {
+            onStart: (List<String> command) {
+              runHistory.add(command);
+              switch (command) {
                 case ['success']:
                   return FakeProcess(stdout: 'stdout success');
                 case ['failure']:
@@ -49,7 +49,7 @@ void main() {
                   return FakeProcess();
               }
             },
-            onRun: (FakeCommandLogEntry entry) {
+            onRun: (List<String> command) {
               // Should not be executed.
               assert(false);
               return io.ProcessResult(81, 1, '', '');

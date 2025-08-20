@@ -164,14 +164,18 @@ abstract class Route<T> extends _RoutePlaceholder {
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
   ///
-  /// {@template flutter.widgets.navigator.Route.requestFocus}
   /// If [requestFocus] is not provided, the value of [Navigator.requestFocus] is
   /// used instead.
-  /// {@endtemplate}
   Route({RouteSettings? settings, bool? requestFocus})
     : _settings = settings ?? const RouteSettings(),
       _requestFocus = requestFocus {
-    assert(debugMaybeDispatchCreated('widgets', 'Route<T>', this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$Route<$T>',
+        object: this,
+      );
+    }
   }
 
   /// When the route state is updated, request focus if the current route is at the top.
@@ -572,7 +576,9 @@ abstract class Route<T> extends _RoutePlaceholder {
     _navigator = null;
     _restorationScopeId.dispose();
     _disposeCompleter.complete();
-    assert(debugMaybeDispatchDisposed(this));
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
   }
 
   /// Whether this route is the top-most route on the navigator.
@@ -946,12 +952,7 @@ abstract class RouteTransitionRecord {
   /// During [TransitionDelegate.resolve], this can be called on an exiting
   /// route to indicate that the route should be removed from the [Navigator]
   /// without completing and without an animated transition.
-  @Deprecated(
-    'Call markForComplete instead. '
-    'This will let route associated future to complete when route is removed. '
-    'This feature was deprecated after v3.27.0-1.0.pre.',
-  )
-  void markForRemove() => markForComplete();
+  void markForRemove();
 }
 
 /// The delegate that decides how pages added and removed from [Navigator.pages]
@@ -986,11 +987,11 @@ abstract class RouteTransitionRecord {
 ///     }
 ///     for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
 ///       if (exitingPageRoute.isWaitingForExitingDecision) {
-///        exitingPageRoute.markForComplete();
+///        exitingPageRoute.markForRemove();
 ///        final List<RouteTransitionRecord>? pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
 ///        if (pagelessRoutes != null) {
 ///          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-///             pagelessRoute.markForComplete();
+///             pagelessRoute.markForRemove();
 ///           }
 ///        }
 ///       }
@@ -1111,7 +1112,8 @@ abstract class TransitionDelegate<T> {
   /// route requires explicit decision on how it should transition off the
   /// Navigator. To make a decision for a removed route, call
   /// [RouteTransitionRecord.markForPop],
-  /// [RouteTransitionRecord.markForComplete]. It is possible that decisions are
+  /// [RouteTransitionRecord.markForComplete] or
+  /// [RouteTransitionRecord.markForRemove]. It is possible that decisions are
   /// not required for routes in the `locationToExitingPageRoute`. This can
   /// happen if the routes have already been popped in earlier page updates and
   /// are still waiting for popping animations to finish. In such case, those
@@ -1157,6 +1159,8 @@ abstract class TransitionDelegate<T> {
   ///    without an animated transition.
   ///  * [RouteTransitionRecord.markForPop], which makes route exit the screen
   ///    with an animated transition.
+  ///  * [RouteTransitionRecord.markForRemove], which does not complete the
+  ///    route and makes it exit the screen without an animated transition.
   ///  * [RouteTransitionRecord.markForComplete], which completes the route and
   ///    makes it exit the screen without an animated transition.
   ///  * [DefaultTransitionDelegate.resolve], which implements the default way
@@ -1250,12 +1254,6 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 ///
 /// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
 const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = TraversalEdgeBehavior.parentScope;
-
-/// The default value of [Navigator.routeDirectionalTraversalEdgeBehavior].
-///
-/// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
-const TraversalEdgeBehavior kDefaultRouteDirectionalTraversalEdgeBehavior =
-    TraversalEdgeBehavior.stop;
 
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
@@ -1578,7 +1576,6 @@ class Navigator extends StatefulWidget {
     this.requestFocus = true,
     this.restorationScopeId,
     this.routeTraversalEdgeBehavior = kDefaultRouteTraversalEdgeBehavior,
-    this.routeDirectionalTraversalEdgeBehavior = kDefaultRouteDirectionalTraversalEdgeBehavior,
     this.onDidRemovePage,
   });
 
@@ -1726,12 +1723,6 @@ class Navigator extends StatefulWidget {
   /// not rendered by Flutter.
   /// {@endtemplate}
   final TraversalEdgeBehavior routeTraversalEdgeBehavior;
-
-  /// Controls the directional transfer of focus beyond the first and the last
-  /// items of a focus scope that defines focus traversal of widgets within a route.
-  ///
-  /// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
-  final TraversalEdgeBehavior routeDirectionalTraversalEdgeBehavior;
 
   /// The name for the default route of the application.
   ///
@@ -2183,9 +2174,9 @@ class Navigator extends StatefulWidget {
   /// and [Route.didChangeNext]). If the [Navigator] has any
   /// [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didPush] and [NavigatorObserver.didRemove]). The
-  /// removed routes are disposed, once the new route has finished animating,
-  /// and the futures that had been returned from pushing those routes
-  /// will complete.
+  /// removed routes are disposed, without being notified, once the new route
+  /// has finished animating. The futures that had been returned from pushing
+  /// those routes will not complete.
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -2459,7 +2450,7 @@ class Navigator extends StatefulWidget {
   /// they will be notified as well (see [NavigatorObserver.didPush] and
   /// [NavigatorObserver.didRemove]). The removed routes are disposed of and
   /// notified, once the new route has finished animating. The futures that had
-  /// been returned from pushing those routes will complete.
+  /// been returned from pushing those routes will not complete.
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -2540,14 +2531,16 @@ class Navigator extends StatefulWidget {
   /// _does_ animate the new route, and delays removing the old route until the
   /// new route has finished animating.
   ///
-  /// The removed route is removed and completed with a `null` value.
+  /// The removed route is removed without being completed, so this method does
+  /// not take a return value argument.
   ///
   /// The new route, the route below the new route (if any), and the route above
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didReplace]). The removed route is disposed with its
-  /// future completed.
+  /// [NavigatorObserver.didReplace]). The removed route is disposed without
+  /// being notified. The future that had been returned from pushing that routes
+  /// will not complete.
   ///
   /// This can be useful in combination with [removeRouteBelow] when building a
   /// non-linear user experience.
@@ -2609,14 +2602,16 @@ class Navigator extends StatefulWidget {
   /// _does_ animate the new route, and delays removing the old route until the
   /// new route has finished animating.
   ///
-  /// The removed route is removed and completed with a `null` value.
+  /// The removed route is removed without being completed, so this method does
+  /// not take a return value argument.
   ///
   /// The new route, the route below the new route (if any), and the route above
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didReplace]). The removed route is disposed with its
-  /// future completed.
+  /// [NavigatorObserver.didReplace]). The removed route is disposed without
+  /// being notified. The future that had been returned from pushing that routes
+  /// will not complete.
   ///
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
@@ -2807,35 +2802,27 @@ class Navigator extends StatefulWidget {
   /// the given context, and [Route.dispose] it.
   ///
   /// {@template flutter.widgets.navigator.removeRoute}
-  /// No animations are run as a result of this method call.
+  /// The removed route is removed without being completed, so this method does
+  /// not take a return value argument. No animations are run as a result of
+  /// this method call.
   ///
   /// The routes below and above the removed route are notified (see
   /// [Route.didChangeNext] and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didRemove]). The removed route is disposed with its
-  /// future completed.
+  /// [NavigatorObserver.didRemove]). The removed route is disposed without
+  /// being notified. The future that had been returned from pushing that routes
+  /// will not complete.
   ///
   /// The given `route` must be in the history; this method will throw an
   /// exception if it is not.
-  ///
-  /// If non-null, `result` will be used as the result of the route that is
-  /// removed; the future that had been returned from pushing the removed route
-  /// will complete with `result`. If provided, must match the type argument of
-  /// the class of the popped route (`T`).
-  ///
-  /// The `T` type argument is the type of the return value of the popped route.
-  ///
-  /// The type of `result`, if provided, must match the type argument of the
-  /// class of the removed route (`T`).
   ///
   /// Ongoing gestures within the current route are canceled.
   /// {@endtemplate}
   ///
   /// This method is used, for example, to instantly dismiss dropdown menus that
   /// are up when the screen's orientation changes.
-  @optionalTypeArgs
-  static void removeRoute<T extends Object?>(BuildContext context, Route<T> route, [T? result]) {
-    return Navigator.of(context).removeRoute<T>(route, result);
+  static void removeRoute(BuildContext context, Route<dynamic> route) {
+    return Navigator.of(context).removeRoute(route);
   }
 
   /// Immediately remove a route from the navigator that most tightly encloses
@@ -2843,36 +2830,24 @@ class Navigator extends StatefulWidget {
   /// one below the given `anchorRoute`.
   ///
   /// {@template flutter.widgets.navigator.removeRouteBelow}
-  /// No animations are run as a result of this method call.
+  /// The removed route is removed without being completed, so this method does
+  /// not take a return value argument. No animations are run as a result of
+  /// this method call.
   ///
   /// The routes below and above the removed route are notified (see
   /// [Route.didChangeNext] and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didRemove]). The removed route is disposed with its
-  /// future completed.
+  /// [NavigatorObserver.didRemove]). The removed route is disposed without
+  /// being notified. The future that had been returned from pushing that routes
+  /// will not complete.
   ///
   /// The given `anchorRoute` must be in the history and must have a route below
   /// it; this method will throw an exception if it is not or does not.
   ///
-  /// If non-null, `result` will be used as the result of the route that is
-  /// removed; the future that had been returned from pushing the removed route
-  /// will complete with `result`. If provided, must match the type argument of
-  /// the class of the popped route (`T`).
-  ///
-  /// The `T` type argument is the type of the return value of the popped route.
-  ///
-  /// The type of `result`, if provided, must match the type argument of the
-  /// class of the removed route (`T`).
-  ///
   /// Ongoing gestures within the current route are canceled.
   /// {@endtemplate}
-  @optionalTypeArgs
-  static void removeRouteBelow<T extends Object?>(
-    BuildContext context,
-    Route<T> anchorRoute, [
-    T? result,
-  ]) {
-    return Navigator.of(context).removeRouteBelow<T>(anchorRoute, result);
+  static void removeRouteBelow(BuildContext context, Route<dynamic> anchorRoute) {
+    return Navigator.of(context).removeRouteBelow(anchorRoute);
   }
 
   /// The state from the closest instance of this class that encloses the given
@@ -3141,7 +3116,15 @@ class _RouteEntry extends RouteTransitionRecord {
              initialState == _RouteLifecycle.replace,
        ),
        currentState = initialState {
-    assert(debugMaybeDispatchCreated('widgets', '_RouteEntry', this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_RouteEntry',
+        object: this,
+      );
+    }
   }
 
   @override
@@ -3352,6 +3335,21 @@ class _RouteEntry extends RouteTransitionRecord {
 
   bool _reportRemovalToObserver = true;
 
+  // Route is removed without being completed.
+  void remove({bool isReplaced = false}) {
+    assert(
+      !pageBased || isWaitingForExitingDecision,
+      'A page-based route cannot be completed using imperative api, provide a '
+      'new list without the corresponding Page to Navigator.pages instead. ',
+    );
+    if (currentState.index >= _RouteLifecycle.remove.index) {
+      return;
+    }
+    assert(isPresent);
+    _reportRemovalToObserver = !isReplaced;
+    currentState = _RouteLifecycle.remove;
+  }
+
   // Route completes with `result` and is removed.
   void complete<T>(T result, {bool isReplaced = false}) {
     assert(
@@ -3379,7 +3377,11 @@ class _RouteEntry extends RouteTransitionRecord {
   /// before disposing.
   void forcedDispose() {
     assert(currentState.index < _RouteLifecycle.disposed.index);
-    assert(debugMaybeDispatchDisposed(this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     currentState = _RouteLifecycle.disposed;
     route.dispose();
   }
@@ -3543,6 +3545,18 @@ class _RouteEntry extends RouteTransitionRecord {
       'out.',
     );
     complete<dynamic>(result);
+    _isWaitingForExitingDecision = false;
+  }
+
+  @override
+  void markForRemove() {
+    assert(
+      !isWaitingForEnteringDecision && isWaitingForExitingDecision && isPresent,
+      'This route cannot be marked for remove. Either a decision has already '
+      'been made or it does not require an explicit decision on how to transition '
+      'out.',
+    );
+    remove();
     _isWaitingForExitingDecision = false;
   }
 
@@ -5288,7 +5302,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _history.add(entry);
     while (index >= 0 && !predicate(_history[index].route)) {
       if (_history[index].isPresent) {
-        _history[index].complete(null);
+        _history[index].remove();
       }
       index -= 1;
     }
@@ -5373,7 +5387,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     );
     final bool wasCurrent = oldRoute.isCurrent;
     _history.insert(index + 1, entry);
-    _history[index].complete(null, isReplaced: true);
+    _history[index].remove(isReplaced: true);
     _flushHistoryUpdates();
     assert(() {
       _debugLocked = false;
@@ -5463,7 +5477,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
     assert(index >= 0, 'There are no routes below the specified anchorRoute.');
     _history.insert(index + 1, entry);
-    _history[index].complete(null, isReplaced: true);
+    _history[index].remove(isReplaced: true);
     _flushHistoryUpdates();
     assert(() {
       _debugLocked = false;
@@ -5627,8 +5641,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.
   ///
   /// {@macro flutter.widgets.navigator.removeRoute}
-  @optionalTypeArgs
-  void removeRoute<T extends Object?>(Route<T> route, [T? result]) {
+  void removeRoute(Route<dynamic> route) {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
@@ -5637,7 +5650,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(route._navigator == this);
     final bool wasCurrent = route.isCurrent;
     final _RouteEntry entry = _history.firstWhere(_RouteEntry.isRoutePredicate(route));
-    entry.complete(result);
+    entry.remove();
     _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       _debugLocked = false;
@@ -5652,8 +5665,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// route to be removed is the one below the given `anchorRoute`.
   ///
   /// {@macro flutter.widgets.navigator.removeRouteBelow}
-  @optionalTypeArgs
-  void removeRouteBelow<T extends Object?>(Route<T> anchorRoute, [T? result]) {
+  void removeRouteBelow(Route<dynamic> anchorRoute) {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
@@ -5674,7 +5686,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       index -= 1;
     }
     assert(index >= 0, 'There are no routes below the specified anchorRoute.');
-    _history[index].complete(result);
+    _history[index].remove();
     _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       _debugLocked = false;

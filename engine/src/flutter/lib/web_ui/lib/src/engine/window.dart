@@ -11,6 +11,7 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
 import 'browser_detection.dart';
+import 'configuration.dart';
 import 'display.dart';
 import 'dom.dart';
 import 'initialization.dart';
@@ -72,6 +73,7 @@ class EngineFlutterView implements ui.FlutterView {
     _resizeSubscription = onResize.listen(_didResize);
     _globalHtmlAttributes.applyAttributes(
       viewId: viewId,
+      autoDetectRenderer: FlutterConfiguration.flutterWebAutoDetect,
       rendererTag: renderer.rendererTag,
       buildMode: buildMode,
     );
@@ -653,6 +655,50 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
       }
       return false;
     });
+  }
+
+  // TODO(mdebbar): Deprecate this and remove it.
+  // https://github.com/flutter/flutter/issues/127395
+  void debugOverrideDevicePixelRatio(double? value) {
+    assert(() {
+      printWarning(
+        'The window.debugOverrideDevicePixelRatio API is deprecated and will '
+        'be removed in a future release. Please use '
+        '`debugOverrideDevicePixelRatio` from `dart:ui_web` instead.',
+      );
+      return true;
+    }());
+    display.debugOverrideDevicePixelRatio(value);
+  }
+
+  // TODO(mdebbar): Deprecate this and remove it.
+  // https://github.com/flutter/flutter/issues/127395
+  ui.Size? get webOnlyDebugPhysicalSizeOverride {
+    assert(() {
+      printWarning(
+        'The webOnlyDebugPhysicalSizeOverride API is deprecated and will be '
+        'removed in a future release. Please use '
+        '`SingletonFlutterWindow.debugPhysicalSizeOverride` from `dart:ui_web` '
+        'instead.',
+      );
+      return true;
+    }());
+    return debugPhysicalSizeOverride;
+  }
+
+  // TODO(mdebbar): Deprecate this and remove it.
+  // https://github.com/flutter/flutter/issues/127395
+  set webOnlyDebugPhysicalSizeOverride(ui.Size? value) {
+    assert(() {
+      printWarning(
+        'The webOnlyDebugPhysicalSizeOverride API is deprecated and will be '
+        'removed in a future release. Please use '
+        '`SingletonFlutterWindow.debugPhysicalSizeOverride` from `dart:ui_web` '
+        'instead.',
+      );
+      return true;
+    }());
+    debugPhysicalSizeOverride = value;
   }
 }
 

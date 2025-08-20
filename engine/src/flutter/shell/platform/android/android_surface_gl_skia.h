@@ -46,9 +46,7 @@ class AndroidSurfaceGLSkia final : public GPUSurfaceGLDelegate,
   bool ResourceContextClearCurrent() override;
 
   // |AndroidSurface|
-  bool SetNativeWindow(
-      fml::RefPtr<AndroidNativeWindow> window,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) override;
+  bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
   // |AndroidSurface|
   virtual std::unique_ptr<Surface> CreateSnapshotSurface() override;

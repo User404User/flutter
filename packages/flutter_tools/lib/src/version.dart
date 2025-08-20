@@ -168,26 +168,16 @@ abstract class FlutterVersion {
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel;
 
-  /// The SHA describing the commit being used for the SDK and tools provide in `flutter/flutter`.
-  ///
-  /// The _exception_ is the _engine artifacts_, which are downloaded separately as [engineRevision].
   String get frameworkRevision;
-
-  /// The shorter Git commit SHA of [frameworkRevion].
   String get frameworkRevisionShort => _shortGitRevision(frameworkRevision);
+
   String get frameworkVersion;
 
   String get devToolsVersion;
+
   String get dartSdkVersion;
 
-  /// The SHA describing the commit being used for the engine artifacts, which are compiled from the `engine/` sub-directory.
-  ///
-  /// When using a standard release build, or master channel, [engineRevision] will be identical to [frameworkRevision] since
-  /// the monorepository merge (as of 2025); however when modifying the framework (or engine) locally, or using a flag such
-  /// as `FLUTTER_PREBUILT_ENGINE_VERSION=...`, the engine SHA will be _different_ than the [frameworkRevision].
   String get engineRevision;
-
-  /// The shorter Git commit SHA of [engineRevision].
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
   // This is static as it is called from a constructor.
@@ -197,23 +187,17 @@ abstract class FlutterVersion {
 
   final String flutterRoot;
 
-  String _getTimeSinceCommit({String? revision}) {
-    return _runGit(
-      FlutterVersion.gitLog(<String>[
-        '-n',
-        '1',
-        '--pretty=format:%ar',
-        if (revision != null) revision,
-      ]).join(' '),
+  String? _frameworkAge;
+
+  // TODO(fujino): calculate this relative to frameworkCommitDate for
+  // _FlutterVersionFromFile so we don't need a git call.
+  String get frameworkAge {
+    return _frameworkAge ??= _runGit(
+      FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
       globals.processUtils,
       flutterRoot,
     );
   }
-
-  // TODO(fujino): calculate this relative to frameworkCommitDate for
-  // _FlutterVersionFromFile so we don't need a git call.
-  late final String frameworkAge = _getTimeSinceCommit();
-  late final String engineAge = _getTimeSinceCommit(revision: engineRevision);
 
   void ensureVersionFile();
 
@@ -225,16 +209,12 @@ abstract class FlutterVersion {
         'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText =
         'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
-    String engineText = 'Engine • revision $engineRevisionShort ($engineAge)';
-    if (engineCommitDate != null) {
-      engineText = '$engineText • $engineCommitDate';
-    }
-
+    final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion • DevTools $devToolsVersion';
 
     // Flutter 1.10.2-pre.69 • channel master • https://github.com/flutter/flutter.git
     // Framework • revision 340c158f32 (85 minutes ago) • 2018-10-26 11:27:22 -0400
-    // Engine • revision 9c46333e14 (96 minutes ago) • 2018-10-26 11:16:22 -0400
+    // Engine • revision 9c46333e14
     // Tools • Dart 2.1.0 (build 2.1.0-dev.8.0 bf26f760b1)
 
     return '$flutterText\n$frameworkText\n$engineText\n$toolsText';
@@ -247,24 +227,15 @@ abstract class FlutterVersion {
     'frameworkRevision': frameworkRevision,
     'frameworkCommitDate': frameworkCommitDate,
     'engineRevision': engineRevision,
-    if (engineCommitDate != null) 'engineCommitDate': engineCommitDate!,
     'dartSdkVersion': dartSdkVersion,
     'devToolsVersion': devToolsVersion,
     'flutterVersion': frameworkVersion,
   };
 
-  /// A date String describing the [frameworkRevision] commit.
+  /// A date String describing the last framework commit.
   ///
   /// If a git command fails, this will return a placeholder date.
   String get frameworkCommitDate;
-
-  /// A date String describing the [engineRevision] commit.
-  ///
-  /// If a git command fails, this will return a placeholder date.
-  ///
-  /// If no date was recorded ([engineCommitDate] is a newly stored field),
-  /// the date is omitted, and left `null`.
-  String? get engineCommitDate;
 
   /// Checks if the currently installed version of Flutter is up-to-date, and
   /// warns the user if it isn't.
@@ -468,7 +439,6 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required this.frameworkRevision,
     required this.frameworkCommitDate,
     required this.engineRevision,
-    required this.engineCommitDate,
     required this.dartSdkVersion,
     required this.devToolsVersion,
     required this.gitTagVersion,
@@ -493,7 +463,6 @@ class _FlutterVersionFromFile extends FlutterVersion {
         frameworkRevision: manifest['frameworkRevision']! as String,
         frameworkCommitDate: manifest['frameworkCommitDate']! as String,
         engineRevision: manifest['engineRevision']! as String,
-        engineCommitDate: manifest['engineCommitDate'] as String?,
         dartSdkVersion: manifest['dartSdkVersion']! as String,
         devToolsVersion: manifest['devToolsVersion']! as String,
         gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String),
@@ -535,9 +504,6 @@ class _FlutterVersionFromFile extends FlutterVersion {
   final String frameworkCommitDate;
 
   @override
-  final String? engineCommitDate;
-
-  @override
   final String engineRevision;
 
   @override
@@ -570,16 +536,6 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   String get frameworkCommitDate => _gitCommitDate(lenient: true, workingDirectory: flutterRoot);
-
-  // This uses 'late final' instead of 'String get' because unlike frameworkCommitDate, it is
-  // operating based on a 'gitRef: ...', which we can assume to be immutable in the context of
-  // this invocation (possibly HEAD could change, but gitRef should not).
-  @override
-  late final String engineCommitDate = _gitCommitDate(
-    gitRef: engineRevision,
-    lenient: true,
-    workingDirectory: flutterRoot,
-  );
 
   String? _repositoryUrl;
   @override

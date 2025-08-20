@@ -48,12 +48,6 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'vm.';
 
   @override
-  String get backButtonLabel => 'Terug';
-
-  @override
-  String get cancelButtonLabel => 'Kanselleer';
-
-  @override
   String get clearButtonLabel => 'Vee uit';
 
   @override
@@ -218,12 +212,6 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'ጥዋት';
-
-  @override
-  String get backButtonLabel => 'ተመለስ';
-
-  @override
-  String get cancelButtonLabel => 'ይቅር';
 
   @override
   String get clearButtonLabel => 'አጽዳ';
@@ -392,12 +380,6 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ص';
 
   @override
-  String get backButtonLabel => 'رجوع';
-
-  @override
-  String get cancelButtonLabel => 'الإلغاء';
-
-  @override
   String get clearButtonLabel => 'محو';
 
   @override
@@ -562,12 +544,6 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'পূৰ্বাহ্ন';
-
-  @override
-  String get backButtonLabel => 'উভতি যাওক';
-
-  @override
-  String get cancelButtonLabel => 'বাতিল কৰক';
 
   @override
   String get clearButtonLabel => 'মচক';
@@ -736,12 +712,6 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Geri';
-
-  @override
-  String get cancelButtonLabel => 'Ləğv edin';
-
-  @override
   String get clearButtonLabel => 'Silin';
 
   @override
@@ -906,12 +876,6 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'раніцы';
-
-  @override
-  String get backButtonLabel => 'Назад';
-
-  @override
-  String get cancelButtonLabel => 'Скасаваць';
 
   @override
   String get clearButtonLabel => 'Ачысціць';
@@ -1080,12 +1044,6 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Назад';
-
-  @override
-  String get cancelButtonLabel => 'Отказ';
-
-  @override
   String get clearButtonLabel => 'Изчистване';
 
   @override
@@ -1252,12 +1210,6 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'ফিরে যান';
-
-  @override
-  String get cancelButtonLabel => 'বাতিল করুন';
-
-  @override
   String get clearButtonLabel => 'মুছুন';
 
   @override
@@ -1399,178 +1351,6 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get todayLabel => 'আজ';
 }
 
-/// The translations for Tibetan (`bo`).
-class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
-  /// Create an instance of the translation bundle for Tibetan.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
-  const CupertinoLocalizationBo({
-    super.localeName = 'bo',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.weekdayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
-
-  @override
-  String get alertDialogLabel => 'གསལ་བརྡ།';
-
-  @override
-  String get anteMeridiemAbbreviation => 'སྔ་དྲོ';
-
-  @override
-  String get backButtonLabel => 'Back';
-
-  @override
-  String get cancelButtonLabel => 'ཕྱིར་འཐེན།';
-
-  @override
-  String get clearButtonLabel => 'གཙང་བཟོ།';
-
-  @override
-  String get copyButtonLabel => 'བཤུས།';
-
-  @override
-  String get cutButtonLabel => 'གཅོད།';
-
-  @override
-  String get datePickerDateOrderString => 'ymd';
-
-  @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
-
-  @override
-  String? get datePickerHourSemanticsLabelFew => null;
-
-  @override
-  String? get datePickerHourSemanticsLabelMany => null;
-
-  @override
-  String? get datePickerHourSemanticsLabelOne => r'$hour ཆུ་ཚོད།';
-
-  @override
-  String get datePickerHourSemanticsLabelOther => r'$hour ཆུ་ཚོད།';
-
-  @override
-  String? get datePickerHourSemanticsLabelTwo => null;
-
-  @override
-  String? get datePickerHourSemanticsLabelZero => null;
-
-  @override
-  String? get datePickerMinuteSemanticsLabelFew => null;
-
-  @override
-  String? get datePickerMinuteSemanticsLabelMany => null;
-
-  @override
-  String? get datePickerMinuteSemanticsLabelOne => 'སྐར་མ། 1';
-
-  @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minute སྐར་མ་དུ་མ།';
-
-  @override
-  String? get datePickerMinuteSemanticsLabelTwo => null;
-
-  @override
-  String? get datePickerMinuteSemanticsLabelZero => null;
-
-  @override
-  String get lookUpButtonLabel => 'འཚོལ་བ།';
-
-  @override
-  String get menuDismissLabel => 'ཐོ་གཞུང་འདོར་བ།';
-
-  @override
-  String get modalBarrierDismissLabel => 'འདོར་བ།';
-
-  @override
-  String get noSpellCheckReplacementsLabel => 'བརྗེས་ལེན་མ་རྙེད།';
-
-  @override
-  String get pasteButtonLabel => 'འཕོས་པ།';
-
-  @override
-  String get postMeridiemAbbreviation => 'ཕྱི་དྲོ།';
-
-  @override
-  String get searchTextFieldPlaceholderLabel => 'འཚོལ་བཤེར།';
-
-  @override
-  String get searchWebButtonLabel => 'དྲ་ཐོག་འཚོལ་བཤེར།';
-
-  @override
-  String get selectAllButtonLabel => 'ཚང་འདེམས།';
-
-  @override
-  String get shareButtonLabel => 'མཉམ་སྤྱོད།…';
-
-  @override
-  String get tabSemanticsLabelRaw => r'འཛར་གནོན་ $tabIndex ཡི $tabCount';
-
-  @override
-  String? get timerPickerHourLabelFew => null;
-
-  @override
-  String? get timerPickerHourLabelMany => null;
-
-  @override
-  String? get timerPickerHourLabelOne => 'ཆུ་ཚོད།';
-
-  @override
-  String get timerPickerHourLabelOther => 'ཆུ་ཚོད་དུ་མ།';
-
-  @override
-  String? get timerPickerHourLabelTwo => null;
-
-  @override
-  String? get timerPickerHourLabelZero => null;
-
-  @override
-  String? get timerPickerMinuteLabelFew => null;
-
-  @override
-  String? get timerPickerMinuteLabelMany => null;
-
-  @override
-  String? get timerPickerMinuteLabelOne => 'སྐར་མ།';
-
-  @override
-  String get timerPickerMinuteLabelOther => 'སྐར་མ།';
-
-  @override
-  String? get timerPickerMinuteLabelTwo => null;
-
-  @override
-  String? get timerPickerMinuteLabelZero => null;
-
-  @override
-  String? get timerPickerSecondLabelFew => null;
-
-  @override
-  String? get timerPickerSecondLabelMany => null;
-
-  @override
-  String? get timerPickerSecondLabelOne => 'སྐར་ཆ།';
-
-  @override
-  String get timerPickerSecondLabelOther => 'སྐར་ཆ།';
-
-  @override
-  String? get timerPickerSecondLabelTwo => null;
-
-  @override
-  String? get timerPickerSecondLabelZero => null;
-
-  @override
-  String get todayLabel => 'དེ་རིང་།';
-}
-
 /// The translations for Bosnian (`bs`).
 class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Bosnian.
@@ -1594,12 +1374,6 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'prijepodne';
-
-  @override
-  String get backButtonLabel => 'Nazad';
-
-  @override
-  String get cancelButtonLabel => 'Otkaži';
 
   @override
   String get clearButtonLabel => 'Obriši';
@@ -1768,12 +1542,6 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Enrere';
-
-  @override
-  String get cancelButtonLabel => 'Cancel·la';
-
-  @override
   String get clearButtonLabel => 'Esborra';
 
   @override
@@ -1938,12 +1706,6 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Zpět';
-
-  @override
-  String get cancelButtonLabel => 'Zrušit';
 
   @override
   String get clearButtonLabel => 'Vymazat';
@@ -2112,12 +1874,6 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Nôl';
-
-  @override
-  String get cancelButtonLabel => 'Canslo';
-
-  @override
   String get clearButtonLabel => 'Clirio';
 
   @override
@@ -2284,12 +2040,6 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Tilbage';
-
-  @override
-  String get cancelButtonLabel => 'Annuller';
-
-  @override
   String get clearButtonLabel => 'Ryd';
 
   @override
@@ -2454,12 +2204,6 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Zurück';
-
-  @override
-  String get cancelButtonLabel => 'Abbrechen';
 
   @override
   String get clearButtonLabel => 'Löschen';
@@ -2656,12 +2400,6 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'π.μ.';
 
   @override
-  String get backButtonLabel => 'Πίσω';
-
-  @override
-  String get cancelButtonLabel => 'Ακύρωση';
-
-  @override
   String get clearButtonLabel => 'Διαγραφή';
 
   @override
@@ -2826,12 +2564,6 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Back';
-
-  @override
-  String get cancelButtonLabel => 'Cancel';
 
   @override
   String get clearButtonLabel => 'Clear';
@@ -3240,12 +2972,6 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'a. m.';
-
-  @override
-  String get backButtonLabel => 'Atrás';
-
-  @override
-  String get cancelButtonLabel => 'Cancelar';
 
   @override
   String get clearButtonLabel => 'Borrar';
@@ -4334,12 +4060,6 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Tagasi';
-
-  @override
-  String get cancelButtonLabel => 'Tühista';
-
-  @override
   String get clearButtonLabel => 'Kustutamine';
 
   @override
@@ -4504,12 +4224,6 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Atzera';
-
-  @override
-  String get cancelButtonLabel => 'Utzi';
 
   @override
   String get clearButtonLabel => 'Garbitu';
@@ -4678,12 +4392,6 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ق.ظ.';
 
   @override
-  String get backButtonLabel => 'برگشتن';
-
-  @override
-  String get cancelButtonLabel => 'لغو';
-
-  @override
   String get clearButtonLabel => 'پاک کردن';
 
   @override
@@ -4848,12 +4556,6 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'ap';
-
-  @override
-  String get backButtonLabel => 'Takaisin';
-
-  @override
-  String get cancelButtonLabel => 'Peru';
 
   @override
   String get clearButtonLabel => 'Tyhjennä';
@@ -5022,12 +4724,6 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Bumalik';
-
-  @override
-  String get cancelButtonLabel => 'Kanselahin';
-
-  @override
   String get clearButtonLabel => 'I-clear';
 
   @override
@@ -5192,12 +4888,6 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Retour';
-
-  @override
-  String get cancelButtonLabel => 'Annuler';
 
   @override
   String get clearButtonLabel => 'Effacer';
@@ -5412,12 +5102,6 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
-  String get backButtonLabel => 'Atrás';
-
-  @override
-  String get cancelButtonLabel => 'Cancelar';
-
-  @override
   String get clearButtonLabel => 'Borrar';
 
   @override
@@ -5582,12 +5266,6 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Zurück';
-
-  @override
-  String get cancelButtonLabel => 'Abbrechen';
 
   @override
   String get clearButtonLabel => 'Löschen';
@@ -5756,12 +5434,6 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'પાછળ';
-
-  @override
-  String get cancelButtonLabel => 'રદ કરો';
-
-  @override
   String get clearButtonLabel => 'સાફ કરો';
 
   @override
@@ -5926,12 +5598,6 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'למסך הקודם';
-
-  @override
-  String get cancelButtonLabel => 'ביטול';
 
   @override
   String get clearButtonLabel => 'ניקוי';
@@ -6100,12 +5766,6 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'वापस जाएं';
-
-  @override
-  String get cancelButtonLabel => 'रद्द करें';
-
-  @override
   String get clearButtonLabel => 'मिटाएं';
 
   @override
@@ -6270,12 +5930,6 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'prijepodne';
-
-  @override
-  String get backButtonLabel => 'Natrag';
-
-  @override
-  String get cancelButtonLabel => 'Odustani';
 
   @override
   String get clearButtonLabel => 'Izbriši';
@@ -6444,12 +6098,6 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'de.';
 
   @override
-  String get backButtonLabel => 'Vissza';
-
-  @override
-  String get cancelButtonLabel => 'Mégse';
-
-  @override
   String get clearButtonLabel => 'Törlés';
 
   @override
@@ -6614,12 +6262,6 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Հետ';
-
-  @override
-  String get cancelButtonLabel => 'Չեղարկել';
 
   @override
   String get clearButtonLabel => 'Մաքրել';
@@ -6788,12 +6430,6 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Kembali';
-
-  @override
-  String get cancelButtonLabel => 'Batal';
-
-  @override
   String get clearButtonLabel => 'Hapus';
 
   @override
@@ -6958,12 +6594,6 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'f.h.';
-
-  @override
-  String get backButtonLabel => 'Til baka';
-
-  @override
-  String get cancelButtonLabel => 'Hætta við';
 
   @override
   String get clearButtonLabel => 'Hreinsa';
@@ -7132,12 +6762,6 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Indietro';
-
-  @override
-  String get cancelButtonLabel => 'Annulla';
-
-  @override
   String get clearButtonLabel => 'Cancella';
 
   @override
@@ -7302,12 +6926,6 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => '戻る';
-
-  @override
-  String get cancelButtonLabel => 'キャンセル';
 
   @override
   String get clearButtonLabel => '消去';
@@ -7476,12 +7094,6 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'უკან';
-
-  @override
-  String get cancelButtonLabel => 'გაუქმება';
-
-  @override
   String get clearButtonLabel => 'გასუფთავება';
 
   @override
@@ -7646,12 +7258,6 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'түстен кейін';
-
-  @override
-  String get backButtonLabel => 'Артқа';
-
-  @override
-  String get cancelButtonLabel => 'Бас тарту';
 
   @override
   String get clearButtonLabel => 'Өшіру';
@@ -7820,12 +7426,6 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'ថយក្រោយ';
-
-  @override
-  String get cancelButtonLabel => 'បោះបង់';
-
-  @override
   String get clearButtonLabel => 'សម្អាត';
 
   @override
@@ -7990,12 +7590,6 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
-
-  @override
-  String get backButtonLabel => '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cc6}';
-
-  @override
-  String get cancelButtonLabel => '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get clearButtonLabel => '\u{ca4}\u{cc6}\u{cb0}\u{cb5}\u{cc1}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
@@ -8164,12 +7758,6 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => '오전';
 
   @override
-  String get backButtonLabel => '뒤로';
-
-  @override
-  String get cancelButtonLabel => '취소';
-
-  @override
   String get clearButtonLabel => '삭제';
 
   @override
@@ -8182,7 +7770,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get datePickerDateOrderString => 'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_dayPeriod_time';
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
 
   @override
   String? get datePickerHourSemanticsLabelFew => null;
@@ -8334,12 +7922,6 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'түшкө чейин';
-
-  @override
-  String get backButtonLabel => 'Артка';
-
-  @override
-  String get cancelButtonLabel => 'Токтотуу';
 
   @override
   String get clearButtonLabel => 'Тазалоо';
@@ -8508,12 +8090,6 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ກ່ອນທ່ຽງ';
 
   @override
-  String get backButtonLabel => 'ກັບຄືນ';
-
-  @override
-  String get cancelButtonLabel => 'ຍົກເລີກ';
-
-  @override
   String get clearButtonLabel => 'ລຶບລ້າງ';
 
   @override
@@ -8678,12 +8254,6 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'priešpiet';
-
-  @override
-  String get backButtonLabel => 'Atgal';
-
-  @override
-  String get cancelButtonLabel => 'Atšaukti';
 
   @override
   String get clearButtonLabel => 'Išvalyti';
@@ -8852,12 +8422,6 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'priekšpusdienā';
 
   @override
-  String get backButtonLabel => 'Atpakaļ';
-
-  @override
-  String get cancelButtonLabel => 'Atcelt';
-
-  @override
   String get clearButtonLabel => 'Notīrīt';
 
   @override
@@ -9022,12 +8586,6 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'ПРЕТПЛАДНЕ';
-
-  @override
-  String get backButtonLabel => 'Назад';
-
-  @override
-  String get cancelButtonLabel => 'Откажи';
 
   @override
   String get clearButtonLabel => 'Избриши';
@@ -9196,12 +8754,6 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'മടങ്ങുക';
-
-  @override
-  String get cancelButtonLabel => 'റദ്ദാക്കുക';
-
-  @override
   String get clearButtonLabel => 'മായ്ക്കുക';
 
   @override
@@ -9366,12 +8918,6 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'ӨГЛӨӨ';
-
-  @override
-  String get backButtonLabel => 'Буцах';
-
-  @override
-  String get cancelButtonLabel => 'Цуцлах';
 
   @override
   String get clearButtonLabel => 'Арилгах';
@@ -9540,12 +9086,6 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'मागे जा';
-
-  @override
-  String get cancelButtonLabel => 'रद्द करा';
-
-  @override
   String get clearButtonLabel => 'साफ करा';
 
   @override
@@ -9710,12 +9250,6 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'PG';
-
-  @override
-  String get backButtonLabel => 'Kembali';
-
-  @override
-  String get cancelButtonLabel => 'Batal';
 
   @override
   String get clearButtonLabel => 'Kosongkan';
@@ -9884,12 +9418,6 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Back';
-
-  @override
-  String get cancelButtonLabel => 'မလုပ်တော့';
-
-  @override
   String get clearButtonLabel => 'ဖယ်ရှားရန်';
 
   @override
@@ -10054,12 +9582,6 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Tilbake';
-
-  @override
-  String get cancelButtonLabel => 'Avbryt';
 
   @override
   String get clearButtonLabel => 'Slett';
@@ -10228,12 +9750,6 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'पछाडि';
-
-  @override
-  String get cancelButtonLabel => 'रद्द गर्नुहोस्';
-
-  @override
   String get clearButtonLabel => 'हटाउनुहोस्';
 
   @override
@@ -10398,12 +9914,6 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'am';
-
-  @override
-  String get backButtonLabel => 'Terug';
-
-  @override
-  String get cancelButtonLabel => 'Annuleren';
 
   @override
   String get clearButtonLabel => 'Wissen';
@@ -10572,12 +10082,6 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Tilbake';
-
-  @override
-  String get cancelButtonLabel => 'Avbryt';
-
-  @override
   String get clearButtonLabel => 'Slett';
 
   @override
@@ -10742,12 +10246,6 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Back';
-
-  @override
-  String get cancelButtonLabel => 'ବାତିଲ କରନ୍ତୁ';
 
   @override
   String get clearButtonLabel => 'ଖାଲି କରନ୍ତୁ';
@@ -10916,12 +10414,6 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'ਪਿੱਛੇ';
-
-  @override
-  String get cancelButtonLabel => 'ਰੱਦ ਕਰੋ';
-
-  @override
   String get clearButtonLabel => 'ਕਲੀਅਰ ਕਰੋ';
 
   @override
@@ -11086,12 +10578,6 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Wstecz';
-
-  @override
-  String get cancelButtonLabel => 'Anuluj';
 
   @override
   String get clearButtonLabel => 'Wyczyść';
@@ -11260,12 +10746,6 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Voltar';
-
-  @override
-  String get cancelButtonLabel => 'Cancelar';
-
-  @override
   String get clearButtonLabel => 'Limpar';
 
   @override
@@ -11426,9 +10906,6 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
   });
 
   @override
-  String get backButtonLabel => 'Anterior';
-
-  @override
   String get shareButtonLabel => 'Partilhar…';
 
   @override
@@ -11482,12 +10959,6 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
-
-  @override
-  String get backButtonLabel => 'Înapoi';
-
-  @override
-  String get cancelButtonLabel => 'Anulați';
 
   @override
   String get clearButtonLabel => 'Ștergeți';
@@ -11656,12 +11127,6 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'АМ';
 
   @override
-  String get backButtonLabel => 'Назад';
-
-  @override
-  String get cancelButtonLabel => 'Отмена';
-
-  @override
   String get clearButtonLabel => 'Очистить';
 
   @override
@@ -11826,12 +11291,6 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'පෙ.ව.';
-
-  @override
-  String get backButtonLabel => 'Back';
-
-  @override
-  String get cancelButtonLabel => 'අවලංගු කරන්න';
 
   @override
   String get clearButtonLabel => 'හිස් කරන්න';
@@ -12000,12 +11459,6 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Späť';
-
-  @override
-  String get cancelButtonLabel => 'Zrušiť';
-
-  @override
   String get clearButtonLabel => 'Vymazať';
 
   @override
@@ -12170,12 +11623,6 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'DOP.';
-
-  @override
-  String get backButtonLabel => 'Nazaj';
-
-  @override
-  String get cancelButtonLabel => 'Prekliči';
 
   @override
   String get clearButtonLabel => 'Počisti';
@@ -12344,12 +11791,6 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'paradite';
 
   @override
-  String get backButtonLabel => 'Prapa';
-
-  @override
-  String get cancelButtonLabel => 'Anulo';
-
-  @override
   String get clearButtonLabel => 'Pastro';
 
   @override
@@ -12514,12 +11955,6 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'пре подне';
-
-  @override
-  String get backButtonLabel => 'Назад';
-
-  @override
-  String get cancelButtonLabel => 'Откажи';
 
   @override
   String get clearButtonLabel => 'Обриши';
@@ -12707,12 +12142,6 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get anteMeridiemAbbreviation => 'pre podne';
 
   @override
-  String get backButtonLabel => 'Nazad';
-
-  @override
-  String get cancelButtonLabel => 'Otkaži';
-
-  @override
   String get clearButtonLabel => 'Obriši';
 
   @override
@@ -12826,12 +12255,6 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'FM';
-
-  @override
-  String get backButtonLabel => 'Tillbaka';
-
-  @override
-  String get cancelButtonLabel => 'Avbryt';
 
   @override
   String get clearButtonLabel => 'Rensa';
@@ -13000,12 +12423,6 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Nyuma';
-
-  @override
-  String get cancelButtonLabel => 'Ghairi';
-
-  @override
   String get clearButtonLabel => 'Futa';
 
   @override
@@ -13170,12 +12587,6 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'பின்செல்';
-
-  @override
-  String get cancelButtonLabel => 'ரத்துசெய்';
 
   @override
   String get clearButtonLabel => 'அழி';
@@ -13344,12 +12755,6 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Back';
-
-  @override
-  String get cancelButtonLabel => 'రద్దు చేయండి';
-
-  @override
   String get clearButtonLabel => 'క్లియర్ చేయండి';
 
   @override
@@ -13419,7 +12824,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get searchTextFieldPlaceholderLabel => 'సెర్చ్';
+  String get searchTextFieldPlaceholderLabel => 'సెర్చ్ చేయి';
 
   @override
   String get searchWebButtonLabel => 'వెబ్‌లో సెర్చ్ చేయండి';
@@ -13514,12 +12919,6 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'กลับ';
-
-  @override
-  String get cancelButtonLabel => 'ยกเลิก';
 
   @override
   String get clearButtonLabel => 'ล้าง';
@@ -13688,12 +13087,6 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Bumalik';
-
-  @override
-  String get cancelButtonLabel => 'Kanselahin';
-
-  @override
   String get clearButtonLabel => 'I-clear';
 
   @override
@@ -13860,12 +13253,6 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'ÖÖ';
 
   @override
-  String get backButtonLabel => 'Geri';
-
-  @override
-  String get cancelButtonLabel => 'İptal';
-
-  @override
   String get clearButtonLabel => 'Temizle';
 
   @override
@@ -14007,178 +13394,6 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get todayLabel => 'Bugün';
 }
 
-/// The translations for Uighur Uyghur (`ug`).
-class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
-  /// Create an instance of the translation bundle for Uighur Uyghur.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
-  const CupertinoLocalizationUg({
-    super.localeName = 'ug',
-    required super.fullYearFormat,
-    required super.dayFormat,
-    required super.weekdayFormat,
-    required super.mediumDateFormat,
-    required super.singleDigitHourFormat,
-    required super.singleDigitMinuteFormat,
-    required super.doubleDigitMinuteFormat,
-    required super.singleDigitSecondFormat,
-    required super.decimalFormat,
-  });
-
-  @override
-  String get alertDialogLabel => 'ئاگاھلاندۇرۇش';
-
-  @override
-  String get anteMeridiemAbbreviation => 'چۈشتىن بۇرۇن';
-
-  @override
-  String get backButtonLabel => 'Back';
-
-  @override
-  String get cancelButtonLabel => 'بىكار قىلىش';
-
-  @override
-  String get clearButtonLabel => 'تازىلاش';
-
-  @override
-  String get copyButtonLabel => 'كۆچۈرۈش';
-
-  @override
-  String get cutButtonLabel => 'كېسىش';
-
-  @override
-  String get datePickerDateOrderString => 'ymd';
-
-  @override
-  String get datePickerDateTimeOrderString => 'date_dayPeriod_time';
-
-  @override
-  String? get datePickerHourSemanticsLabelFew => null;
-
-  @override
-  String? get datePickerHourSemanticsLabelMany => null;
-
-  @override
-  String? get datePickerHourSemanticsLabelOne => r'سائەت $hour';
-
-  @override
-  String get datePickerHourSemanticsLabelOther => r'سائەت $hour';
-
-  @override
-  String? get datePickerHourSemanticsLabelTwo => null;
-
-  @override
-  String? get datePickerHourSemanticsLabelZero => null;
-
-  @override
-  String? get datePickerMinuteSemanticsLabelFew => null;
-
-  @override
-  String? get datePickerMinuteSemanticsLabelMany => null;
-
-  @override
-  String? get datePickerMinuteSemanticsLabelOne => '1 مىنۇت';
-
-  @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minute مىنۇت';
-
-  @override
-  String? get datePickerMinuteSemanticsLabelTwo => null;
-
-  @override
-  String? get datePickerMinuteSemanticsLabelZero => null;
-
-  @override
-  String get lookUpButtonLabel => 'ئىزدەش';
-
-  @override
-  String get menuDismissLabel => 'تىزىملىكنى بىكار قىلىش';
-
-  @override
-  String get modalBarrierDismissLabel => 'بىكار قىلىش';
-
-  @override
-  String get noSpellCheckReplacementsLabel => 'ئالماشتۇرىدىغان مەزمۇن تېپىلمىدى';
-
-  @override
-  String get pasteButtonLabel => 'چاپلاش';
-
-  @override
-  String get postMeridiemAbbreviation => 'چۈشتىن كېيىن';
-
-  @override
-  String get searchTextFieldPlaceholderLabel => 'ئىزدەش';
-
-  @override
-  String get searchWebButtonLabel => 'توردا ئىزدەش';
-
-  @override
-  String get selectAllButtonLabel => 'ھەممىنى تاللاش';
-
-  @override
-  String get shareButtonLabel => 'ھەمبەھرلەش...';
-
-  @override
-  String get tabSemanticsLabelRaw => r'بەتكۈچ $tabIndex جەمئىي $tabCount';
-
-  @override
-  String? get timerPickerHourLabelFew => null;
-
-  @override
-  String? get timerPickerHourLabelMany => null;
-
-  @override
-  String? get timerPickerHourLabelOne => 'سائەت';
-
-  @override
-  String get timerPickerHourLabelOther => 'سائەت';
-
-  @override
-  String? get timerPickerHourLabelTwo => null;
-
-  @override
-  String? get timerPickerHourLabelZero => null;
-
-  @override
-  String? get timerPickerMinuteLabelFew => null;
-
-  @override
-  String? get timerPickerMinuteLabelMany => null;
-
-  @override
-  String? get timerPickerMinuteLabelOne => 'مىنۇت';
-
-  @override
-  String get timerPickerMinuteLabelOther => 'مىنۇت';
-
-  @override
-  String? get timerPickerMinuteLabelTwo => null;
-
-  @override
-  String? get timerPickerMinuteLabelZero => null;
-
-  @override
-  String? get timerPickerSecondLabelFew => null;
-
-  @override
-  String? get timerPickerSecondLabelMany => null;
-
-  @override
-  String? get timerPickerSecondLabelOne => 'سېكۇنت';
-
-  @override
-  String get timerPickerSecondLabelOther => 'سېكۇنت';
-
-  @override
-  String? get timerPickerSecondLabelTwo => null;
-
-  @override
-  String? get timerPickerSecondLabelZero => null;
-
-  @override
-  String get todayLabel => 'بۈگۈن';
-}
-
 /// The translations for Ukrainian (`uk`).
 class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Ukrainian.
@@ -14202,12 +13417,6 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'дп';
-
-  @override
-  String get backButtonLabel => 'Назад';
-
-  @override
-  String get cancelButtonLabel => 'Скасувати';
 
   @override
   String get clearButtonLabel => 'Очистити';
@@ -14376,12 +13585,6 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Back';
-
-  @override
-  String get cancelButtonLabel => 'منسوخ کریں';
-
-  @override
   String get clearButtonLabel => 'صاف کریں';
 
   @override
@@ -14546,12 +13749,6 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonLabel => 'Orqaga';
-
-  @override
-  String get cancelButtonLabel => 'Bekor qilish';
 
   @override
   String get clearButtonLabel => 'Tozalash';
@@ -14720,12 +13917,6 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'SÁNG';
 
   @override
-  String get backButtonLabel => 'Quay lại';
-
-  @override
-  String get cancelButtonLabel => 'Huỷ';
-
-  @override
   String get clearButtonLabel => 'Xoá';
 
   @override
@@ -14890,12 +14081,6 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => '上午';
-
-  @override
-  String get backButtonLabel => '返回';
-
-  @override
-  String get cancelButtonLabel => '取消';
 
   @override
   String get clearButtonLabel => '清除';
@@ -15236,12 +14421,6 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get backButtonLabel => 'Emuva';
-
-  @override
-  String get cancelButtonLabel => 'Khansela';
-
-  @override
   String get clearButtonLabel => 'Sula';
 
   @override
@@ -15403,7 +14582,6 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'be', // Belarusian
   'bg', // Bulgarian
   'bn', // Bengali Bangla
-  'bo', // Tibetan
   'bs', // Bosnian
   'ca', // Catalan Valencian
   'cs', // Czech
@@ -15468,7 +14646,6 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
-  'ug', // Uighur Uyghur
   'uk', // Ukrainian
   'ur', // Urdu
   'uz', // Uzbek
@@ -15495,7 +14672,6 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `be` - Belarusian
 ///  * `bg` - Bulgarian
 ///  * `bn` - Bengali Bangla
-///  * `bo` - Tibetan
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
@@ -15560,7 +14736,6 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
-///  * `ug` - Uighur Uyghur
 ///  * `uk` - Ukrainian
 ///  * `ur` - Urdu
 ///  * `uz` - Uzbek
@@ -15600,8 +14775,6 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
       return CupertinoLocalizationBg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'bn':
       return CupertinoLocalizationBn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'bo':
-      return CupertinoLocalizationBo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'bs':
       return CupertinoLocalizationBs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ca':
@@ -15816,8 +14989,6 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
       return CupertinoLocalizationTl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'tr':
       return CupertinoLocalizationTr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'ug':
-      return CupertinoLocalizationUg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'uk':
       return CupertinoLocalizationUk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ur':

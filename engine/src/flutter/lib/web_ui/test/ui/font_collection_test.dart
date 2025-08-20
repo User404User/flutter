@@ -11,6 +11,7 @@ import 'package:ui/src/engine.dart';
 
 import '../common/fake_asset_manager.dart';
 import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -34,7 +35,10 @@ Future<void> testMain() async {
     () async {
       final FlutterFontCollection collection = renderer.fontCollection;
       final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
-      expect(await collection.loadFontFromList(ahemData.asUint8List()), isTrue);
+      expect(
+        await collection.loadFontFromList(ahemData.asUint8List()),
+        !isHtml, // HtmlFontCollection requires family name
+      );
     },
   );
 
@@ -96,7 +100,13 @@ Future<void> testMain() async {
     );
     expect(result.loadedFonts, <String>[robotoVariableFontUrl, robotoTestFontUrl]);
     expect(result.fontFailures, hasLength(1));
-    expect(result.fontFailures[invalidFontUrl], isA<FontNotFoundError>());
+    if (isHtml) {
+      // The HTML renderer doesn't have a way to differentiate 404's from other
+      // download errors.
+      expect(result.fontFailures[invalidFontUrl], isA<FontDownloadError>());
+    } else {
+      expect(result.fontFailures[invalidFontUrl], isA<FontNotFoundError>());
+    }
   });
 
   test('Loading asset fonts reports when a font has invalid data', () async {
@@ -131,7 +141,13 @@ Future<void> testMain() async {
     );
     expect(result.loadedFonts, <String>[robotoVariableFontUrl, robotoTestFontUrl]);
     expect(result.fontFailures, hasLength(1));
-    expect(result.fontFailures[invalidFontUrl], isA<FontInvalidDataError>());
+    if (isHtml) {
+      // The HTML renderer doesn't have a way to differentiate invalid data
+      // from other download errors.
+      expect(result.fontFailures[invalidFontUrl], isA<FontDownloadError>());
+    } else {
+      expect(result.fontFailures[invalidFontUrl], isA<FontInvalidDataError>());
+    }
   });
 
   test('Font manifest with numeric and string descriptor values parses correctly', () async {

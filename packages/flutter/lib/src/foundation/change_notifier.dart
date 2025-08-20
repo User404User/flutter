@@ -11,7 +11,6 @@ import 'dart:ui' show VoidCallback;
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
-import 'debug.dart';
 import 'diagnostics.dart';
 import 'memory_allocations.dart';
 
@@ -101,6 +100,8 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
+const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -155,7 +156,7 @@ mixin class ChangeNotifier implements Listenable {
   ///
   /// As [ChangeNotifier] is used as mixin, it does not have constructor,
   /// so we use [addListener] to dispatch the event.
-  bool _debugCreationDispatched = false;
+  bool _creationDispatched = false;
 
   /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
   /// disposed.
@@ -231,13 +232,16 @@ mixin class ChangeNotifier implements Listenable {
   /// so that the method is tree-shaken away when the flag is false.
   @protected
   static void maybeDispatchObjectCreation(ChangeNotifier object) {
-    assert(() {
-      if (!object._debugCreationDispatched) {
-        debugMaybeDispatchCreated('foundation', 'ChangeNotifier', object);
-        object._debugCreationDispatched = true;
-      }
-      return true;
-    }());
+    // Tree shaker does not include this method and the class MemoryAllocations
+    // if kFlutterMemoryAllocationsEnabled is false.
+    if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ChangeNotifier',
+        object: object,
+      );
+      object._creationDispatched = true;
+    }
   }
 
   /// Register a closure to be called when the object changes.
@@ -383,11 +387,11 @@ mixin class ChangeNotifier implements Listenable {
     );
     assert(() {
       _debugDisposed = true;
-      if (_debugCreationDispatched) {
-        assert(debugMaybeDispatchDisposed(this));
-      }
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _listeners = _emptyListeners;
     _count = 0;
   }

@@ -5,20 +5,15 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 #include <dwmapi.h>
-#include <shlobj.h>
-#include <windows.h>
-#include <winerror.h>
 
 #include <filesystem>
 #include <shared_mutex>
 #include <sstream>
-#include <string>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/shell/common/shorebird/shorebird.h"
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/common/path_utils.h"
@@ -31,8 +26,6 @@
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/third_party/accessibility/ax/ax_node.h"
-#include "shell/platform/windows/flutter_project_bundle.h"
-#include "third_party/tonic/filesystem/filesystem/file.h"
 
 // winbase.h defines GetCurrentTime as a macro.
 #undef GetCurrentTime
@@ -201,8 +194,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   enable_impeller_ = std::find(switches.begin(), switches.end(),
                                "--enable-impeller=true") != switches.end();
 
-  egl_manager_ = egl::Manager::Create(
-      static_cast<egl::GpuPreference>(project_->gpu_preference()));
+  egl_manager_ = egl::Manager::Create();
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
@@ -239,10 +231,6 @@ FlutterWindowsEngine::~FlutterWindowsEngine() {
   Stop();
 }
 
-FlutterWindowsEngine* FlutterWindowsEngine::GetEngineForId(int64_t engine_id) {
-  return reinterpret_cast<FlutterWindowsEngine*>(engine_id);
-}
-
 void FlutterWindowsEngine::SetSwitches(
     const std::vector<std::string>& switches) {
   project_->SetSwitches(switches);
@@ -252,146 +240,13 @@ bool FlutterWindowsEngine::Run() {
   return Run("");
 }
 
-int GetReleaseVersionAndBuildNumber(ReleaseVersion* release_version) {
-  char module_path[MAX_PATH];
-  // Get the full path of the currently running executable. The return value is
-  // the size of the string that was copied to the buffer, with -1 indicating
-  // failure.
-  if (GetModuleFileNameA(NULL, module_path, MAX_PATH) == -1) {
-    return -1;
-  }
-
-  // Get the size of the version information
-  DWORD handle = -1;
-  DWORD version_info_size = GetFileVersionInfoSizeA(module_path, &handle);
-  if (version_info_size == -1) {
-    return -1;
-  }
-
-  // Allocate memory for version info
-  std::unique_ptr<char[]> version_data(new char[version_info_size]);
-  if (!GetFileVersionInfoA(module_path, handle, version_info_size,
-                           version_data.get())) {
-    return -1;
-  }
-
-  // Adopted from
-  // https://learn.microsoft.com/en-us/windows/win32/api/winver/nf-winver-verqueryvaluea
-  // Get the translation table
-  struct LANGANDCODEPAGE {
-    WORD wLanguage;
-    WORD wCodePage;
-  }* lpTranslate;
-
-  UINT cbTranslate = 0;
-  if (!VerQueryValueA(version_data.get(), "\\VarFileInfo\\Translation",
-                      (LPVOID*)&lpTranslate, &cbTranslate)) {
-    FML_LOG(ERROR) << "Error: Unable to get translation info.";
-    return -1;
-  }
-
-  // Construct the query string using the first translation found
-  char subBlock[64];
-  sprintf_s(subBlock, "\\StringFileInfo\\%04x%04x\\ProductVersion",
-            lpTranslate[0].wLanguage, lpTranslate[0].wCodePage);
-
-  LPSTR versionString = nullptr;
-  UINT size = 0;
-  if (!VerQueryValueA(version_data.get(), subBlock, (LPVOID*)&versionString,
-                      &size)) {
-    return -1;
-  }
-
-  if (!versionString) {
-    return -1;
-  }
-
-  // The version string is in the format of "1.0.0+1", with the label ("+1")
-  // being optional.
-  auto version = std::string(versionString);
-  auto plusPos = version.find("+");
-  if (plusPos != std::string::npos) {
-    auto semVer = version.substr(0, plusPos);
-    auto patch = version.substr(plusPos + 1, version.length());
-    release_version->version = semVer;
-    release_version->build_number = patch;
-  } else {
-    release_version->version = version;
-  }
-
-  return kSuccess;
-}
-
-bool GetLocalAppDataPath(std::string& outPath) {
-  PWSTR path = nullptr;
-  HRESULT result = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &path);
-  if (!SUCCEEDED(result)) {
-    return false;
-  }
-
-  std::wstring widePath(path);
-  std::string localAppDataPath(widePath.begin(), widePath.end());
-  // The calling process is responsible for freeing this resource
-  // https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath
-  CoTaskMemFree(path);
-  outPath = localAppDataPath;
-  return true;
-}
-
-bool SetUpShorebird(std::string assets_path_string, std::string& patch_path) {
-  auto shorebird_yaml_path =
-      fml::paths::JoinPaths({assets_path_string, "shorebird.yaml"});
-  std::string shorebird_yaml_contents("");
-  if (!filesystem::ReadFileToString(shorebird_yaml_path,
-                                    &shorebird_yaml_contents)) {
-    FML_LOG(ERROR) << "Failed to read shorebird.yaml.";
-    return false;
-  }
-
-  std::string code_cache_path;
-  if (!GetLocalAppDataPath(code_cache_path)) {
-    FML_LOG(ERROR) << "Failed to retrieve the local AppData directory.";
-    return false;
-  }
-
-  auto executable_location = fml::paths::GetExecutableDirectoryPath().second;
-  auto app_path =
-      fml::paths::JoinPaths({executable_location, "data", "app.so"});
-  ReleaseVersion release_version;
-  auto release_version_result =
-      GetReleaseVersionAndBuildNumber(&release_version);
-  if (release_version_result != kSuccess) {
-    FML_LOG(ERROR)
-        << "Failed to retrieve the release version and build number.";
-    return false;
-  }
-
-  ShorebirdConfigArgs shorebird_args(code_cache_path, code_cache_path, app_path,
-                                     shorebird_yaml_contents, release_version);
-  return ConfigureShorebird(shorebird_args, patch_path);
-}
-
 bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
-  std::string assets_path_string = project_->assets_path().u8string();
-  std::string icu_path_string = project_->icu_path().u8string();
-
   if (!project_->HasValidPaths()) {
     FML_LOG(ERROR) << "Missing or unresolvable paths to assets.";
     return false;
   }
-
-  std::string patch_path;
-  auto setup_shorebird_result = SetUpShorebird(assets_path_string, patch_path);
-  if (setup_shorebird_result) {
-    // If we have a patch installed, we replace the default AOT library path
-    // with the patch path here.
-    FML_LOG(INFO) << "Setting project patch path: " << patch_path;
-    project_->SetAotLibraryPath(patch_path);
-  } else {
-    FML_LOG(ERROR) << "Failed to configure Shorebird.";
-  }
-
-  // This loads AOT data from the project_'s aot_library_path_.
+  std::string assets_path_string = project_->assets_path().u8string();
+  std::string icu_path_string = project_->icu_path().u8string();
   if (embedder_api_.RunsAOTCompiledDartCode()) {
     aot_data_ = project_->LoadAotData(embedder_api_);
     if (!aot_data_) {
@@ -438,13 +293,6 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   custom_task_runners.thread_priority_setter =
       &WindowsPlatformThreadPrioritySetter;
 
-  if (project_->ui_thread_policy() ==
-      FlutterUIThreadPolicy::RunOnPlatformThread) {
-    FML_LOG(WARNING)
-        << "Running with merged platform and UI thread. Experimental.";
-    custom_task_runners.ui_task_runner = &platform_task_runner;
-  }
-
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
   args.shutdown_dart_vm_when_done = true;
@@ -452,7 +300,6 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = argv.empty() ? nullptr : argv.data();
-  args.engine_id = reinterpret_cast<int64_t>(this);
 
   // Fail if conflicting non-default entrypoints are specified in the method
   // argument and the project.
@@ -493,7 +340,9 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                                        void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
 
-    auto view = host->view(update->view_id);
+    // TODO(loicsharma): Remove implicit view assumption.
+    // https://github.com/flutter/flutter/issues/142845
+    auto view = host->view(kImplicitViewId);
     if (!view) {
       return;
     }
@@ -521,15 +370,6 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
       host->root_isolate_create_callback_();
     }
   };
-  // Copied from shell\platform\darwin\macos\framework\Source\FlutterEngine.mm
-  // Writes log messages to stdout.
-  args.log_message_callback = [](const char* tag, const char* message,
-                                 void* user_data) {
-    if (tag && tag[0]) {
-      std::cout << tag << ": ";
-    }
-    std::cout << message << std::endl;
-  };
   args.channel_update_callback = [](const FlutterChannelUpdate* update,
                                     void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
@@ -539,11 +379,6 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                             SAFE_ACCESS(update, listening, false));
     }
   };
-  args.view_focus_change_request_callback =
-      [](const FlutterViewFocusChangeRequest* request, void* user_data) {
-        auto host = static_cast<FlutterWindowsEngine*>(user_data);
-        host->OnViewFocusChangeRequest(request);
-      };
 
   args.custom_task_runners = &custom_task_runners;
 
@@ -635,6 +470,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
                                     displays.data(), displays.size());
 
   SendSystemLocales();
+  SetLifecycleState(flutter::AppLifecycleState::kResumed);
 
   settings_plugin_->StartWatching();
   settings_plugin_->SendSettings();
@@ -664,7 +500,6 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
       view_id, this, std::move(window), windows_proc_table_);
 
   view->CreateRenderSurface();
-  view->UpdateSemanticsEnabled(semantics_enabled_);
 
   next_view_id_++;
 
@@ -862,13 +697,6 @@ void FlutterWindowsEngine::SendKeyEvent(const FlutterKeyEvent& event,
   }
 }
 
-void FlutterWindowsEngine::SendViewFocusEvent(
-    const FlutterViewFocusEvent& event) {
-  if (engine_) {
-    embedder_api_.SendViewFocusEvent(engine_, &event);
-  }
-}
-
 bool FlutterWindowsEngine::SendPlatformMessage(
     const char* channel,
     const uint8_t* message,
@@ -948,42 +776,10 @@ void FlutterWindowsEngine::SetNextFrameCallback(fml::closure callback) {
       this);
 }
 
-HCURSOR FlutterWindowsEngine::GetCursorByName(
-    const std::string& cursor_name) const {
-  static auto* cursors = new std::map<std::string, const wchar_t*>{
-      {"allScroll", IDC_SIZEALL},
-      {"basic", IDC_ARROW},
-      {"click", IDC_HAND},
-      {"forbidden", IDC_NO},
-      {"help", IDC_HELP},
-      {"move", IDC_SIZEALL},
-      {"none", nullptr},
-      {"noDrop", IDC_NO},
-      {"precise", IDC_CROSS},
-      {"progress", IDC_APPSTARTING},
-      {"text", IDC_IBEAM},
-      {"resizeColumn", IDC_SIZEWE},
-      {"resizeDown", IDC_SIZENS},
-      {"resizeDownLeft", IDC_SIZENESW},
-      {"resizeDownRight", IDC_SIZENWSE},
-      {"resizeLeft", IDC_SIZEWE},
-      {"resizeLeftRight", IDC_SIZEWE},
-      {"resizeRight", IDC_SIZEWE},
-      {"resizeRow", IDC_SIZENS},
-      {"resizeUp", IDC_SIZENS},
-      {"resizeUpDown", IDC_SIZENS},
-      {"resizeUpLeft", IDC_SIZENWSE},
-      {"resizeUpRight", IDC_SIZENESW},
-      {"resizeUpLeftDownRight", IDC_SIZENWSE},
-      {"resizeUpRightDownLeft", IDC_SIZENESW},
-      {"wait", IDC_WAIT},
-  };
-  const wchar_t* idc_name = IDC_ARROW;
-  auto it = cursors->find(cursor_name);
-  if (it != cursors->end()) {
-    idc_name = it->second;
+void FlutterWindowsEngine::SetLifecycleState(flutter::AppLifecycleState state) {
+  if (lifecycle_manager_) {
+    lifecycle_manager_->SetLifecycleState(state);
   }
-  return windows_proc_table_->LoadCursor(nullptr, idc_name);
 }
 
 void FlutterWindowsEngine::SendSystemLocales() {
@@ -1079,19 +875,12 @@ bool FlutterWindowsEngine::PostRasterThreadTask(fml::closure callback) const {
 }
 
 bool FlutterWindowsEngine::DispatchSemanticsAction(
-    FlutterViewId view_id,
     uint64_t target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
-  FlutterSendSemanticsActionInfo info{
-      .struct_size = sizeof(FlutterSendSemanticsActionInfo),
-      .view_id = view_id,
-      .node_id = target,
-      .action = action,
-      .data = data.GetMapping(),
-      .data_length = data.GetSize(),
-  };
-  return (embedder_api_.SendSemanticsAction(engine_, &info));
+  return (embedder_api_.DispatchSemanticsAction(engine_, target, action,
+                                                data.GetMapping(),
+                                                data.GetSize()) == kSuccess);
 }
 
 void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
@@ -1187,34 +976,12 @@ std::optional<LRESULT> FlutterWindowsEngine::ProcessExternalWindowMessage(
   return std::nullopt;
 }
 
-void FlutterWindowsEngine::UpdateFlutterCursor(
-    const std::string& cursor_name) const {
-  SetFlutterCursor(GetCursorByName(cursor_name));
-}
-
-void FlutterWindowsEngine::SetFlutterCursor(HCURSOR cursor) const {
-  windows_proc_table_->SetCursor(cursor);
-}
-
 void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
   if (name == "flutter/platform" && listening) {
     lifecycle_manager_->BeginProcessingExit();
   } else if (name == "flutter/lifecycle" && listening) {
     lifecycle_manager_->BeginProcessingLifecycle();
   }
-}
-
-void FlutterWindowsEngine::OnViewFocusChangeRequest(
-    const FlutterViewFocusChangeRequest* request) {
-  std::shared_lock read_lock(views_mutex_);
-
-  auto iterator = views_.find(request->view_id);
-  if (iterator == views_.end()) {
-    return;
-  }
-
-  FlutterWindowsView* view = iterator->second;
-  view->Focus();
 }
 
 bool FlutterWindowsEngine::Present(const FlutterPresentViewInfo* info) {

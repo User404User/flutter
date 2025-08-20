@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -11,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
@@ -25,7 +25,6 @@ import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
-import '../migrations/lldb_init_migration.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
@@ -33,7 +32,6 @@ import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'migrations/host_app_info_plist_migration.dart';
@@ -170,14 +168,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
-    LLDBInitMigration(
-      app.project,
-      buildInfo,
-      globals.logger,
-      deviceID: deviceID,
-      fileSystem: globals.fs,
-      environmentType: environmentType,
-    ),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -282,9 +272,6 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
-      fileSystem: globals.fs,
-      fileSystemUtils: globals.fsUtils,
-      plistParser: globals.plistParser,
     );
   }
 
@@ -328,9 +315,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     for (final MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
       buildCommands.add('${signingConfig.key}=${signingConfig.value}');
     }
-  }
-
-  if (codesign) {
     buildCommands.add('-allowProvisioningUpdates');
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
@@ -585,7 +569,6 @@ Future<XcodeBuildResult> buildXcodeProject({
         globals.printError('Archive succeeded but the expected xcarchive at $outputDir not found');
       }
     }
-
     return XcodeBuildResult(
       success: true,
       output: outputDir,

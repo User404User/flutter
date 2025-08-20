@@ -86,7 +86,7 @@ workspace:
   - shell/vmservice
   - testing/benchmark
   - testing/dart
-  - testing/ios_scenario_app
+  - testing/scenario_app
   - testing/skia_gold_client
   - testing/smoke_test_failure
   - testing/symbols
@@ -97,6 +97,7 @@ workspace:
   - tools/clangd_check
   - tools/compare_goldens
   - tools/const_finder
+  - tools/dir_contents_diff
   - tools/engine_tool
   - tools/header_guard_check
   - tools/gen_web_locale_keymap
@@ -166,6 +167,8 @@ dependency_overrides:
     path: ./third_party/pkg/googleapis/discoveryapis_commons
   _fe_analyzer_shared:
     path: ./third_party/dart/pkg/_fe_analyzer_shared
+  _macros:
+    path: ./third_party/dart/pkg/_macros
   analyzer:
     path: ./third_party/dart/pkg/analyzer
   archive:
@@ -201,7 +204,7 @@ dependency_overrides:
   gcloud:
     path: ./third_party/pkg/gcloud
   glob:
-    path: ./third_party/dart/third_party/pkg/tools/pkgs/glob
+    path: ./third_party/dart/third_party/pkg/glob
   googleapis:
     path: ./third_party/pkg/googleapis/generated/googleapis
   googleapis_auth:
@@ -220,6 +223,8 @@ dependency_overrides:
     path: ./third_party/dart/pkg/kernel
   logging:
     path: ./third_party/dart/third_party/pkg/core/pkgs/logging
+  macros:
+    path: ./third_party/dart/pkg/macros
   matcher:
     path: ./third_party/dart/third_party/pkg/test/pkgs/matcher
   meta:
@@ -293,7 +298,7 @@ dependency_overrides:
   web_socket:
     path: ./third_party/dart/third_party/pkg/http/pkgs/web_socket
   web_socket_channel:
-    path: ./third_party/dart/third_party/pkg/http/pkgs/web_socket_channel
+    path: ./third_party/dart/third_party/pkg/web_socket_channel
   webkit_inspection_protocol:
     path: ./third_party/dart/third_party/pkg/webkit_inspection_protocol
   yaml:

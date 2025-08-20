@@ -6,11 +6,27 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
-#include <gdk/gdkwayland.h>
 #include <cstring>
 #include <vector>
 
 #include "gtest/gtest.h"
+
+// Disgusting hack but could not find any way to create a GdkDevice
+struct _FakeGdkDevice {
+  GObject parent_instance;
+  gchar* name;
+  GdkInputSource source;
+};
+GdkDevice* makeFakeDevice(GdkInputSource source) {
+  _FakeGdkDevice* device =
+      static_cast<_FakeGdkDevice*>(g_malloc0(sizeof(_FakeGdkDevice)));
+  device->source = source;
+  // Bully the type checker
+  (reinterpret_cast<GTypeInstance*>(device))->g_class =
+      static_cast<GTypeClass*>(g_malloc0(sizeof(GTypeClass)));
+  (reinterpret_cast<GTypeInstance*>(device))->g_class->g_type = GDK_TYPE_DEVICE;
+  return reinterpret_cast<GdkDevice*>(device);
+}
 
 TEST(FlScrollingManagerTest, DiscreteDirectional) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
@@ -34,9 +50,7 @@ TEST(FlScrollingManagerTest, DiscreteDirectional) {
 
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
-  GdkDevice* mouse =
-      GDK_DEVICE(g_object_new(gdk_wayland_device_get_type(), "input-source",
-                              GDK_SOURCE_MOUSE, nullptr));
+  GdkDevice* mouse = makeFakeDevice(GDK_SOURCE_MOUSE);
   GdkEventScroll* event =
       reinterpret_cast<GdkEventScroll*>(gdk_event_new(GDK_SCROLL));
   event->time = 1;
@@ -107,9 +121,7 @@ TEST(FlScrollingManagerTest, DiscreteScrolling) {
 
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
-  GdkDevice* mouse =
-      GDK_DEVICE(g_object_new(gdk_wayland_device_get_type(), "input-source",
-                              GDK_SOURCE_MOUSE, nullptr));
+  GdkDevice* mouse = makeFakeDevice(GDK_SOURCE_MOUSE);
   GdkEventScroll* event =
       reinterpret_cast<GdkEventScroll*>(gdk_event_new(GDK_SCROLL));
   event->time = 1;
@@ -152,9 +164,7 @@ TEST(FlScrollingManagerTest, Panning) {
 
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
-  GdkDevice* touchpad =
-      GDK_DEVICE(g_object_new(gdk_wayland_device_get_type(), "input-source",
-                              GDK_SOURCE_TOUCHPAD, nullptr));
+  GdkDevice* touchpad = makeFakeDevice(GDK_SOURCE_TOUCHPAD);
   GdkEventScroll* event =
       reinterpret_cast<GdkEventScroll*>(gdk_event_new(GDK_SCROLL));
   event->time = 1;

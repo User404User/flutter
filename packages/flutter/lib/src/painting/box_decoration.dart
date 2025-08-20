@@ -28,9 +28,8 @@ import 'image_provider.dart';
 ///
 /// The box has a [border], a body, and may cast a [boxShadow].
 ///
-/// The [shape] of the box can be [BoxShape.circle] or [BoxShape.rectangle]. If
-/// it is [BoxShape.rectangle], then the [borderRadius] property can be used to
-/// make it a rounded rectangle ([RRect]).
+/// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
+/// then the [borderRadius] property controls the roundness of the corners.
 ///
 /// The body of the box is painted in layers. The bottom-most layer is the
 /// [color], which fills the box. Above that is the [gradient], which also fills

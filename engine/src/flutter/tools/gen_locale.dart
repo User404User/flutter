@@ -11,6 +11,8 @@
 // this script (the first set for _canonicalizeLanguageCode and the second set
 // for _canonicalizeRegionCode).
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';

@@ -153,15 +153,11 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     return {};
   }
 
-  {
+  if (settings.root_isolate_create_callback) {
+    // Isolate callbacks always occur in isolate scope and before user code has
+    // had a chance to run.
     tonic::DartState::Scope scope(isolate.get());
-    Dart_SetCurrentThreadOwnsIsolate();
-
-    if (settings.root_isolate_create_callback) {
-      // Isolate callbacks always occur in isolate scope and before user code
-      // has had a chance to run.
-      settings.root_isolate_create_callback(*isolate.get());
-    }
+    settings.root_isolate_create_callback(*isolate.get());
   }
 
   if (root_isolate_create_callback) {
@@ -514,13 +510,7 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
     SetMessageHandlingTaskRunner(GetTaskRunners().GetPlatformTaskRunner(),
                                  true);
   } else {
-    // When running with custom UI task runner post directly to runner (there is
-    // no task queue).
-    bool post_directly_to_runner =
-        GetTaskRunners().GetUITaskRunner() &&
-        !GetTaskRunners().GetUITaskRunner()->GetTaskQueueId().is_valid();
-    SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner(),
-                                 post_directly_to_runner);
+    SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner(), false);
   }
 
   if (tonic::CheckAndHandleError(

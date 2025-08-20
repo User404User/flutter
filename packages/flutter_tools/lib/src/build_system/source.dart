@@ -5,18 +5,8 @@
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../project.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
-
-//////////////////////////////////////////////////////////////////////
-//                                                                  //
-//  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
-//                                                                  //
-//  There is a link to this file in //docs/tool/Engine-artifacts.md //
-//  and it would be very kind of you to update the link, if needed. //
-//                                                                  //
-//////////////////////////////////////////////////////////////////////
 
 /// A set of source files.
 abstract class ResolvedFiles {
@@ -42,9 +32,6 @@ class SourceVisitor implements ResolvedFiles {
   ///
   /// Defaults to `true`.
   final bool inputs;
-
-  /// The current project.
-  late final FlutterProject _project = FlutterProject.fromDirectory(environment.projectDir);
 
   @override
   final List<File> sources = <File>[];
@@ -169,7 +156,7 @@ class SourceVisitor implements ResolvedFiles {
   ///
   /// If the [Artifact] points to a directory then all child files are included.
   /// To increase the performance of builds that use a known revision of Flutter,
-  /// these are updated to point towards the `engine.stamp` file instead of
+  /// these are updated to point towards the engine.version file instead of
   /// the artifact itself.
   void visitArtifact(Artifact artifact, TargetPlatform? platform, BuildMode? mode) {
     // This is not a local engine.
@@ -177,8 +164,8 @@ class SourceVisitor implements ResolvedFiles {
       sources.add(
         environment.flutterRootDir
             .childDirectory('bin')
-            .childDirectory('cache')
-            .childFile('engine.stamp'),
+            .childDirectory('internal')
+            .childFile('engine.version'),
       );
       return;
     }
@@ -203,7 +190,7 @@ class SourceVisitor implements ResolvedFiles {
   ///
   /// If the [Artifact] points to a directory then all child files are included.
   /// To increase the performance of builds that use a known revision of Flutter,
-  /// these are updated to point towards the `engine.stamp` file instead of
+  /// these are updated to point towards the engine.version file instead of
   /// the artifact itself.
   void visitHostArtifact(HostArtifact artifact) {
     // This is not a local engine.
@@ -211,8 +198,8 @@ class SourceVisitor implements ResolvedFiles {
       sources.add(
         environment.flutterRootDir
             .childDirectory('bin')
-            .childDirectory('cache')
-            .childFile('engine.stamp'),
+            .childDirectory('internal')
+            .childFile('engine.version'),
       );
       return;
     }
@@ -226,26 +213,12 @@ class SourceVisitor implements ResolvedFiles {
     }
     sources.add(entity as File);
   }
-
-  void visitProjectSource(ProjectSourceBuilder builder, bool optional) {
-    final File source = builder(_project);
-    final String path = source.absolute.path;
-
-    if (optional && !environment.fileSystem.isFileSync(path)) {
-      return;
-    }
-
-    sources.add(environment.fileSystem.file(path));
-  }
 }
 
 /// A description of an input or output of a [Target].
 abstract class Source {
   /// This source is a file URL which contains some references to magic
-  /// environment variables defined in [Environment].
-  ///
-  /// If [optional] is true, the file is not required to exist. In this case, it
-  /// is never resolved as an input.
+  /// environment variables.
   const factory Source.pattern(String pattern, {bool optional}) = _PatternSource;
 
   /// The source is provided by an [Artifact].
@@ -258,20 +231,6 @@ abstract class Source {
   ///
   /// If [artifact] points to a directory then all child files are included.
   const factory Source.hostArtifact(HostArtifact artifact) = _HostArtifactSource;
-
-  /// The source is provided by a [FlutterProject].
-  ///
-  /// If [optional] is true, the file is not required to exist. In this case, it
-  /// is never resolved as an input.
-  ///
-  /// Example:
-  ///
-  /// ```dart
-  /// // A project's `pubspec.yaml` file:
-  /// Source.fromProject((FlutterProject project) => project.pubspecFile);
-  /// ```
-  const factory Source.fromProject(ProjectSourceBuilder sourceBuilder, {bool optional}) =
-      _ProjectSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -320,21 +279,6 @@ class _HostArtifactSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
-
-  @override
-  bool get implicit => false;
-}
-
-typedef ProjectSourceBuilder = File Function(FlutterProject);
-
-class _ProjectSource implements Source {
-  const _ProjectSource(this.builder, {this.optional = false});
-
-  final ProjectSourceBuilder builder;
-  final bool optional;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitProjectSource(builder, optional);
 
   @override
   bool get implicit => false;

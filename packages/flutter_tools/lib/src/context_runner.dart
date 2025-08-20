@@ -167,6 +167,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             logger: globals.logger,
             platform: globals.platform,
             xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+            usage: globals.flutterUsage,
             analytics: globals.analytics,
           ),
       CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!, globals.userMessages),
@@ -288,7 +289,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
                   ),
       MacOSWorkflow: () => MacOSWorkflow(featureFlags: featureFlags, platform: globals.platform),
       MDnsVmServiceDiscovery:
-          () => MDnsVmServiceDiscovery(logger: globals.logger, analytics: globals.analytics),
+          () => MDnsVmServiceDiscovery(
+            logger: globals.logger,
+            flutterUsage: globals.flutterUsage,
+            analytics: globals.analytics,
+          ),
       OperatingSystemUtils:
           () => OperatingSystemUtils(
             fileSystem: globals.fs,
@@ -323,6 +328,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             processManager: globals.processManager,
             botDetector: globals.botDetector,
             platform: globals.platform,
+            usage: globals.flutterUsage,
           ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
@@ -379,6 +385,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             processManager: globals.processManager,
             platform: globals.platform,
             fileSystem: globals.fs,
+            usage: globals.flutterUsage,
             analytics: globals.analytics,
           ),
     },

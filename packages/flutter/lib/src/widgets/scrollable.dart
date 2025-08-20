@@ -872,10 +872,7 @@ class ScrollableState extends State<Scrollable>
     assert(_drag == null);
     _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
-    // _hold might be non-null if the scroll position is currently animating.
-    if (_hold != null) {
-      _disposeHold();
-    }
+    assert(_hold == null);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {

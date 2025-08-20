@@ -7,7 +7,6 @@
 #include "impeller/renderer/backend/vulkan/driver_info_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
-#include "impeller/renderer/backend/vulkan/workarounds_vk.h"
 
 namespace impeller::testing {
 
@@ -223,68 +222,17 @@ TEST(DriverInfoVKTest, CanUseFramebufferFetch) {
   EXPECT_TRUE(CanUseFramebufferFetch("Mali-G51", false));
 }
 
-TEST(DriverInfoVKTest, DisableOldXclipseDriver) {
-  auto context =
-      MockVulkanContextBuilder()
-          .SetPhysicalPropertiesCallback(
-              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
-                prop->vendorID = 0x144D;  // Samsung
-                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
-                // Version 1.1.0
-                prop->apiVersion = (1 << 22) | (1 << 12);
-              })
-          .Build();
-
-  EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
-
-  context =
-      MockVulkanContextBuilder()
-          .SetPhysicalPropertiesCallback(
-              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
-                prop->vendorID = 0x144D;  // Samsung
-                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
-                // Version 1.3.0
-                prop->apiVersion = (1 << 22) | (3 << 12);
-              })
-          .Build();
-
-  EXPECT_FALSE(context->GetDriverInfo()->IsKnownBadDriver());
-}
-
-TEST(DriverInfoVKTest, OldPowerVRDisabled) {
-  std::shared_ptr<ContextVK> context =
+TEST(DriverInfoVKTest, AllPowerVRDisabled) {
+  auto const context =
       MockVulkanContextBuilder()
           .SetPhysicalPropertiesCallback(
               [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
                 prop->vendorID = 0x1010;
                 prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
-                std::string name = "PowerVR Rogue GE8320";
-                name.copy(prop->deviceName, name.size());
               })
           .Build();
 
   EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
-  EXPECT_EQ(context->GetDriverInfo()->GetPowerVRGPUInfo(),
-            std::optional<PowerVRGPU>(PowerVRGPU::kUnknown));
-}
-
-TEST(DriverInfoVKTest, NewPowerVREnabled) {
-  std::shared_ptr<ContextVK> context =
-      MockVulkanContextBuilder()
-          .SetPhysicalPropertiesCallback(
-              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
-                prop->vendorID = 0x1010;
-                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
-                std::string name = "PowerVR DXT 123";
-                name.copy(prop->deviceName, name.size());
-              })
-          .Build();
-
-  EXPECT_FALSE(context->GetDriverInfo()->IsKnownBadDriver());
-  EXPECT_EQ(context->GetDriverInfo()->GetPowerVRGPUInfo(),
-            std::optional<PowerVRGPU>(PowerVRGPU::kDXT));
-  EXPECT_TRUE(GetWorkaroundsFromDriverInfo(*context->GetDriverInfo())
-                  .input_attachment_self_dependency_broken);
 }
 
 }  // namespace impeller::testing

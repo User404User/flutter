@@ -36,7 +36,6 @@ export 'dart:ui'
         PathOperation,
         RRect,
         RSTransform,
-        RSuperellipse,
         Radius,
         Rect,
         Shader,

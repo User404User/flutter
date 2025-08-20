@@ -186,10 +186,10 @@ import 'package:native_assets_cli/code_assets.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {
-  await build(args, (input, output) async {
-    final packageName = input.packageName;
+  await build(args, (config, output) async {
+    final packageName = config.packageName;
 
-    if (!input.config.buildCodeAssets) {
+    if (!config.buildAssetTypes.contains(CodeAsset.type)) {
       return;
     }
     final builders = [
@@ -202,7 +202,7 @@ void main(List<String> args) async {
         name: packageName,
         assetName: '${packageName}_bindings_generated.dart',
         sources: ['src/$packageName.c'],
-        flags: input.dynamicLinkingFlags('add'),
+        flags: config.dynamicLinkingFlags('add'),
       ),
     ];
 
@@ -212,7 +212,7 @@ void main(List<String> args) async {
 
     for (final builder in builders) {
       await builder.run(
-        input: input,
+        config: config,
         output: output,
         logger: logger,
       );
@@ -220,8 +220,8 @@ void main(List<String> args) async {
   });
 }
 
-extension on BuildInput {
-  List<String> dynamicLinkingFlags(String libraryName) => switch (config.code.targetOS) {
+extension on BuildConfig {
+  List<String> dynamicLinkingFlags(String libraryName) => switch (codeConfig.targetOS) {
         OS.macOS || OS.iOS => [
             '-L${outputDirectory.toFilePath()}',
             '-l$libraryName',
@@ -234,7 +234,7 @@ extension on BuildInput {
         OS.windows => [
             outputDirectory.resolve('$libraryName.lib').toFilePath()
           ],
-        _ => throw UnimplementedError('Unsupported OS: ${config.code.targetOS}'),
+        _ => throw UnimplementedError('Unsupported OS: ${codeConfig.targetOS}'),
       };
 }
 ''';

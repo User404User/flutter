@@ -131,16 +131,15 @@ Future<void> main(List<String> args) async {
       'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
       'android_java11_tool_integration_tests': androidJava11IntegrationToolTestsRunner,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
-      // All the unit/widget tests run using `flutter test --platform=chrome`
+      // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
+      'web_tests': webTestsSuite.runWebHtmlUnitTests,
+      // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
       'web_canvaskit_tests': webTestsSuite.runWebCanvasKitUnitTests,
-      // All the unit/widget tests run using `flutter test --platform=chrome --wasm`
+      // All the unit/widget tests run using `flutter test --platform=chrome --wasm --web-renderer=skwasm`
       'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
-      'android_engine_vulkan_tests':
-          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.vulkan),
-      'android_engine_opengles_tests':
-          () => runAndroidEngineTests(impellerBackend: ImpellerBackend.opengles),
+      'android_engine_tests': runAndroidEngineTests,
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
@@ -236,17 +235,10 @@ Future<void> _runIntegrationToolTests() async {
   );
 }
 
-Future<void> _runWidgetPreviewScaffoldToolTests() async {
-  await runFlutterTest(
-    path.join(_toolsPath, 'test', 'widget_preview_scaffold.shard', 'widget_preview_scaffold'),
-  );
-}
-
 Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
-    'widget_preview_scaffold': _runWidgetPreviewScaffoldToolTests,
   });
 }
 
@@ -351,6 +343,7 @@ Future<void> _runBuildTests() async {
         ..add(
           Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')),
         )
+        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));

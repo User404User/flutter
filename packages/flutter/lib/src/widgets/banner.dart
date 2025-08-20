@@ -29,6 +29,8 @@ const TextStyle _kTextStyle = TextStyle(
   height: 1.0,
 );
 
+const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
+
 /// Where to show a [Banner].
 ///
 /// The start and end locations are relative to the ambient [Directionality]
@@ -69,7 +71,15 @@ class BannerPainter extends CustomPainter {
     this.textStyle = _kTextStyle,
     this.shadow = _kShadow,
   }) : super(repaint: PaintingBinding.instance.systemFonts) {
-    assert(debugMaybeDispatchCreated('widgets', 'BannerPainter', this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterWidgetsLibrary,
+        className: '$BannerPainter',
+        object: this,
+      );
+    }
   }
 
   /// The message to show in the banner.
@@ -128,7 +138,11 @@ class BannerPainter extends CustomPainter {
   ///
   /// After calling this method, this object is no longer usable.
   void dispose() {
-    assert(debugMaybeDispatchDisposed(this));
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _textPainter?.dispose();
     _textPainter = null;
   }

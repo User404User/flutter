@@ -14,9 +14,6 @@
 #include "impeller/renderer/backend/gles/description_gles.h"
 #include "impeller/renderer/backend/gles/gles.h"
 
-/// Enable to allow GLES to push/pop labels for usage in GPU traces
-#define IP_ENABLE_GLES_LABELING false
-
 namespace impeller {
 
 const char* GLErrorToString(GLenum value);
@@ -250,7 +247,6 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(UniformBlockBinding);               \
   PROC(BindBufferRange);                   \
   PROC(WaitSync);                          \
-  PROC(RenderbufferStorageMultisample)     \
   PROC(BlitFramebuffer);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
@@ -266,8 +262,7 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(GetQueryObjectui64vEXT);             \
   PROC(BeginQueryEXT);                      \
   PROC(EndQueryEXT);                        \
-  PROC(GetQueryObjectuivEXT);               \
-  PROC(BlitFramebufferANGLE);
+  PROC(GetQueryObjectuivEXT);
 
 enum class DebugResourceType {
   kTexture,

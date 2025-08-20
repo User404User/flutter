@@ -9,11 +9,19 @@ import 'dart:_wasm';
 import 'dart:ffi';
 import 'dart:js_interop';
 
-extension type WebAssemblyMemory._(JSObject _) implements JSObject {
+@JS()
+@staticInterop
+class WebAssemblyMemory {}
+
+extension WebAssemblyMemoryExtension on WebAssemblyMemory {
   external JSArrayBuffer get buffer;
 }
 
-extension type SkwasmInstance._(JSObject _) implements JSObject {
+@JS()
+@staticInterop
+class SkwasmInstance {}
+
+extension SkwasmInstanceExtension on SkwasmInstance {
   external WebAssemblyMemory get wasmMemory;
 }
 

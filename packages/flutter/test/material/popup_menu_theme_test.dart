@@ -137,7 +137,7 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key enabledPopupItemKey = UniqueKey();
     final Key disabledPopupItemKey = UniqueKey();
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -259,7 +259,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(popupMenuTheme: popupMenuTheme),
+        theme: ThemeData(useMaterial3: true, popupMenuTheme: popupMenuTheme),
         key: popupButtonApp,
         home: Material(
           child: Column(
@@ -386,7 +386,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(popupMenuTheme: popupMenuTheme),
+        theme: ThemeData(useMaterial3: true, popupMenuTheme: popupMenuTheme),
         key: popupButtonApp,
         home: Material(
           child: Column(
@@ -690,7 +690,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(popupMenuTheme: popupMenuTheme),
+          theme: ThemeData(useMaterial3: true, popupMenuTheme: popupMenuTheme),
           key: popupButtonApp,
           home: Material(
             child: Column(

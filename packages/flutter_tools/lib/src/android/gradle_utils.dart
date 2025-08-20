@@ -22,21 +22,14 @@ import 'android_sdk.dart';
 
 // These are the versions used in the project templates.
 //
-// In general, Flutter aims to default to the latest stable version.
-// However, this currently requires to migrate existing integration tests to the
-// latest supported values.
+// In general, Flutter aims to default to the latest version.
+// However, this currently requires to migrate existing integration tests to the latest supported values.
 //
 // Please see the README before changing any of these values.
-
-// See https://gradle.org/releases
-const String templateDefaultGradleVersion = '8.12';
-
-// See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const String templateAndroidGradlePluginVersion = '8.7.3';
-const String templateAndroidGradlePluginVersionForModule = '8.7.3';
-
-// See https://kotlinlang.org/docs/releases.html#release-details
-const String templateKotlinGradlePluginVersion = '2.1.0';
+const String templateDefaultGradleVersion = '8.10.2';
+const String templateAndroidGradlePluginVersion = '8.7.0';
+const String templateAndroidGradlePluginVersionForModule = '8.7.0';
+const String templateKotlinGradlePluginVersion = '1.8.22';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
@@ -60,17 +53,17 @@ const String oneMajorVersionHigherJavaVersion = '24';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String maxKnownAndSupportedGradleVersion = '8.12';
+const String maxKnownAndSupportedGradleVersion = '8.10.2';
 
 // Update this when new versions of AGP come out.
 //
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const String maxKnownAndSupportedAgpVersion = '8.7.3';
+const String maxKnownAndSupportedAgpVersion = '8.7.1';
 
 // Update this when new versions of AGP come out.
-const String maxKnownAgpVersion = '8.7.3';
+const String maxKnownAgpVersion = '8.7.1';
 
 // Oldest documented version of AGP that has a listed minimum
 // compatible Java version.
@@ -488,7 +481,7 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
     return isWithinVersionRange(gradleV, min: '4.10.1', max: maxKnownAndSupportedGradleVersion);
   }
 
-  logger.printTrace('Unknown Gradle-AGP compatibility, Gradle: $gradleV, AGP: $agpV');
+  logger.printTrace('Unknown Gradle-Agp compatibility, $gradleV, $agpV');
   return false;
 }
 
@@ -552,7 +545,7 @@ bool validateJavaAndGradle(Logger logger, {required String? javaV, required Stri
     }
   }
 
-  logger.printTrace('Unknown Java-Gradle compatibility, Java: $javaV, Gradle: $gradleV');
+  logger.printTrace('Unknown Java-Gradle compatibility $javaV, $gradleV');
   return false;
 }
 

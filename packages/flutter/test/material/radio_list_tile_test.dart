@@ -725,7 +725,7 @@ void main() {
 
     Widget buildFrame({Color? activeColor, Color? fillColor}) {
       return MaterialApp(
-        theme: ThemeData(
+        theme: ThemeData.light().copyWith(
           radioTheme: RadioThemeData(
             fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.selected) ? fillColor : null;
@@ -1046,7 +1046,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     final Color? hoverColor = Colors.orange[500];
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: true);
     Widget buildApp({bool enabled = true}) {
       return wrap(
         child: MaterialApp(
@@ -1140,6 +1140,7 @@ void main() {
 
     Widget buildRadio({bool active = false, bool useOverlay = true}) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: RadioListTile<bool>(
             value: active,

@@ -73,7 +73,6 @@ class ListTileThemeData with Diagnosticable {
     this.minTileHeight,
     this.titleAlignment,
     this.controlAffinity,
-    this.isThreeLine,
   });
 
   /// Overrides the default value of [ListTile.dense].
@@ -140,9 +139,6 @@ class ListTileThemeData with Diagnosticable {
   /// or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity].
   final ListTileControlAffinity? controlAffinity;
 
-  /// If specified, overrides the default value of [ListTile.isThreeLine].
-  final bool? isThreeLine;
-
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ListTileThemeData copyWith({
@@ -191,7 +187,6 @@ class ListTileThemeData with Diagnosticable {
       visualDensity: visualDensity ?? this.visualDensity,
       titleAlignment: titleAlignment ?? this.titleAlignment,
       controlAffinity: controlAffinity ?? this.controlAffinity,
-      isThreeLine: isThreeLine ?? this.isThreeLine,
     );
   }
 
@@ -226,7 +221,6 @@ class ListTileThemeData with Diagnosticable {
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       titleAlignment: t < 0.5 ? a?.titleAlignment : b?.titleAlignment,
       controlAffinity: t < 0.5 ? a?.controlAffinity : b?.controlAffinity,
-      isThreeLine: t < 0.5 ? a?.isThreeLine : b?.isThreeLine,
     );
   }
 
@@ -253,7 +247,6 @@ class ListTileThemeData with Diagnosticable {
     visualDensity,
     titleAlignment,
     controlAffinity,
-    isThreeLine,
   ]);
 
   @override
@@ -285,8 +278,7 @@ class ListTileThemeData with Diagnosticable {
         other.mouseCursor == mouseCursor &&
         other.visualDensity == visualDensity &&
         other.titleAlignment == titleAlignment &&
-        other.controlAffinity == controlAffinity &&
-        other.isThreeLine == isThreeLine;
+        other.controlAffinity == controlAffinity;
   }
 
   @override
@@ -345,7 +337,6 @@ class ListTileThemeData with Diagnosticable {
         defaultValue: null,
       ),
     );
-    properties.add(DiagnosticsProperty<bool>('isThreeLine', isThreeLine, defaultValue: null));
   }
 }
 
@@ -582,7 +573,6 @@ class ListTileTheme extends InheritedTheme {
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
     ListTileControlAffinity? controlAffinity,
-    bool? isThreeLine,
     required Widget child,
   }) {
     return Builder(
@@ -613,7 +603,6 @@ class ListTileTheme extends InheritedTheme {
             mouseCursor: mouseCursor ?? parent.mouseCursor,
             visualDensity: visualDensity ?? parent.visualDensity,
             controlAffinity: controlAffinity ?? parent.controlAffinity,
-            isThreeLine: isThreeLine ?? parent.isThreeLine,
           ),
           child: child,
         );
@@ -638,7 +627,6 @@ class ListTileTheme extends InheritedTheme {
         horizontalTitleGap: horizontalTitleGap,
         minVerticalPadding: minVerticalPadding,
         minLeadingWidth: minLeadingWidth,
-        isThreeLine: _data?.isThreeLine,
       ),
       child: child,
     );

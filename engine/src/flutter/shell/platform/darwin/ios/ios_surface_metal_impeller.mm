@@ -42,7 +42,7 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 }
 
 // |IOSSurface|
-std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface() {
+std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface(GrDirectContext*) {
   impeller_context_->UpdateOffscreenLayerPixelFormat(
       impeller::FromMTLPixelFormat(layer_.pixelFormat));
   return std::make_unique<GPUSurfaceMetalImpeller>(this,          //

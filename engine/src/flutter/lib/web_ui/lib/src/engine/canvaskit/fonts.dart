@@ -255,15 +255,15 @@ class FontDownloadResult {
 }
 
 class SkiaFallbackRegistry implements FallbackFontRegistry {
-  SkiaFallbackRegistry(this._fontCollection);
+  SkiaFallbackRegistry(this.fontCollection);
 
-  final SkiaFontCollection _fontCollection;
+  SkiaFontCollection fontCollection;
 
   @override
   List<int> getMissingCodePoints(List<int> codeUnits, List<String> fontFamilies) {
     final List<SkFont> fonts = <SkFont>[];
     for (final String font in fontFamilies) {
-      final List<SkFont>? typefacesForFamily = _fontCollection.familyToFontMap[font];
+      final List<SkFont>? typefacesForFamily = fontCollection.familyToFontMap[font];
       if (typefacesForFamily != null) {
         fonts.addAll(typefacesForFamily);
       }
@@ -295,13 +295,13 @@ class SkiaFallbackRegistry implements FallbackFontRegistry {
       printWarning('Failed to parse fallback font $familyName as a font.');
       return;
     }
-    _fontCollection.registeredFallbackFonts.add(
+    fontCollection.registeredFallbackFonts.add(
       RegisteredFont(buffer.asUint8List(), familyName, typeface),
     );
   }
 
   @override
   void updateFallbackFontFamilies(List<String> families) {
-    _fontCollection.registerDownloadedFonts();
+    fontCollection.registerDownloadedFonts();
   }
 }

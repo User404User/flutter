@@ -49,9 +49,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any # Pick up the pinned version from flutter_localizations
-
-flutter:
-  generate: true
 ''';
 
   String? _main;

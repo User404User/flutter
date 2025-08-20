@@ -96,7 +96,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     }
 
     return MaterialApp(
-      theme: ThemeData(colorScheme: colorScheme),
+      theme: ThemeData(useMaterial3: true, colorScheme: colorScheme),
       debugShowCheckedModeBanner: false,
       home: Builder(
         builder:

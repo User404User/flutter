@@ -22,7 +22,6 @@ import '../../src/context.dart';
 import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/logging_logger.dart';
-import '../../src/package_config.dart';
 
 final Platform linuxPlatform = FakePlatform(environment: <String, String>{});
 
@@ -47,13 +46,9 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem.file('pubspec.yaml')
-      ..createSync()
-      ..writeAsStringSync('''
-name: foo
-''');
+    fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file('test/foo.dart').createSync(recursive: true);
-    writePackageConfigFile(mainLibName: 'foo', directory: fileSystem.currentDirectory);
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     residentCompiler = FakeResidentCompiler(fileSystem);
     logger = LoggingLogger();
   });
@@ -221,11 +216,20 @@ dependencies:
     sdk: flutter
   a_plugin: 1.0.0
 ''');
-      writePackageConfigFile(
-        directory: fileSystem.currentDirectory,
-        mainLibName: 'foo',
-        packages: <String, String>{'a_plugin': '/a_plugin'},
-      );
+      fileSystem.directory('.dart_tool').childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "a_plugin",
+      "rootUri": "/a_plugin/",
+      "packageUri": "lib/"
+    }
+  ]
+}
+''');
       fakeDartPlugin.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -307,7 +311,6 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
-    bool recompileRestart = false,
   }) async {
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);

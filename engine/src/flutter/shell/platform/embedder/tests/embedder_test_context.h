@@ -34,8 +34,6 @@ using SemanticsActionCallback =
 using LogMessageCallback =
     std::function<void(const char* tag, const char* message)>;
 using ChannelUpdateCallback = std::function<void(const FlutterChannelUpdate*)>;
-using ViewFocusChangeRequestCallback =
-    std::function<void(const FlutterViewFocusChangeRequest*)>;
 
 struct AOTDataDeleter {
   void operator()(FlutterEngineAOTData aot_data) {
@@ -96,9 +94,6 @@ class EmbedderTestContext {
 
   void SetChannelUpdateCallback(const ChannelUpdateCallback& callback);
 
-  void SetViewFocusChangeRequestCallback(
-      const ViewFocusChangeRequestCallback& callback);
-
   std::future<sk_sp<SkImage>> GetNextSceneImage();
 
   EmbedderTestCompositor& GetCompositor();
@@ -138,7 +133,6 @@ class EmbedderTestContext {
   SemanticsNodeCallback update_semantics_node_callback_;
   SemanticsActionCallback update_semantics_custom_action_callback_;
   ChannelUpdateCallback channel_update_callback_;
-  ViewFocusChangeRequestCallback view_focus_change_request_callback_;
   std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
   LogMessageCallback log_message_callback_;
   std::unique_ptr<EmbedderTestCompositor> compositor_;
@@ -163,8 +157,6 @@ class EmbedderTestContext {
   GetComputePlatformResolvedLocaleCallbackHook();
 
   FlutterChannelUpdateCallback GetChannelUpdateCallbackHook();
-
-  FlutterViewFocusChangeRequestCallback GetViewFocusChangeRequestCallbackHook();
 
   void SetupAOTMappingsIfNecessary();
 

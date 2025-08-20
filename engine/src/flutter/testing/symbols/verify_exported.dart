@@ -150,8 +150,7 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
     for (final String key in entryMap.keys) {
       final bool isValidFlutterGpuSymbol =
           key.startsWith('InternalFlutterGpu') && entryMap[key] == 'T';
-      final bool isLibcxxSymbol = key.endsWith('_lcxx_override');
-      if (!isValidFlutterGpuSymbol && !isLibcxxSymbol && entryMap[key] != expectedSymbols[key]) {
+      if (!isValidFlutterGpuSymbol && entryMap[key] != expectedSymbols[key]) {
         badSymbols[key] = entryMap[key]!;
       }
     }

@@ -19,15 +19,13 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String flutterRoot = r'C:\flutter';
 const String buildFilePath = r'windows\CMakeLists.txt';
-const String visualStudioPath =
-    r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
-const String _cmakePath = visualStudioPath +
-    r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
+const String _cmakePath =
+    visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
 const String _defaultGenerator = 'Visual Studio 16 2019';
 
 final Platform windowsPlatform = FakePlatform(
@@ -38,13 +36,6 @@ final Platform windowsPlatform = FakePlatform(
     'USERPROFILE': '/',
   },
 );
-final Platform windowsPlatformWithPublicKey =
-    FakePlatform(operatingSystem: 'windows', environment: <String, String>{
-  'PROGRAMFILES(X86)': r'C:\Program Files (x86)\',
-  'FLUTTER_ROOT': flutterRoot,
-  'USERPROFILE': '/',
-  'SHOREBIRD_PUBLIC_KEY': 'my_public_key',
-});
 final Platform notWindowsPlatform = FakePlatform(
   environment: <String, String>{'FLUTTER_ROOT': flutterRoot},
 );
@@ -71,7 +62,7 @@ void main() {
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -122,9 +113,7 @@ void main() {
         ...<String>['--target', 'INSTALL'],
         if (verbose) '--verbose',
       ],
-      environment: <String, String>{
-        if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'true'
-      },
+      environment: <String, String>{if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'true'},
       onRun: onRun,
       stdout: stdout,
     );
@@ -140,8 +129,7 @@ void main() {
       setUpMockProjectFilesForBuild();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['windows', '--no-pub']),
+        createTestCommandRunner(command).run(const <String>['windows', '--no-pub']),
         throwsToolExit(),
       );
     },
@@ -164,10 +152,10 @@ void main() {
       setUpMockCoreProjectFiles();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['windows', '--no-pub']),
+        createTestCommandRunner(command).run(const <String>['windows', '--no-pub']),
         throwsToolExit(
-          message: 'No Windows desktop project configured. See '
+          message:
+              'No Windows desktop project configured. See '
               'https://flutter.dev/to/add-desktop-support '
               'to learn about adding Windows support to a project.',
         ),
@@ -192,10 +180,8 @@ void main() {
       setUpMockProjectFilesForBuild();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['windows', '--no-pub']),
-        throwsToolExit(
-            message: '"build windows" only supported on Windows hosts.'),
+        createTestCommandRunner(command).run(const <String>['windows', '--no-pub']),
+        throwsToolExit(message: '"build windows" only supported on Windows hosts.'),
       );
     },
     overrides: <Type, Generator>{
@@ -217,8 +203,7 @@ void main() {
       setUpMockProjectFilesForBuild();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['windows', '--no-pub']),
+        createTestCommandRunner(command).run(const <String>['windows', '--no-pub']),
         throwsToolExit(
           message:
               '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".',
@@ -248,8 +233,7 @@ void main() {
         buildCommand('Release', stdout: 'STDOUT STUFF'),
       ]);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['windows', '--no-pub']);
+      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
       expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.traceText, contains('STDOUT STUFF'));
     },
@@ -276,8 +260,7 @@ void main() {
         buildCommand('Release'),
       ]);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['windows', '--no-pub']);
+      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
 
       expect(
         analyticsTimingEventExists(
@@ -347,8 +330,7 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
         buildCommand('Release', stdout: stdout),
       ]);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['windows', '--no-pub']);
+      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
       // Just the warnings and errors should be surfaced.
       expect(testLogger.errorText, r'''
 C:\foo\windows\x64\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\x64\runner\test.vcxproj]
@@ -381,8 +363,7 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
         buildCommand('Release', verbose: true, stdout: 'STDOUT STUFF'),
       ]);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['windows', '--no-pub', '-v']);
+      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub', '-v']);
       expect(testLogger.statusText, contains('STDOUT STUFF'));
       expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
     },
@@ -397,8 +378,7 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
   testUsingContext(
     'Windows build works around CMake generation bug',
     () async {
-      final FakeVisualStudio fakeVisualStudio =
-          FakeVisualStudio(displayVersion: '17.1.0');
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(displayVersion: '17.1.0');
       final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
@@ -410,6 +390,7 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
         buildCommand('Release'),
       ]);
       fileSystem.file(fileSystem.path.join('lib', 'other.dart')).createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json')).createSync(recursive: true);
 
       // Relevant portions of an incorrectly generated project, with some
       // irrelevant details removed for length.
@@ -503,8 +484,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       assembleProject.createSync(recursive: true);
       assembleProject.writeAsStringSync(fakeBadProjectContent);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['windows', '--no-pub']);
+      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
 
       final List<String> projectLines = assembleProject.readAsLinesSync();
 
@@ -553,6 +533,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
         buildCommand('Release'),
       ]);
       fileSystem.file(fileSystem.path.join('lib', 'other.dart')).createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json')).createSync(recursive: true);
 
       await createTestCommandRunner(command).run(const <String>[
         'windows',
@@ -564,6 +545,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
         r'--split-debug-info=C:\foo\',
         '--dart-define=foo=a',
         '--dart-define=bar=b',
+        r'--bundle-sksl-path=foo\bar.sksl.json',
         r'--target=lib\other.dart',
       ]);
 
@@ -589,7 +571,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
           r'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
           r'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
           r'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-          r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI="',
+          r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI="',
           r'  "DART_OBFUSCATION=true"',
           r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
           r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
@@ -599,6 +581,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
           r'  "FLUTTER_ROOT=C:\\flutter"',
           r'  "PROJECT_DIR=C:\\"',
           r'  "FLUTTER_TARGET=lib\\other.dart"',
+          r'  "BUNDLE_SKSL_PATH=foo\\bar.sksl.json"',
         ]),
       );
     },
@@ -655,8 +638,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       await createTestCommandRunner(
         command,
       ).run(const <String>['windows', '--release', '--no-pub']);
-      expect(testLogger.statusText,
-          contains(r'✓ Built build\windows\x64\runner\Release'));
+      expect(testLogger.statusText, contains(r'✓ Built build\windows\x64\runner\Release'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -670,8 +652,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     'Windows build passes correct generator',
     () async {
       const String generator = 'A different generator';
-      final FakeVisualStudio fakeVisualStudio =
-          FakeVisualStudio(cmakeGenerator: generator);
+      final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(cmakeGenerator: generator);
       final BuildWindowsCommand command = BuildWindowsCommand(
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
@@ -714,8 +695,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
         buildCommand('Release'),
       ]);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['windows', '--no-pub']);
+      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -763,12 +743,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       await createTestCommandRunner(
         command,
-      ).run(const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
-        '--build-number=4'
-      ]);
+      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -924,12 +899,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       await createTestCommandRunner(
         command,
-      ).run(const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
-        '--build-number=4'
-      ]);
+      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -977,12 +947,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       await createTestCommandRunner(
         command,
-      ).run(const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
-        '--build-number=hello'
-      ]);
+      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=hello']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -1039,12 +1004,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
       await createTestCommandRunner(
         command,
-      ).run(const <String>[
-        'windows',
-        '--no-pub',
-        '--build-name=1.2.3',
-        '--build-number=4.5'
-      ]);
+      ).run(const <String>['windows', '--no-pub', '--build-name=1.2.3', '--build-number=4.5']);
 
       final File cmakeConfig = fileSystem.currentDirectory
           .childDirectory('windows')
@@ -1164,16 +1124,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
         contains('A summary of your Windows bundle analysis can be found at'),
       );
       expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
-      expect(fakeAnalytics.sentEvents,
-          contains(Event.codeSizeAnalysis(platform: 'windows')));
+      expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'windows')));
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => windowsPlatform,
-      FileSystemUtils: () =>
-          FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
+      FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
       Analytics: () => fakeAnalytics,
     },
   );
@@ -1190,14 +1148,12 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
         logger: BufferLogger.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       )..visualStudioOverride = fakeVisualStudio;
-      fileSystem.currentDirectory = fileSystem.directory("test_'path")
-        ..createSync();
+      fileSystem.currentDirectory = fileSystem.directory("test_'path")..createSync();
       final String absPath = fileSystem.currentDirectory.absolute.path;
       setUpMockCoreProjectFiles();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['windows', '--no-pub']),
+        createTestCommandRunner(command).run(const <String>['windows', '--no-pub']),
         throwsToolExit(
           message:
               'Path $absPath contains invalid characters in "\'#!\$^&*=|,;<>?". '
@@ -1236,8 +1192,7 @@ No file or variants found for asset: images/a_dot_burr.jpeg.
         buildCommand('Release', stdout: stdout),
       ]);
 
-      await createTestCommandRunner(command)
-          .run(const <String>['windows', '--no-pub']);
+      await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
       // Just the warnings and errors should be surfaced.
       expect(testLogger.errorText, r'''
 Error detected in pubspec.yaml:
@@ -1251,39 +1206,6 @@ No file or variants found for asset: images/a_dot_burr.jpeg.
       FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
-
-  testUsingContext(
-      'shorebird.yaml is updated when SHOREBIRD_PUBLIC_KEY env var is set',
-      () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand(
-        logger: BufferLogger.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils())
-      ..visualStudioOverride = fakeVisualStudio;
-    setUpMockProjectFilesForBuild();
-    final File shorebirdYamlFile = fileSystem.file(
-      r'build\windows\x64\runner\Release\data\flutter_assets\shorebird.yaml',
-    )
-      ..createSync(recursive: true)
-      ..writeAsStringSync('app_id: my-app-id');
-
-    processManager = FakeProcessManager.list(<FakeCommand>[
-      cmakeGenerationCommand(),
-      buildCommand('Release'),
-    ]);
-
-    await createTestCommandRunner(command)
-        .run(const <String>['windows', '--release', '--no-pub']);
-
-    final String updatedYaml = shorebirdYamlFile.readAsStringSync();
-    expect(updatedYaml, contains('app_id: my-app-id'));
-    expect(updatedYaml, contains('patch_public_key: my_public_key'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => windowsPlatformWithPublicKey,
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-  });
 }
 
 class FakeVisualStudio extends Fake implements VisualStudio {

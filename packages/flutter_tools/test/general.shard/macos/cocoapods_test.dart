@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -23,7 +24,6 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
-import '../../src/package_config.dart';
 
 enum _StdioStream { stdout, stderr }
 
@@ -32,6 +32,7 @@ void main() {
   late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
   late BufferLogger logger;
+  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
@@ -59,19 +60,10 @@ void main() {
   }
 
   FlutterProject setupProjectUnderTest() {
-    fileSystem.directory('project').childFile('pubspec.yaml')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('''
-name: my_app
-environement:
-  sdk: '^3.5.0'
-''');
-
     // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
     final FlutterProject projectUnderTest = FlutterProject.fromDirectory(
       fileSystem.directory('project'),
     );
-    writePackageConfigFile(directory: projectUnderTest.directory, mainLibName: 'my_app');
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
     return projectUnderTest;
@@ -82,6 +74,7 @@ environement:
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
+    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -92,6 +85,7 @@ environement:
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      usage: usage,
       analytics: fakeAnalytics,
     );
     fileSystem.file(
@@ -233,6 +227,7 @@ environement:
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
+        usage: usage,
         analytics: fakeAnalytics,
       );
 
@@ -274,6 +269,7 @@ environement:
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
+        usage: usage,
         analytics: fakeAnalytics,
       );
 
@@ -399,6 +395,11 @@ environement:
       'includes Pod config in xcconfig files, if the user manually added Pod dependencies without using Flutter plugins',
       () async {
         final FlutterProject projectUnderTest = setupProjectUnderTest();
+        final File packageConfigFile = fileSystem.file(
+          fileSystem.path.join('project', '.dart_tool', 'package_config.json'),
+        );
+        packageConfigFile.createSync(recursive: true);
+        packageConfigFile.writeAsStringSync('{"configVersion":2,"packages":[]}');
         projectUnderTest.ios.podfile
           ..createSync()
           ..writeAsStringSync('Custom Podfile');
@@ -415,7 +416,7 @@ environement:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.directory('project'),
         );
-        await injectPlugins(project, iosPlatform: true, releaseMode: false);
+        await injectPlugins(project, iosPlatform: true);
 
         final String debugContents =
             projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -1260,6 +1261,7 @@ end''');
             );
             expect(logger.errorText, contains('set up CocoaPods for ARM macOS'));
             expect(logger.errorText, contains('enable-libffi-alloc'));
+            expect(usage.events, contains(const TestUsageEvent('pod-install-failure', 'arm-ffi')));
             expect(
               fakeAnalytics.sentEvents,
               contains(
@@ -1485,6 +1487,7 @@ end''');
           processManager: fakeProcessManager,
           version: Version(14, 3, 0),
         ),
+        usage: usage,
         analytics: fakeAnalytics,
       );
 

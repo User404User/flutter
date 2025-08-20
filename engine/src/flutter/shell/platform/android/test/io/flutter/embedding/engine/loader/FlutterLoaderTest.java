@@ -9,7 +9,6 @@ import static io.flutter.Build.API_LEVELS;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
@@ -100,14 +99,7 @@ public class FlutterLoaderTest {
     final String oldGenHeapArg = "--old-gen-heap-size=" + oldGenHeapSizeMegaBytes;
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(oldGenHeapArg));
   }
@@ -130,14 +122,7 @@ public class FlutterLoaderTest {
         "--resource-cache-max-bytes-threshold=" + resourceCacheMaxBytesThreshold;
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(resourceCacheMaxBytesThresholdArg));
   }
@@ -155,14 +140,7 @@ public class FlutterLoaderTest {
     final String leakVMArg = "--leak-vm=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(leakVMArg));
   }
@@ -184,14 +162,7 @@ public class FlutterLoaderTest {
     final String leakVMArg = "--leak-vm=false";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(leakVMArg));
   }
@@ -220,14 +191,7 @@ public class FlutterLoaderTest {
     final String enableImpellerArg = "--enable-impeller";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertFalse(arguments.contains(enableImpellerArg));
   }
@@ -245,14 +209,7 @@ public class FlutterLoaderTest {
     final String enableVulkanValidationArg = "--enable-vulkan-validation";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertFalse(arguments.contains(enableVulkanValidationArg));
   }
@@ -274,14 +231,7 @@ public class FlutterLoaderTest {
     final String enableImpellerArg = "--enable-impeller=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(enableImpellerArg));
   }
@@ -303,45 +253,9 @@ public class FlutterLoaderTest {
     final String disabledControlArg = "--enable-surface-control";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
+        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(disabledControlArg));
-  }
-
-  @Test
-  public void itSetsShaderInitModeFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderInitialization", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String shaderModeArg = "--impeller-lazy-shader-mode";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(shaderModeArg));
   }
 
   @Test

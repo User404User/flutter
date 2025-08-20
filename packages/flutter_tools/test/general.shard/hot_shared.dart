@@ -38,6 +38,9 @@ class FakeDevFs extends Fake implements DevFS {
   Set<String> shaderPathsToEvict = <String>{};
 
   @override
+  Set<String> scenePathsToEvict = <String>{};
+
+  @override
   Uri? baseUri;
 }
 
@@ -158,6 +161,7 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
+    GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,

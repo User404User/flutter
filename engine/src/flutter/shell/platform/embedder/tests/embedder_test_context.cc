@@ -156,11 +156,6 @@ void EmbedderTestContext::SetChannelUpdateCallback(
   channel_update_callback_ = callback;
 }
 
-void EmbedderTestContext::SetViewFocusChangeRequestCallback(
-    const ViewFocusChangeRequestCallback& callback) {
-  view_focus_change_request_callback_ = callback;
-}
-
 void EmbedderTestContext::PlatformMessageCallback(
     const FlutterPlatformMessage* message) {
   if (platform_message_callback_) {
@@ -256,16 +251,6 @@ EmbedderTestContext::GetChannelUpdateCallbackHook() {
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->channel_update_callback_) {
       context->channel_update_callback_(update);
-    }
-  };
-}
-
-FlutterViewFocusChangeRequestCallback
-EmbedderTestContext::GetViewFocusChangeRequestCallbackHook() {
-  return [](const FlutterViewFocusChangeRequest* request, void* user_data) {
-    auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
-    if (context->view_focus_change_request_callback_) {
-      context->view_focus_change_request_callback_(request);
     }
   };
 }

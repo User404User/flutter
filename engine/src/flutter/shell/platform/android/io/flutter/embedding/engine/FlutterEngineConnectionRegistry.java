@@ -341,7 +341,6 @@ import java.util.Set;
     flutterEngine
         .getPlatformViewsController()
         .attach(activity, flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
-    flutterEngine.getPlatformViewsController2().attach(activity, flutterEngine.getDartExecutor());
 
     // Notify all ActivityAware plugins that they are now attached to a new Activity.
     for (ActivityAware activityAware : activityAwarePlugins.values()) {
@@ -392,7 +391,6 @@ import java.util.Set;
   private void detachFromActivityInternal() {
     // Deactivate PlatformViewsController.
     flutterEngine.getPlatformViewsController().detach();
-    flutterEngine.getPlatformViewsController2().detach();
 
     exclusiveActivity = null;
     activityPluginBinding = null;

@@ -329,12 +329,6 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDiffRoundRect(
   AccumulateComplexity(complexity);
 }
 
-void DisplayListMetalComplexityCalculator::MetalHelper::drawRoundSuperellipse(
-    const DlRoundSuperellipse& rse) {
-  // Drawing RSEs on Skia falls back to RRect.
-  drawRoundRect(rse.ToApproximateRoundRect());
-}
-
 void DisplayListMetalComplexityCalculator::MetalHelper::drawPath(
     const DlPath& path) {
   if (IsComplex()) {
@@ -418,7 +412,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawArc(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawPoints(
-    DlPointMode mode,
+    DlCanvas::PointMode mode,
     uint32_t count,
     const DlPoint points[]) {
   if (IsComplex()) {
@@ -433,12 +427,12 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawPoints(
     // c = 0.75
     complexity = (count + 12000) * 25 / 2;
   } else {
-    if (mode == DlPointMode::kPolygon) {
+    if (mode == DlCanvas::PointMode::kPolygon) {
       // m = 1/1250
       // c = 1
       complexity = (count + 1250) * 160;
     } else {
-      if (IsHairline() && mode == DlPointMode::kPoints) {
+      if (IsHairline() && mode == DlCanvas::PointMode::kPoints) {
         // This is a special case, it triggers an extremely fast path.
         // m = 1/14500
         // c = 0
@@ -487,8 +481,8 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawImage(
   // If we don't need to upload, then the cost scales linearly with the
   // area of the image. If it needs uploading, the cost scales linearly
   // with the square of the area (!!!).
-  DlISize dimensions = image->GetSize();
-  unsigned int area = dimensions.Area();
+  SkISize dimensions = image->dimensions();
+  unsigned int area = dimensions.width() * dimensions.height();
 
   // m = 1/17000
   // c = 3
@@ -508,7 +502,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawImage(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::ImageRect(
-    const DlISize& size,
+    const SkISize& size,
     bool texture_backed,
     bool render_with_attributes,
     bool enforce_src_edges) {
@@ -519,7 +513,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::ImageRect(
   //
   // Within each group, they all perform within a few % of each other *except*
   // when we have a strict constraint and anti-aliasing enabled.
-  unsigned int area = size.Area();
+  unsigned int area = size.width() * size.height();
 
   // These values were worked out by creating a straight line graph (y=mx+c)
   // approximately matching the measured data, normalising the data so that
@@ -560,8 +554,8 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawImageNine(
   }
   // Whether uploading or not, the performance is comparable across all
   // variations.
-  DlISize dimensions = image->GetSize();
-  unsigned int area = dimensions.Area();
+  SkISize dimensions = image->dimensions();
+  unsigned int area = dimensions.width() * dimensions.height();
 
   // m = 1/8000
   // c = 3

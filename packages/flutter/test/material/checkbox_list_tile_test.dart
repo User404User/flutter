@@ -82,6 +82,7 @@ void main() {
 
     Widget buildFrame(Color? color) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
         home: Material(
           child: CheckboxListTile(value: true, checkColor: color, onChanged: (bool? value) {}),
         ),
@@ -351,7 +352,7 @@ void main() {
 
     Widget buildFrame({Color? activeColor, Color? fillColor}) {
       return MaterialApp(
-        theme: ThemeData(
+        theme: ThemeData.light().copyWith(
           checkboxTheme: CheckboxThemeData(
             fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
               return states.contains(MaterialState.selected) ? fillColor : null;
@@ -917,6 +918,7 @@ void main() {
 
       Widget buildCheckbox({bool active = false, bool useOverlay = true}) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: CheckboxListTile(
               value: active,
@@ -1075,7 +1077,7 @@ void main() {
   });
 
   testWidgets('Material3 - CheckboxListTile respects isError', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp() {
@@ -1232,7 +1234,6 @@ void main() {
         isChecked: true,
         hasEnabledState: true,
         isEnabled: true,
-        hasSelectedState: true,
         hasTapAction: true,
         hasFocusAction: true,
         isFocusable: true,

@@ -6,13 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  TextStyle iconStyle(WidgetTester tester, IconData icon) {
-    final RichText iconRichText = tester.widget<RichText>(
-      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-    );
-    return iconRichText.text.style!;
-  }
-
   test('OutlinedButtonThemeData lerp special cases', () {
     expect(OutlinedButtonThemeData.lerp(null, null, 0), null);
     const OutlinedButtonThemeData data = OutlinedButtonThemeData();
@@ -25,7 +18,7 @@ void main() {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme),
+        theme: ThemeData.from(useMaterial3: true, colorScheme: colorScheme),
         home: Scaffold(
           body: Center(child: OutlinedButton(onPressed: () {}, child: const Text('button'))),
         ),
@@ -280,7 +273,10 @@ void main() {
 
     Widget buildFrame({Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor}) {
       return MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme.copyWith(shadow: overallShadowColor)),
+        theme: ThemeData.from(
+          useMaterial3: true,
+          colorScheme: colorScheme.copyWith(shadow: overallShadowColor),
+        ),
         home: Scaffold(
           body: Center(
             child: OutlinedButtonTheme(
@@ -448,35 +444,6 @@ void main() {
       final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
 
       expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
-    },
-  );
-
-  // Regression test for https://github.com/flutter/flutter/issues/162839.
-  testWidgets(
-    'OutlinedButton icon uses provided OutlinedButtonTheme foregroundColor over default icon color',
-    (WidgetTester tester) async {
-      const Color foregroundColor = Color(0xFFFFA500);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            outlinedButtonTheme: OutlinedButtonThemeData(
-              style: OutlinedButton.styleFrom(foregroundColor: foregroundColor),
-            ),
-          ),
-          home: Material(
-            child: Center(
-              child: OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-                label: const Text('Button'),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(iconStyle(tester, Icons.add).color, foregroundColor);
     },
   );
 }

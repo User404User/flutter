@@ -52,8 +52,6 @@ final class SurfaceTextureSurfaceProducer
   @Override
   public void release() {
     texture.release();
-    surface.release();
-    surface = null;
     released = true;
   }
 
@@ -96,12 +94,6 @@ final class SurfaceTextureSurfaceProducer
       surface = new Surface(texture.surfaceTexture());
     }
     return surface;
-  }
-
-  @Override
-  public Surface getForcedNewSurface() {
-    surface = null;
-    return getSurface();
   }
 
   @Override

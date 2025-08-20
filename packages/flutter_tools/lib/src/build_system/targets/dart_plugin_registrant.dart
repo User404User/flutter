@@ -76,6 +76,9 @@ class DartPluginRegistrantTarget extends Target {
 
   @override
   List<Source> get outputs => <Source>[
-    Source.fromProject((FlutterProject project) => project.dartPluginRegistrant, optional: true),
+    const Source.pattern(
+      '{PROJECT_DIR}/.dart_tool/flutter_build/dart_plugin_registrant.dart',
+      optional: true,
+    ),
   ];
 }

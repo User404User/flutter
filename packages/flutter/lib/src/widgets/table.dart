@@ -436,28 +436,11 @@ class _TableElement extends RenderObjectElement {
 ///
 /// To create an empty [TableCell], provide a [SizedBox.shrink]
 /// as the [child].
-class TableCell extends StatelessWidget {
+class TableCell extends ParentDataWidget<TableCellParentData> {
   /// Creates a widget that controls how a child of a [Table] is aligned.
-  const TableCell({super.key, this.verticalAlignment, required this.child});
+  const TableCell({super.key, this.verticalAlignment, required super.child});
 
   /// How this cell is aligned vertically.
-  final TableCellVerticalAlignment? verticalAlignment;
-
-  /// The child of this cell.
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return _TableCell(
-      verticalAlignment: verticalAlignment,
-      child: Semantics(role: SemanticsRole.cell, child: child),
-    );
-  }
-}
-
-class _TableCell extends ParentDataWidget<TableCellParentData> {
-  const _TableCell({this.verticalAlignment, required super.child});
-
   final TableCellVerticalAlignment? verticalAlignment;
 
   @override

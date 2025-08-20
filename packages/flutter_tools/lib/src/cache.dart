@@ -29,7 +29,6 @@ import 'base/user_messages.dart';
 import 'convert.dart';
 import 'features.dart';
 
-const String kShorebirdStorageUrl = 'https://download.shorebird.dev';
 const String kFlutterRootEnvironmentVariableName =
     'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName =
@@ -492,7 +491,7 @@ class Cache {
 
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {
-    _engineRevision ??= getStampFor('engine');
+    _engineRevision ??= getVersionFor('engine');
     if (_engineRevision == null) {
       throwToolExit('Could not determine engine revision.');
     }
@@ -535,10 +534,6 @@ class Cache {
       return storageRealm.isEmpty
           ? 'https://storage.googleapis.com'
           : 'https://storage.googleapis.com/$storageRealm';
-    }
-    // Shorebird's artifact proxy is a trusted source.
-    if (overrideUrl == kShorebirdStorageUrl) {
-      return overrideUrl;
     }
     // verify that this is a valid URI.
     overrideUrl = storageRealm.isEmpty ? overrideUrl : '$overrideUrl/$storageRealm';
@@ -689,14 +684,12 @@ class Cache {
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
-  // TODO(matanlurey): Remove the ability to do "generic" realms, and special case for engine.
-  // https://github.com/flutter/flutter/issues/164315
   String? getRealmFor(String artifactName) {
     final File realmFile = _fileSystem.file(
       _fileSystem.path.join(
         _rootOverride?.path ?? flutterRoot!,
         'bin',
-        'cache',
+        'internal',
         '$artifactName.realm',
       ),
     );
@@ -936,9 +929,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   final String stampName;
-
-  @override
-  String? get version => cache.engineRevision;
 
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
@@ -1249,7 +1239,7 @@ class ArtifactUpdater {
       status.pause();
       _logger.printWarning(
         'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
-        'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=01_activation.yml',
+        'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=1_activation.yml',
       );
       status.resume();
     }

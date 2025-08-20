@@ -45,8 +45,10 @@ void MockRasterCache::AddMockLayer(int width, int height) {
 void MockRasterCache::AddMockPicture(int width, int height) {
   FML_DCHECK(access_threshold() > 0);
   SkMatrix ctm = SkMatrix::I();
-  DisplayListBuilder builder(DlRect::MakeLTRB(0, 0, 200 + width, 200 + height));
-  builder.DrawPath(DlPath::MakeRectXYWH(100, 100, width, height), DlPaint());
+  DisplayListBuilder builder(SkRect::MakeLTRB(0, 0, 200 + width, 200 + height));
+  SkPath path;
+  path.addRect(100, 100, 100 + width, 100 + height);
+  builder.DrawPath(path, DlPaint());
   sk_sp<DisplayList> display_list = builder.Build();
 
   FixedRefreshRateStopwatch raster_time;

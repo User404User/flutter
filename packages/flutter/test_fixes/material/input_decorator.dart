@@ -35,12 +35,4 @@ void main() {
     floatingLabelAlignment: FloatingLabelAlignment.center,
     floatingLabelBehavior: FloatingLabelBehavior.always,
   );
-
-  // Changes made in https://github.com/flutter/flutter/pull/161235.
-  const InputDecoration decoration = InputDecoration(maintainHintHeight: false);
-  decoration.maintainHintHeight;
-
-  const InputDecoration decoration = InputDecoration.collapsed(
-    maintainHintHeight: false,
-  );
 }

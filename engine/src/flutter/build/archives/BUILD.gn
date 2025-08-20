@@ -45,7 +45,6 @@ generated_file("artifacts_entitlement_config") {
 if (build_engine_artifacts) {
   zip_bundle("artifacts") {
     deps = [
-      "$dart_src/runtime/bin:analyze_snapshot",
       "$dart_src/runtime/bin:gen_snapshot",
       "//flutter/flutter_frontend_server:frontend_server",
       "//flutter/impeller/compiler:impellerc",
@@ -59,17 +58,14 @@ if (build_engine_artifacts) {
       # Mac artifacts sometimes use mac and sometimes darwin. Standardizing the
       # names will require changes in the list of artifacts the tool is downloading.
       if (flutter_runtime_mode == "debug") {
-        prefix = "darwin-$target_cpu"
+        prefix = "darwin-$target_cpu/"
       } else {
-        prefix = "darwin-$target_cpu-$flutter_runtime_mode"
+        prefix = "darwin-$target_cpu-$flutter_runtime_mode/"
       }
     } else if (flutter_runtime_mode != "debug") {
-      prefix = "$full_target_platform_name-$flutter_runtime_mode"
+      prefix = "$full_target_platform_name-$flutter_runtime_mode/"
     } else {
-      prefix = "$full_target_platform_name"
-    }
-    if (dart_dynamic_modules) {
-      prefix = "$prefix-ddm"
+      prefix = "$full_target_platform_name/"
     }
     output = "$prefix/artifacts.zip"
 
@@ -144,10 +140,6 @@ if (build_engine_artifacts) {
       deps += [ ":artifacts_entitlement_config" ]
       files += [
         {
-          source = "$root_out_dir/analyze_snapshot$exe"
-          destination = "analyze_snapshot$exe"
-        },
-        {
           source = "$target_gen_dir/entitlements.txt"
           destination = "entitlements.txt"
         },
@@ -207,11 +199,7 @@ generated_file("dart_sdk_entitlement_config") {
 if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
   zip_bundle("dart_sdk_archive") {
     deps = [ ":dart_sdk_entitlement_config" ]
-    if (dart_dynamic_modules) {
-      output = "dart-sdk-$full_target_platform_name-ddm.zip"
-    } else {
-      output = "dart-sdk-$full_target_platform_name.zip"
-    }
+    output = "dart-sdk-$full_target_platform_name.zip"
     files = [
       {
         source = prebuilt_dart_sdk
@@ -236,11 +224,7 @@ if (build_engine_artifacts && flutter_prebuilt_dart_sdk) {
 if (build_engine_artifacts && !flutter_prebuilt_dart_sdk) {
   zip_bundle_from_file("dart_sdk_archive") {
     deps = [ "$dart_src:create_sdk" ]
-    if (dart_dynamic_modules) {
-      output = "dart-sdk-$full_target_platform_name-ddm.zip"
-    } else {
-      output = "dart-sdk-$full_target_platform_name.zip"
-    }
+    output = "dart-sdk-$full_target_platform_name.zip"
     files = [
       {
         source = rebase_path("$root_build_dir/dart-sdk")
@@ -324,24 +308,13 @@ if (is_mac) {
 }
 
 if (host_os == "win") {
-  # This rule archives both gen_snapshot *and* analyze_snapshot. The name is
-  # misleading. We (shorebird) have updated this rule to include
-  # analyze_snapshot but did not update the name because it is referenced
-  # elsewhere in the tooling.
   zip_bundle("archive_win_gen_snapshot") {
-    deps = [
-      "//flutter:analyze_snapshot",
-      "//flutter:gen_snapshot",
-    ]
+    deps = [ "//flutter:gen_snapshot" ]
     output = "$full_target_platform_name-$flutter_runtime_mode/windows-x64.zip"
     files = [
       {
         source = "$root_out_dir/gen_snapshot/gen_snapshot.exe"
         destination = "gen_snapshot.exe"
-      },
-      {
-        source = "$root_out_dir/analyze_snapshot/analyze_snapshot.exe"
-        destination = "analyze_snapshot.exe"
       },
     ]
   }

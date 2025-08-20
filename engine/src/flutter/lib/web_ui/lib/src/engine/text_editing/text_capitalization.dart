@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../dom.dart';
 
@@ -62,7 +62,14 @@ class TextCapitalizationConfig {
     String autocapitalize = '';
     switch (textCapitalization) {
       case TextCapitalization.words:
-        autocapitalize = 'words';
+        // TODO(mdebbar): There is a bug for `words` level capitalization in IOS now.
+        // For now go back to default. Remove the check after bug is resolved.
+        // https://bugs.webkit.org/show_bug.cgi?id=148504
+        if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
+          autocapitalize = 'sentences';
+        } else {
+          autocapitalize = 'words';
+        }
       case TextCapitalization.characters:
         autocapitalize = 'characters';
       case TextCapitalization.sentences:
@@ -70,10 +77,10 @@ class TextCapitalizationConfig {
       case TextCapitalization.none:
         autocapitalize = 'off';
     }
-    if (domElement.isA<DomHTMLInputElement>()) {
+    if (domInstanceOfString(domElement, 'HTMLInputElement')) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.setAttribute('autocapitalize', autocapitalize);
-    } else if (domElement.isA<DomHTMLTextAreaElement>()) {
+    } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       element.setAttribute('autocapitalize', autocapitalize);
     }

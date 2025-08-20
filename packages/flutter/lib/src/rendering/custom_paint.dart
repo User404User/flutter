@@ -912,9 +912,6 @@ class RenderCustomPaint extends RenderProxyBox {
 
     final SemanticsProperties properties = newSemantics.properties;
     final SemanticsConfiguration config = SemanticsConfiguration();
-    if (properties.role != null) {
-      config.role = properties.role!;
-    }
     if (properties.sortKey != null) {
       config.sortKey = properties.sortKey;
     }
@@ -987,9 +984,6 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.liveRegion != null) {
       config.liveRegion = properties.liveRegion!;
     }
-    if (properties.isRequired != null) {
-      config.isRequired = properties.isRequired;
-    }
     if (properties.maxValueLength != null) {
       config.maxValueLength = properties.maxValueLength;
     }
@@ -1019,9 +1013,6 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.textDirection != null) {
       config.textDirection = properties.textDirection;
-    }
-    if (config.validationResult != properties.validationResult) {
-      config.validationResult = properties.validationResult;
     }
     if (properties.onTap != null) {
       config.onTap = properties.onTap;
